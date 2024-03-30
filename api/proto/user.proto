@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 
 package KhanAPI;
-
+option go_package = "./../../pkg/UserAPIService";
 
 service UserAPI {
   rpc Login (LoginRequest) returns (LoginResponse);
