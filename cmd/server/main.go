@@ -1,7 +1,49 @@
 package main
 
-import "fmt"
+import (
+	"google.golang.org/grpc"
+	"log"
+	"main/internal/service/User"
+	"main/pkg/UserAPIService"
+	"net"
+)
+
+func StartUserAPIServer() {
+	lis, err := net.Listen("tcp", ":9090")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+		return
+	}
+
+	userS := User.NewServer()
+	grpcServer := grpc.NewServer()
+	UserAPIService.RegisterUserAPIServer(grpcServer, userS)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
+}
+
+func StartPostAPIServer() {
+	lis, err := net.Listen("tcp", ":9190")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+		return
+	}
+
+	postS := Post.NewServer()
+	grpcServer := grpc.NewServer()
+	UserAPIService.RegisterUserAPIServer(grpcServer, postS)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
+}
 
 func main() {
-	fmt.Println("hello world")
+	println("hello world")
+
+	go StartUserAPIServer()
+	go StartPostAPIServer()
+
 }
