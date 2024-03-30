@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+package KhanAPI;
+option go_package = "./../../pkg/UserAPIService";
+
+service UserAPI {
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc ForgetPassword (ForgetPasswordRequest) returns (google.protobuf.Empty);
+  rpc NewPasswordWithToken (NewPasswordWithTokenRequest) returns (google.protobuf.Empty);
+  rpc SignUp (SignUpRequest) returns (SignUpResponse);
+  rpc CodeVerification (CodeVerificationRequest) returns (CodeVerificationResponse);
+  rpc PersonalInfoCompletion (PersonalInfoCompletionRequest) returns (PersonalInfoCompletionRequest);
+}
+
+message User {
+  string fName = 1;
+  string lName = 2;
+  string username = 3;
+  uint64 userID = 4;
+  string birthDay = 5;
+  string gender = 6;
+  string profilePicUrl = 7;
+}
+
+// login begin
+
+message LoginRequest {
+  string userNameOrEmail = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  User user = 1;
+  string jwtToken = 2;
+}
+
+// login end
+
+// forget pass begin
+
+message ForgetPasswordRequest {
+  string userNameOrEmail = 1;
+}
+
+message NewPasswordWithTokenRequest {
+  string resetPasswordToken = 1;
+  string password = 2;
+}
+
+// forget pass end
+
+// signUp begin
+
+message SignUpRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+}
+
+message SignUpResponse {
+  string token = 1;
+}
+
+message CodeVerificationRequest {
+  string signUpToken = 1;
+  string code = 2;
+}
+
+message CodeVerificationResponse {
+  string jwtToken = 1;
+}
+
+// token in header
+message PersonalInfoCompletionRequest {
+  string fName = 1;
+  string lName = 2;
+  string birthDay = 3;
+  string gender = 4;
+}
+
+message PersonalInfoCompletionResponse {
+  User user = 1;
+}
+
+// signUp end
+
