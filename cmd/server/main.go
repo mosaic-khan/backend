@@ -16,7 +16,7 @@ func StartUserAPIServer() {
 	}
 
 	userS := User.NewServer()
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(userS.AuthMiddleware))
 	UserAPIService.RegisterUserAPIServer(grpcServer, userS)
 
 	if err := grpcServer.Serve(lis); err != nil {
@@ -31,9 +31,9 @@ func StartPostAPIServer() {
 		return
 	}
 
-	postS := Post.NewServer()
+	//postS := Post.NewServer()
 	grpcServer := grpc.NewServer()
-	UserAPIService.RegisterUserAPIServer(grpcServer, postS)
+	//UserAPIService.RegisterUserAPIServer(grpcServer, postS)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

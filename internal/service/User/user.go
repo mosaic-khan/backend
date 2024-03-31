@@ -13,6 +13,7 @@ type Server struct {
 	UserAPIService.UnimplementedUserAPIServer
 	pool *pgxpool.Pool
 	//querier *db.Queries
+	hmacSecret string
 }
 
 func getPool() (*pgxpool.Pool, error) {
@@ -35,5 +36,6 @@ func NewServer() *Server {
 	return &Server{
 		pool: pool,
 		//querier: db.New(pool),
+		hmacSecret: os.Getenv("hmacSecret"),
 	}
 }
