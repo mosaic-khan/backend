@@ -1,22 +1,23 @@
 package User
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
+	"main/internal/storage/db"
 	"main/pkg/UserAPIService"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 type Server struct {
 	UserAPIService.UnimplementedUserAPIServer
-	pool *pgxpool.Pool
-	//querier *db.Queries
+	query      *db.Queries
 	hmacSecret []byte
 }
 
-func getPool() (*pgxpool.Pool, error) {
+func getQuery() (*db.Queries, error) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
@@ -24,18 +25,23 @@ func getPool() (*pgxpool.Pool, error) {
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
 	)
-	return pgxpool.New(context.Background(), connStr)
+
+	conn, err := sql.Open("postges", connStr)
+	if err != nil {
+		return nil, err
+	}
+	q := db.New(conn)
+	return q, nil
 }
 
 func NewServer() *Server {
-	pool, err := getPool()
+	q, err := getQuery()
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 
 	return &Server{
-		pool: pool,
-		//querier: db.New(pool),
+		query:      q,
 		hmacSecret: []byte(os.Getenv("hmacSecret")),
 	}
 }
