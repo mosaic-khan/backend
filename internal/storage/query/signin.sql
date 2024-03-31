@@ -1,7 +1,7 @@
 -- name: InsertSignin :one
 INSERT INTO signin (email, username, password, verification_code, expire)
 VALUES ($1, $2, $3, $4, $5)
-RETURN id;
+RETURNING id;
 
 -- name: GetSigninCode :one
 SELECT verification_code

@@ -10,71 +10,71 @@ import (
 	"database/sql"
 )
 
-const existsEmail = `-- name: ExistsEmail :one
+const existsUserEmail = `-- name: ExistsUserEmail :one
 SELECT count(*)
 FROM account
 WHERE email = $1
 `
 
-func (q *Queries) ExistsEmail(ctx context.Context, email string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, existsEmail, email)
+func (q *Queries) ExistsUserEmail(ctx context.Context, email string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, existsUserEmail, email)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const existsUsername = `-- name: ExistsUsername :one
+const existsUserUsername = `-- name: ExistsUserUsername :one
 SELECT count(*)
 FROM account
 WHERE username = $1
 `
 
-func (q *Queries) ExistsUsername(ctx context.Context, username string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, existsUsername, username)
+func (q *Queries) ExistsUserUsername(ctx context.Context, username string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, existsUserUsername, username)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const getPasswordByEmail = `-- name: GetPasswordByEmail :one
+const getUserPasswordByEmail = `-- name: GetUserPasswordByEmail :one
 SELECT password
 FROM account
 WHERE email = $1
 `
 
-func (q *Queries) GetPasswordByEmail(ctx context.Context, email string) (string, error) {
-	row := q.db.QueryRowContext(ctx, getPasswordByEmail, email)
+func (q *Queries) GetUserPasswordByEmail(ctx context.Context, email string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getUserPasswordByEmail, email)
 	var password string
 	err := row.Scan(&password)
 	return password, err
 }
 
-const getPasswordByUsername = `-- name: GetPasswordByUsername :one
+const getUserPasswordByUsername = `-- name: GetUserPasswordByUsername :one
 select password
 FROM account
 WHERE username = $1
 `
 
-func (q *Queries) GetPasswordByUsername(ctx context.Context, username string) (string, error) {
-	row := q.db.QueryRowContext(ctx, getPasswordByUsername, username)
+func (q *Queries) GetUserPasswordByUsername(ctx context.Context, username string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getUserPasswordByUsername, username)
 	var password string
 	err := row.Scan(&password)
 	return password, err
 }
 
-const insertNewUser = `-- name: InsertNewUser :exec
+const insertUser = `-- name: InsertUser :exec
 INSERT INTO account (email, username, password)
 VALUES ($1, $2, $3)
 `
 
-type InsertNewUserParams struct {
+type InsertUserParams struct {
 	Email    string
 	Username string
 	Password string
 }
 
-func (q *Queries) InsertNewUser(ctx context.Context, arg InsertNewUserParams) error {
-	_, err := q.db.ExecContext(ctx, insertNewUser, arg.Email, arg.Username, arg.Password)
+func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
+	_, err := q.db.ExecContext(ctx, insertUser, arg.Email, arg.Username, arg.Password)
 	return err
 }
 

@@ -66,3 +66,12 @@ type Account struct {
 	CreationDate time.Time
 	Password     string
 }
+
+type Signin struct {
+	ID               int32
+	Email            string
+	Username         string
+	Password         string
+	VerificationCode string
+	Expire           time.Time
+}
