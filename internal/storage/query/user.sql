@@ -1,4 +1,4 @@
--- name: InsertNewUser :exec
+-- name: InsertUser :exec
 INSERT INTO account (email, username, password)
 VALUES ($1, $2, $3);
 
@@ -10,22 +10,22 @@ SET	first_name = $1,
 	birth_day  = $4
 WHERE username = $5;
 
--- name: GetPasswordByEmail :one
+-- name: GetUserPasswordByEmail :one
 SELECT password
 FROM account
 WHERE email = $1;
 
--- name: GetPasswordByUsername :one
+-- name: GetUserPasswordByUsername :one
 select password
 FROM account
 WHERE username = $1;
 
--- name: ExistsEmail :one
+-- name: ExistsUserEmail :one
 SELECT count(*)
 FROM account
 WHERE email = $1;
 
--- name: ExistsUsername :one
+-- name: ExistsUserUsername :one
 SELECT count(*)
 FROM account
 WHERE username = $1;

@@ -9,6 +9,6 @@ CREATE TABLE account (
     last_name VARCHAR(40),
     gender GENDER,
     birth_day DATE,
-    creation_date DATE  NOT NULL DEFAULT CURRENT_DATE,
+    creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
     password CHAR(60) NOT NULL
 );
