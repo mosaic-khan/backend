@@ -7,6 +7,7 @@ import (
 	"main/internal/service/utils"
 	"main/pkg/UserAPIService"
 	"net"
+	"sync"
 )
 
 func StartUserAPIServer() {
@@ -23,6 +24,8 @@ func StartUserAPIServer() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+
+	v.Done()
 }
 
 func StartPostAPIServer() {
@@ -39,12 +42,19 @@ func StartPostAPIServer() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+
+	v.Done()
 }
+
+var v sync.WaitGroup
 
 func main() {
 	println("hello world")
 
+	v.Add(2)
+
 	go StartUserAPIServer()
 	go StartPostAPIServer()
 
+	v.Wait()
 }
