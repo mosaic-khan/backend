@@ -4,6 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"main/internal/service/User"
+	"main/internal/service/utils"
 	"main/pkg/UserAPIService"
 	"net"
 )
@@ -16,7 +17,7 @@ func StartUserAPIServer() {
 	}
 
 	userS := User.NewServer()
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(utils.MiddleWareAuth()))
 	UserAPIService.RegisterUserAPIServer(grpcServer, userS)
 
 	if err := grpcServer.Serve(lis); err != nil {
@@ -31,9 +32,9 @@ func StartPostAPIServer() {
 		return
 	}
 
-	postS := Post.NewServer()
-	grpcServer := grpc.NewServer()
-	UserAPIService.RegisterUserAPIServer(grpcServer, postS)
+	//postS := Post.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(utils.MiddleWareAuth()))
+	//UserAPIService.RegisterUserAPIServer(grpcServer, postS)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
