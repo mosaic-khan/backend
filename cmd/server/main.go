@@ -3,8 +3,8 @@ package main
 import (
 	"google.golang.org/grpc"
 	"log"
-	utils "main/internal/service"
 	"main/internal/service/User"
+	"main/internal/service/utils"
 	"main/pkg/UserAPIService"
 	"net"
 )
