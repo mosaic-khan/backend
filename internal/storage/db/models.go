@@ -67,7 +67,7 @@ type Account struct {
 	Password     string
 }
 
-type Signin struct {
+type Signup struct {
 	ID               int32
 	Email            string
 	Username         string
