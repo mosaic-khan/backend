@@ -20,6 +20,16 @@ select password
 FROM account
 WHERE username = $1;
 
+-- name: GetUserByEmail :one
+SELECT *
+FROM account
+WHERE email = $1;
+
+-- name: GetUserByUsername :one
+SELECT *
+FROM account
+WHERE username = $1;
+
 -- name: ExistsUserEmail :one
 SELECT count(*)
 FROM account
