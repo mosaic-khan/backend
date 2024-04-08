@@ -19,7 +19,7 @@ message User {
   string fName = 1;
   string lName = 2;
   string username = 3;
-  uint64 userID = 4;
+  string email = 4;
   string birthDay = 5;
   string gender = 6;
   string profilePicUrl = 7;
