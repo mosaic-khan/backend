@@ -26,7 +26,7 @@ func getQuery() (*db.Queries, error) {
 		os.Getenv("DB_NAME"),
 	)
 
-	conn, err := sql.Open("postges", connStr)
+	conn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
