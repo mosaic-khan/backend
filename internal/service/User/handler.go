@@ -34,7 +34,7 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 
 	var user db.Account
 
-	if err1 != nil {
+	if err1 == nil {
 		user = userEmail
 	} else {
 		user = userUsername
@@ -44,6 +44,8 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		return nil, status.Errorf(codes.InvalidArgument, "Incorrect password")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error checking password")
 	}
 
 	// get userID
