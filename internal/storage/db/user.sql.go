@@ -127,6 +127,22 @@ func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (int64, 
 	return id, err
 }
 
+const resetPassword = `-- name: ResetPassword :exec
+UPDATE account
+SET password = $2
+WHERE id = $1
+`
+
+type ResetPasswordParams struct {
+	ID       int64
+	Password string
+}
+
+func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, resetPassword, arg.ID, arg.Password)
+	return err
+}
+
 const updateUserInfo = `-- name: UpdateUserInfo :exec
 UPDATE account
 SET	first_name = $1,

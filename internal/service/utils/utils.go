@@ -116,3 +116,7 @@ func CreateLoginToken(userID string, duration time.Duration, key []byte) (string
 func SendSignUpEmail(code string) {
 
 }
+
+func SendResetPassEmail(token string) {
+
+}

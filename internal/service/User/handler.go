@@ -7,6 +7,7 @@ import (
 	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/UserAPIService"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -73,11 +74,63 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 }
 
 func (s *Server) ForgetPassword(ctx context.Context, in *UserAPIService.ForgetPasswordRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ForgetPassword not implemented")
+
+	user, err := s.query.GetUserByEmail(ctx, in.UserNameOrEmail)
+	if err != nil {
+		return nil, nil
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Issuer:    "KhanWeb",
+		Subject:   strconv.FormatInt(user.ID, 10),
+		Audience:  jwt.ClaimStrings{"ForgetPass"},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+		ID:        strconv.Itoa(rand.Int()),
+	})
+	tokenStr, err := token.SignedString(s.hmacSecret)
+	if err != nil {
+		return nil, nil
+	}
+
+	utils.SendResetPassEmail(tokenStr)
+
+	return nil, nil
 }
 
 func (s *Server) NewPasswordWithToken(ctx context.Context, in *UserAPIService.NewPasswordWithTokenRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewPasswordWithToken not implemented")
+	token, err := jwt.Parse(in.ResetPasswordToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, status.Errorf(codes.Unauthenticated, "unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.hmacSecret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+	}
+
+	userIDStr, err := token.Claims.GetSubject()
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return nil, err
+	}
+
+	if !utils.ValidatePassword(in.Password) {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid password")
+	}
+
+	bcryptPass, _ := bcrypt.GenerateFromPassword([]byte(in.Password), 10)
+
+	err = s.query.ResetPassword(ctx, db.ResetPasswordParams{
+		ID:       int64(userID),
+		Password: string(bcryptPass),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (*UserAPIService.SignUpResponse, error) {

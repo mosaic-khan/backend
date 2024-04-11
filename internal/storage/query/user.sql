@@ -40,3 +40,8 @@ WHERE email = $1;
 SELECT count(*)
 FROM account
 WHERE username = $1;
+
+-- name: ResetPassword :exec
+UPDATE account
+SET password = $2
+WHERE id = $1;
