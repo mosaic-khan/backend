@@ -1,6 +1,7 @@
--- name: InsertUser :exec
+-- name: InsertUser :one
 INSERT INTO account (email, username, password)
-VALUES ($1, $2, $3);
+VALUES ($1, $2, $3)
+RETURNING id;
 
 -- name: UpdateUserInfo :exec
 UPDATE account
