@@ -8,6 +8,11 @@ SELECT verification_code
 FROM signup
 WHERE id = $1;
 
+-- name: GetSignUpData :one
+SELECT *
+FROM signup
+WHERE id = $1;
+
 -- name: DeleteSignup :exec
 DELETE
 FROM signup
