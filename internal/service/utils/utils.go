@@ -8,8 +8,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"math/rand"
 	"os"
+	"regexp"
 	"strings"
+	"time"
 )
 
 func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
@@ -57,7 +60,7 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 			return nil, status.Error(codes.Unauthenticated, "invalid token")
 		}
 
-		userID, err := token.Claims.GetIssuer()
+		userID, err := token.Claims.GetSubject()
 		if err != nil {
 			return nil, status.Error(codes.Internal, "error while extracting userID")
 		}
@@ -68,5 +71,48 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 		// Call handler
 		return handler(newCtx, req)
 	}
+
+}
+
+func ValidateUsername(username string) bool {
+	return false
+}
+
+func ValidateEmail(mail string) bool {
+	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(mail)
+}
+
+func ValidateName(name string) bool {
+	var nameRegex = regexp.MustCompile(`^[a-zA-Z ]{3,}$`)
+	return nameRegex.MatchString(name)
+}
+
+func ValidatePassword(password string) bool {
+	var passRegex = regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$`)
+	return passRegex.MatchString(password)
+}
+
+func GenerateVerificationCode() string {
+	const charset = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
+	b := make([]byte, 6)
+	for i := 0; i < 6; i++ {
+		b[i] = charset[rand.Int()%len(charset)]
+	}
+	return string(b)
+}
+
+func CreateLoginToken(userID string, duration time.Duration, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
+		Issuer:    "KhanWeb",
+		Subject:   userID,
+		Audience:  jwt.ClaimStrings{"Login"},
+	})
+
+	return token.SignedString(key)
+}
+
+func SendSignUpEmail(code string) {
 
 }
