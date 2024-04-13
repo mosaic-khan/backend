@@ -234,7 +234,7 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
-	
+
 	TXQuery := s.query.WithTx(TX)
 
 	usernameCnt, err := TXQuery.ExistsUserUsername(ctx, signUpRow.Username)
@@ -271,5 +271,30 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 }
 
 func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*UserAPIService.PersonalInfoCompletionRequest, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
+}
+
+func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*UserAPIService.EditProfileInfoResponse, error) {
+	token, err := jwt.Parse(in.JwtToken, func(token *jwt.Token) (interface{}, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, status.Errorf(codes.Unauthenticated, "unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.hmacSecret, nil
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, err.Error())
+	}
+
+	aud, _ := token.Claims.GetAudience()
+	if len(aud) != 1 || aud[0] != "Login" {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid token")
+	}
+
+	userIDStr, _ := token.Claims.GetSubject()
+	_, err = strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
 	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
 }
