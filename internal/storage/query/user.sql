@@ -8,7 +8,7 @@ SET	first_name = $1,
 	last_name  = $2,
 	gender	   = $3,
 	birth_day  = $4
-WHERE username = $5;
+WHERE id = $5;
 
 -- name: GetUserPasswordByEmail :one
 SELECT password

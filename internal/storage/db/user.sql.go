@@ -130,7 +130,7 @@ SET	first_name = $1,
 	last_name  = $2,
 	gender	   = $3,
 	birth_day  = $4
-WHERE username = $5
+WHERE id = $5
 `
 
 type UpdateUserInfoParams struct {
@@ -138,7 +138,7 @@ type UpdateUserInfoParams struct {
 	LastName  sql.NullString
 	Gender    NullGender
 	BirthDay  sql.NullTime
-	Username  string
+	ID        int64
 }
 
 func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
@@ -147,7 +147,7 @@ func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) 
 		arg.LastName,
 		arg.Gender,
 		arg.BirthDay,
-		arg.Username,
+		arg.ID,
 	)
 	return err
 }
