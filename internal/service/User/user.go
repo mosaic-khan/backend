@@ -44,6 +44,6 @@ func NewServer() *Server {
 	return &Server{
 		conn:       conn,
 		query:      q,
-		hmacSecret: []byte(os.Getenv("hmacSecret")),
+		hmacSecret: []byte(os.Getenv("SECRET_KEY")),
 	}
 }
