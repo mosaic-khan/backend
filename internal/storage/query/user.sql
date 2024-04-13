@@ -31,6 +31,11 @@ SELECT *
 FROM account
 WHERE username = $1;
 
+-- name: GetUserByID :one
+SELECT *
+FROM account
+WHERE id = $1;
+
 -- name: ExistsUserEmail :one
 SELECT count(*)
 FROM account
