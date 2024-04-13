@@ -121,7 +121,7 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	utils.SendSignUpEmail(verificationCode)
+	go utils.SendSignUpEmail(verificationCode)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(signUpExpTime),
@@ -178,11 +178,10 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 	defer func(TX *sql.Tx) {
 		_ = TX.Commit()
 	}(TX)
-
 	if err != nil {
-		_ = TX.Rollback()
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
+	
 	TXQuery := s.query.WithTx(TX)
 
 	usernameCnt, err := TXQuery.ExistsUserUsername(ctx, signUpRow.Username)
