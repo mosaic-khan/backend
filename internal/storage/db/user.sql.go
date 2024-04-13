@@ -59,6 +59,29 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (Account, er
 	return i, err
 }
 
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, username, first_name, last_name, gender, birth_day, creation_date, password
+FROM account
+WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id int64) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.FirstName,
+		&i.LastName,
+		&i.Gender,
+		&i.BirthDay,
+		&i.CreationDate,
+		&i.Password,
+	)
+	return i, err
+}
+
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, email, username, first_name, last_name, gender, birth_day, creation_date, password
 FROM account
@@ -133,7 +156,7 @@ SET	first_name = $1,
 	last_name  = $2,
 	gender	   = $3,
 	birth_day  = $4
-WHERE username = $5
+WHERE id = $5
 `
 
 type UpdateUserInfoParams struct {
@@ -141,7 +164,7 @@ type UpdateUserInfoParams struct {
 	LastName  sql.NullString
 	Gender    NullGender
 	BirthDay  sql.NullTime
-	Username  string
+	ID        int64
 }
 
 func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
@@ -150,7 +173,7 @@ func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) 
 		arg.LastName,
 		arg.Gender,
 		arg.BirthDay,
-		arg.Username,
+		arg.ID,
 	)
 	return err
 }

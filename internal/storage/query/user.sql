@@ -9,7 +9,7 @@ SET	first_name = $1,
 	last_name  = $2,
 	gender	   = $3,
 	birth_day  = $4
-WHERE username = $5;
+WHERE id = $5;
 
 -- name: GetUserPasswordByEmail :one
 SELECT password
@@ -30,6 +30,11 @@ WHERE email = $1;
 SELECT *
 FROM account
 WHERE username = $1;
+
+-- name: GetUserByID :one
+SELECT *
+FROM account
+WHERE id = $1;
 
 -- name: ExistsUserEmail :one
 SELECT count(*)
