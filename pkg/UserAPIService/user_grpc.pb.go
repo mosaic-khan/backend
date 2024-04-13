@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v5.26.1
-// source: user.proto
+// source: api/proto/user.proto
 
 package UserAPIService
 
@@ -29,6 +29,7 @@ type UserAPIClient interface {
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	CodeVerification(ctx context.Context, in *CodeVerificationRequest, opts ...grpc.CallOption) (*CodeVerificationResponse, error)
 	PersonalInfoCompletion(ctx context.Context, in *PersonalInfoCompletionRequest, opts ...grpc.CallOption) (*PersonalInfoCompletionRequest, error)
+	EditProfileInfo(ctx context.Context, in *EditProfileInfoRequest, opts ...grpc.CallOption) (*EditProfileInfoResponse, error)
 }
 
 type userAPIClient struct {
@@ -93,6 +94,15 @@ func (c *userAPIClient) PersonalInfoCompletion(ctx context.Context, in *Personal
 	return out, nil
 }
 
+func (c *userAPIClient) EditProfileInfo(ctx context.Context, in *EditProfileInfoRequest, opts ...grpc.CallOption) (*EditProfileInfoResponse, error) {
+	out := new(EditProfileInfoResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/EditProfileInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserAPIServer is the server API for UserAPI service.
 // All implementations must embed UnimplementedUserAPIServer
 // for forward compatibility
@@ -103,6 +113,7 @@ type UserAPIServer interface {
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	CodeVerification(context.Context, *CodeVerificationRequest) (*CodeVerificationResponse, error)
 	PersonalInfoCompletion(context.Context, *PersonalInfoCompletionRequest) (*PersonalInfoCompletionRequest, error)
+	EditProfileInfo(context.Context, *EditProfileInfoRequest) (*EditProfileInfoResponse, error)
 	mustEmbedUnimplementedUserAPIServer()
 }
 
@@ -127,6 +138,9 @@ func (UnimplementedUserAPIServer) CodeVerification(context.Context, *CodeVerific
 }
 func (UnimplementedUserAPIServer) PersonalInfoCompletion(context.Context, *PersonalInfoCompletionRequest) (*PersonalInfoCompletionRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
+}
+func (UnimplementedUserAPIServer) EditProfileInfo(context.Context, *EditProfileInfoRequest) (*EditProfileInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditProfileInfo not implemented")
 }
 func (UnimplementedUserAPIServer) mustEmbedUnimplementedUserAPIServer() {}
 
@@ -249,6 +263,24 @@ func _UserAPI_PersonalInfoCompletion_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserAPI_EditProfileInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditProfileInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserAPIServer).EditProfileInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.UserAPI/EditProfileInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserAPIServer).EditProfileInfo(ctx, req.(*EditProfileInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserAPI_ServiceDesc is the grpc.ServiceDesc for UserAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,7 +312,11 @@ var UserAPI_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "PersonalInfoCompletion",
 			Handler:    _UserAPI_PersonalInfoCompletion_Handler,
 		},
+		{
+			MethodName: "EditProfileInfo",
+			Handler:    _UserAPI_EditProfileInfo_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "user.proto",
+	Metadata: "api/proto/user.proto",
 }
