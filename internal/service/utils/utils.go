@@ -16,7 +16,7 @@ import (
 )
 
 func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
-	hmacSecret := []byte(os.Getenv("hmacSecret"))
+	hmacSecret := []byte(os.Getenv("SECRET_KEY"))
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
 
