@@ -291,10 +291,74 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 	}
 
 	userIDStr, _ := token.Claims.GetSubject()
-	_, err = strconv.ParseInt(userIDStr, 10, 64)
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
+	user, err := s.query.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not retrieve user")
+	}
+
+	fname := sql.NullString{}
+	lname := sql.NullString{}
+	gender := db.NullGender{}
+	birthDay := sql.NullTime{}
+
+	// update first name if one is provided else keep the current first name
+	if in.FName != nil {
+		fname = sql.NullString{
+			String: *in.FName,
+			Valid:  true,
+		}
+	} else {
+		fname = user.FirstName
+	}
+	// update last name if one is provided else keep the current last name
+	if in.LName != nil {
+		lname = sql.NullString{
+			String: *in.LName,
+			Valid:  true,
+		}
+	} else {
+		lname = user.LastName
+	}
+	// update gender if one is provided else keep the current gender
+	if in.Gender != nil {
+		gender = db.NullGender{
+			Gender: db.Gender(*in.Gender),
+			Valid:  true,
+		}
+	} else {
+		gender = user.Gender
+	}
+	// update birth day if one is provided else keep the current birth day
+	t, err := time.Parse("2006-01-02", *in.BirthDay)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error parsing birthday")
+	}
+	if in.BirthDay != nil {
+		birthDay = sql.NullTime{
+			Time:  t,
+			Valid: true,
+		}
+	} else {
+		birthDay = user.BirthDay
+	}
+
+	err = s.query.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
+		FirstName: fname,
+		LastName:  lname,
+		Gender:    gender,
+		BirthDay:  birthDay,
+		ID:        userID,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not update user profile")
+	}
+
+	return &UserAPIService.EditProfileInfoResponse{Ok: true}, nil
+
 }

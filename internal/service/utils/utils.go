@@ -3,16 +3,17 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 	"math/rand"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
@@ -75,7 +76,7 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 }
 
 func ValidateUsername(username string) bool {
-	return false
+	return true
 }
 
 func ValidateEmail(mail string) bool {
