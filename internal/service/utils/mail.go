@@ -7,7 +7,7 @@ import (
 
 func verificationEmail(code string) (string, error) {
 
-	tmp, err := template.ParseFiles("./templates/verification_email.gohtml")
+	tmp, err := template.ParseFiles("./templates/verification.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -20,4 +20,22 @@ func verificationEmail(code string) (string, error) {
 	}
 
 	return b.String(), nil
+}
+
+func forgetPassEmail(url string) (string, error) {
+
+	tmp, err := template.ParseFiles("./templates/forgetPass.gohtml")
+	if err != nil {
+		return "", err
+	}
+
+	b := new(bytes.Buffer)
+
+	err = tmp.Execute(b, url)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
+
 }
