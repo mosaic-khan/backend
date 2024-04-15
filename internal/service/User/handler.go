@@ -109,11 +109,15 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 
 	signUpExpTime := time.Now().Add(5 * time.Minute)
 	verificationCode := utils.GenerateVerificationCode()
+	bcryptPass, err := bcrypt.GenerateFromPassword([]byte(in.Password), 10)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error hashing password")
+	}
 
 	signupID, err := s.query.InsertSignup(ctx, db.InsertSignupParams{
 		Email:            in.Email,
 		Username:         in.Username,
-		Password:         in.Password,
+		Password:         string(bcryptPass),
 		VerificationCode: verificationCode,
 		Expire:           signUpExpTime,
 	})
@@ -139,7 +143,7 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 }
 
 func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVerificationRequest) (*UserAPIService.CodeVerificationResponse, error) {
-	token, err := jwt.Parse(in.Code, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(in.SignUpToken, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwt.SigningMethodHS256 {
 			return nil, status.Errorf(codes.Unauthenticated, "unexpected signing method: %v", token.Header["alg"])
 		}
@@ -196,12 +200,10 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 		return nil, err
 	}
 
-	bcryptPass, _ := bcrypt.GenerateFromPassword([]byte(signUpRow.Password), 10)
-
 	userID, err := TXQuery.InsertUser(ctx, db.InsertUserParams{
 		Email:    signUpRow.Email,
 		Username: signUpRow.Username,
-		Password: string(bcryptPass),
+		Password: signUpRow.Password,
 	})
 	if err != nil {
 		_ = TX.Rollback()
