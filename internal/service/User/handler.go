@@ -222,22 +222,8 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 }
 
 func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*UserAPIService.EditProfileInfoResponse, error) {
-	token, err := jwt.Parse(in.JwtToken, func(token *jwt.Token) (interface{}, error) {
-		if token.Method != jwt.SigningMethodHS256 {
-			return nil, status.Errorf(codes.Unauthenticated, "unexpected signing method: %v", token.Header["alg"])
-		}
-		return s.hmacSecret, nil
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, err.Error())
-	}
 
-	aud, _ := token.Claims.GetAudience()
-	if len(aud) != 1 || aud[0] != "Login" {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid token")
-	}
-
-	userIDStr, _ := token.Claims.GetSubject()
+	userIDStr := ctx.Value("userID").(string)
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -280,12 +266,12 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 	} else {
 		gender = user.Gender
 	}
-	// update birth day if one is provided else keep the current birth day
-	t, err := time.Parse("2006-01-02", *in.BirthDay)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error parsing birthday")
-	}
+	// update birthday if one is provided else keep the current birthday
 	if in.BirthDay != nil {
+		t, err := time.Parse("2006-01-02", *in.BirthDay)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error parsing birthday")
+		}
 		birthDay = sql.NullTime{
 			Time:  t,
 			Valid: true,
