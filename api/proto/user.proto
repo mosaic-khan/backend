@@ -95,7 +95,6 @@ message EditProfileInfoRequest {
   optional string lName = 2;
   optional string gender = 3;
   optional string birthDay = 4;
-  string jwtToken = 5;
 }
 
 message EditProfileInfoResponse {
