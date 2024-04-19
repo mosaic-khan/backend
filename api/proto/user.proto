@@ -13,6 +13,7 @@ service UserAPI {
   rpc SignUp (SignUpRequest) returns (SignUpResponse);
   rpc CodeVerification (CodeVerificationRequest) returns (CodeVerificationResponse);
   rpc PersonalInfoCompletion (PersonalInfoCompletionRequest) returns (PersonalInfoCompletionRequest);
+  rpc EditProfileInfo (EditProfileInfoRequest) returns (EditProfileInfoResponse);
 }
 
 message User {
@@ -87,3 +88,17 @@ message PersonalInfoCompletionResponse {
 
 // signUp end
 
+// EditProfie begin
+
+message EditProfileInfoRequest {
+  optional string fName = 1;
+  optional string lName = 2;
+  optional string gender = 3;
+  optional string birthDay = 4;
+}
+
+message EditProfileInfoResponse {
+  bool ok = 1;
+}
+
+// EditProfile End
