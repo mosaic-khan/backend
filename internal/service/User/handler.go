@@ -180,6 +180,7 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 
 	go utils.SendSignUpEmail(in.Email, verificationCode)
 
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(signUpExpTime),
 		Issuer:    "KhanWeb",
