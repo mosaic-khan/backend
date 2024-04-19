@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strings"
@@ -119,6 +120,60 @@ func CreateLoginToken(userID string, duration time.Duration, key []byte) (string
 	return token.SignedString(key)
 }
 
-func SendSignUpEmail(code string) {
+func SendSignUpEmail(email string, code string) {
+	username := "mmdhossein.haghdadi@gmail.com"
+	password := "xsmtpsib-eb6248a76b82480199faf72cd07e43092f9d8c6ed89357698b5ac6a362171213-sRFDAq53XJx0c9nM"
 
+	from := "no-reply@khanmedia.ir"
+
+	// Receiver email address.
+	to := []string{
+		email,
+	}
+
+	// smtp server configuration.
+	smtpHost := "smtp-relay.brevo.com"
+	smtpPort := "587"
+
+	// Message.
+	message, _ := verificationEmail(code)
+
+	// Authentication.
+	auth := smtp.PlainAuth("", username, password, smtpHost)
+
+	// Sending email.
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func SendResetPassEmail(email string, token string) {
+	username := "mmdhossein.haghdadi@gmail.com"
+	password := "xsmtpsib-eb6248a76b82480199faf72cd07e43092f9d8c6ed89357698b5ac6a362171213-sRFDAq53XJx0c9nM"
+
+	from := "no-reply@khanmedia.ir"
+
+	// Receiver email address.
+	to := []string{
+		email,
+	}
+
+	// smtp server configuration.
+	smtpHost := "smtp-relay.brevo.com"
+	smtpPort := "587"
+
+	// Message.
+	message, _ := forgetPassEmail(fmt.Sprintf("khanmedia.ir/forgetpass?token=%s", token))
+
+	// Authentication.
+	auth := smtp.PlainAuth("", username, password, smtpHost)
+
+	// Sending email.
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
