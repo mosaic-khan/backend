@@ -17,7 +17,7 @@ import (
 )
 
 func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
-	hmacSecret := []byte(os.Getenv("hmacSecret"))
+	hmacSecret := []byte(os.Getenv("SECRET_KEY"))
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (midResponse interface{}, midErr error) {
 
@@ -76,7 +76,8 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 }
 
 func ValidateUsername(username string) bool {
-	return true
+	var usernameRegex = regexp.MustCompile(`^[a-zA-z0-9_-]{8,32}$`)
+	return usernameRegex.MatchString(username)
 }
 
 func ValidateEmail(mail string) bool {
@@ -85,13 +86,17 @@ func ValidateEmail(mail string) bool {
 }
 
 func ValidateName(name string) bool {
-	var nameRegex = regexp.MustCompile(`^[a-zA-Z ]{3,}$`)
+	var nameRegex = regexp.MustCompile(`^[a-zA-Z ]{3,40}$`)
 	return nameRegex.MatchString(name)
 }
 
 func ValidatePassword(password string) bool {
-	var passRegex = regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$`)
-	return passRegex.MatchString(password)
+	var lowerChar = regexp.MustCompile(`[a-z]`)
+	var upperChar = regexp.MustCompile(`[A-Z]`)
+	var digit = regexp.MustCompile(`\d`)
+	var specialChar = regexp.MustCompile(`[!@#$%^&*_]`)
+	var length = regexp.MustCompile(`^.{8,72}$`)
+	return lowerChar.MatchString(password) && upperChar.MatchString(password) && digit.MatchString(password) && specialChar.MatchString(password) && length.MatchString(password)
 }
 
 func GenerateVerificationCode() string {
