@@ -91,7 +91,7 @@ func (s *Server) ForgetPassword(ctx context.Context, in *UserAPIService.ForgetPa
 		return nil, nil
 	}
 
-	utils.SendResetPassEmail(tokenStr)
+	utils.SendResetPassEmail(in.UserNameOrEmail, tokenStr)
 
 	return nil, nil
 }
@@ -178,7 +178,7 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	go utils.SendSignUpEmail(verificationCode)
+	go utils.SendSignUpEmail(in.Email, verificationCode)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(signUpExpTime),
