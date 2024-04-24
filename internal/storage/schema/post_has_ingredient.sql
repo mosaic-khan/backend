@@ -1,0 +1,14 @@
+CREATE TABLE post_has_ingredient (
+	id BIGSERIAL PRIMARY KEY,
+	amount VARCHAR(64),
+	post_id BIGINT NOT NULL,
+	ingredient_id INT NOT NULL,
+	FOREIGN KEY(ingredient_id)
+		REFERENCES ingredient(id)
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE,
+	FOREIGN KEY(post_id)
+		REFERENCES post(id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+);
