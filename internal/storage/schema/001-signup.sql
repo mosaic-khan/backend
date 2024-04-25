@@ -1,4 +1,4 @@
-CREATE TABLE signup (
+CREATE TABLE IF NOT EXISTS signup (
     id SERIAL PRIMARY KEY,
     email VARCHAR(571) NOT NULL,
     username VARCHAR(32) NOT NULL,
