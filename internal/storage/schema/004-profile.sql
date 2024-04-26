@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS profile (
     gender GENDER NOT NULL DEFAULT 'prefer not to say',
     birth_day DATE,
     profile_pic_address TEXT,
-    city VARCHAR(40) REFERENCES "city"(name),
+    city_id SMALLINT REFERENCES "city"(id),
     bio varchar(140)
 )
