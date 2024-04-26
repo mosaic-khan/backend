@@ -38,13 +38,14 @@ message User {
 }
 
 message Profile {
-  string name = 1;
-  string username = 2;
-  int64 profileID = 3;
-  string pronouns = 4;
-  string bio = 5;
-  string city = 6;
-  string profilePicUrl = 7;
+  int64 id = 1;
+  string name = 2;
+  string username = 3;
+  int64 profileID = 4;
+  string pronouns = 5;
+  string bio = 6;
+  string city = 7;
+  string profilePicUrl = 8;
 }
 
 message RefreshTokenResponse {
