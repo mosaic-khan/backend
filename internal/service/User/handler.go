@@ -275,11 +275,34 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 }
 
 func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
+	userID := ctx.Value("userID").(int64)
+
+	t, err := time.Parse("2006-01-02", in.GetBirthDay())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error parsing birthday")
+	}
+	birthDay := sql.NullTime{
+		Time:  t,
+		Valid: true,
+	}
+
+	err = s.query.UpdateProfileInfo(ctx, db.UpdateProfileInfoParams{
+		FirstName: in.FName,
+		LastName:  in.LName,
+		Gender:    db.Gender(in.Gender),
+		BirthDay:  birthDay,
+		Bio:       "",
+		CityID:    sql.NullInt16{},
+		UserID:    userID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while updating profile info")
+	}
+
+	return nil, nil
 }
 
 func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*emptypb.Empty, error) {
-
 	userID := ctx.Value("userID").(int64)
 
 	userInfo, err := s.query.GetUserInfo(ctx, userID)
@@ -287,8 +310,8 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
 
-	fname := sql.NullString{}
-	lname := sql.NullString{}
+	fname := ""
+	lname := ""
 	gender := db.Gender("")
 	birthDay := sql.NullTime{}
 	city := sql.NullInt16{}
@@ -296,19 +319,13 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 
 	// update first name if one is provided else keep the current first name
 	if in.FName != nil {
-		fname = sql.NullString{
-			String: *in.FName,
-			Valid:  true,
-		}
+		fname = in.GetFName()
 	} else {
 		fname = userInfo.FirstName
 	}
 	// update last name if one is provided else keep the current last name
 	if in.LName != nil {
-		lname = sql.NullString{
-			String: *in.LName,
-			Valid:  true,
-		}
+		lname = in.GetLName()
 	} else {
 		lname = userInfo.LastName
 	}
@@ -320,7 +337,7 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 	}
 	// update birthday if one is provided else keep the current birthday
 	if in.BirthDay != nil {
-		t, err := time.Parse("2006-01-02", *in.BirthDay)
+		t, err := time.Parse("2006-01-02", in.GetBirthDay())
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error parsing birthday")
 		}
@@ -366,7 +383,24 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 }
 
 func (s *Server) GetUserInfo(ctx context.Context, in *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+	userID := ctx.Value("userID").(int64)
+
+	userInfo, err := s.query.GetUserInfo(ctx, userID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not retrieve user")
+	}
+
+	return &UserAPIService.GetUserInfoResponse{User: &UserAPIService.User{
+		FName:         userInfo.FirstName,
+		LName:         userInfo.LastName,
+		Username:      userInfo.Username,
+		Email:         userInfo.Email,
+		BirthDay:      userInfo.BirthDay.Time.String(),
+		Gender:        string(userInfo.Gender),
+		ProfilePicUrl: userInfo.ProfilePicAddress.String,
+		City:          userInfo.CityName,
+		Bio:           userInfo.Bio,
+	}}, nil
 }
 
 func (s *Server) ChangeUsername(context.Context, *UserAPIService.ChangeUsernameRequest) (*emptypb.Empty, error) {
@@ -381,18 +415,109 @@ func (s *Server) ConfirmChangeEmail(context.Context, *UserAPIService.ConfirmChan
 	return nil, status.Errorf(codes.Unimplemented, "method ConfirmChangeEmail not implemented")
 }
 
-func (s *Server) ChangePassword(context.Context, *UserAPIService.ChangePasswordRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
+func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePasswordRequest) (*emptypb.Empty, error) {
+	userID := ctx.Value("userID").(int64)
+
+	bcryptPass, err := bcrypt.GenerateFromPassword([]byte(in.OldPassword), 10)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while converting to bcrypt")
+	}
+
+	user, err := s.query.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "error fetching user by user ID")
+	}
+
+	if user.Password != string(bcryptPass) {
+		return nil, status.Errorf(codes.Unauthenticated, "incorrect pass")
+	}
+
+	bcryptPass, err = bcrypt.GenerateFromPassword([]byte(in.NewPassword), 10)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while converting to bcrypt")
+	}
+
+	err = s.query.ResetPassword(ctx, db.ResetPasswordParams{
+		ID:       userID,
+		Password: string(bcryptPass),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while changing password")
+	}
+
+	return nil, nil
 }
 
 func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfilePicRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeProfilePic not implemented")
 }
 
-func (s *Server) GetUserProfile(context.Context, *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
+	userID := ctx.Value("userID").(int64)
+
+	var profile *UserAPIService.Profile
+	var gender string
+
+	if in.Username == nil {
+		profileDB, err := s.query.GetProfileByUserID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+
+		profile = &UserAPIService.Profile{
+			Id:            profileDB.ID,
+			Name:          profileDB.Name.(string),
+			Username:      profileDB.Username,
+			Pronouns:      "",
+			Bio:           profileDB.Bio,
+			City:          profileDB.CityName,
+			ProfilePicUrl: profile.ProfilePicUrl,
+		}
+
+		gender = string(profileDB.Gender)
+
+	} else {
+		profileDB, err := s.query.GetProfileByUsername(ctx, in.GetUsername())
+		if err != nil {
+			return nil, err
+		}
+
+		profile = &UserAPIService.Profile{
+			Id:            profileDB.ID,
+			Name:          profileDB.Name.(string),
+			Username:      profileDB.Username,
+			Pronouns:      "",
+			Bio:           profileDB.Bio,
+			City:          profileDB.CityName,
+			ProfilePicUrl: profile.ProfilePicUrl,
+		}
+
+		gender = string(profileDB.Gender)
+	}
+
+	if gender == "male" {
+		profile.Pronouns = "He/Him"
+	} else if gender == "female" {
+		profile.Pronouns = "She/Her"
+	}
+
+	return &UserAPIService.GetProfileResponse{Profile: profile}, nil
 }
 
-func (s *Server) GetCities(context.Context, *UserAPIService.GetCitiesRequest) (*UserAPIService.GetCitiesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCities not implemented")
+func (s *Server) GetCities(ctx context.Context, in *UserAPIService.GetCitiesRequest) (*UserAPIService.GetCitiesResponse, error) {
+
+	citiesDB, err := s.query.GetCities(ctx, in.CityPattern)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while retriving cities")
+	}
+
+	cities := make([]*UserAPIService.City, len(citiesDB))
+	for i, city := range citiesDB {
+		cities[i] = &UserAPIService.City{
+			Id:   int32(city.ID),
+			Name: city.Name,
+		}
+	}
+
+	return &UserAPIService.GetCitiesResponse{Cities: cities}, nil
 }
