@@ -33,7 +33,7 @@ type UserAPIClient interface {
 	ConfirmChangeEmail(ctx context.Context, in *ConfirmChangeEmailRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ChangeProfilePic(ctx context.Context, in *ChangeProfilePicRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetUserProfile(ctx context.Context, in *GetUserProfileRequests, opts ...grpc.CallOption) (*GetUserProfileResponse, error)
+	GetProfile(ctx context.Context, in *GetProfileRequests, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	GetCities(ctx context.Context, in *GetCitiesRequest, opts ...grpc.CallOption) (*GetCitiesResponse, error)
 }
 
@@ -171,9 +171,9 @@ func (c *userAPIClient) ChangeProfilePic(ctx context.Context, in *ChangeProfileP
 	return out, nil
 }
 
-func (c *userAPIClient) GetUserProfile(ctx context.Context, in *GetUserProfileRequests, opts ...grpc.CallOption) (*GetUserProfileResponse, error) {
-	out := new(GetUserProfileResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/GetUserProfile", in, out, opts...)
+func (c *userAPIClient) GetProfile(ctx context.Context, in *GetProfileRequests, opts ...grpc.CallOption) (*GetProfileResponse, error) {
+	out := new(GetProfileResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/GetProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ type UserAPIServer interface {
 	ConfirmChangeEmail(context.Context, *ConfirmChangeEmailRequest) (*emptypb.Empty, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*emptypb.Empty, error)
 	ChangeProfilePic(context.Context, *ChangeProfilePicRequest) (*emptypb.Empty, error)
-	GetUserProfile(context.Context, *GetUserProfileRequests) (*GetUserProfileResponse, error)
+	GetProfile(context.Context, *GetProfileRequests) (*GetProfileResponse, error)
 	GetCities(context.Context, *GetCitiesRequest) (*GetCitiesResponse, error)
 	mustEmbedUnimplementedUserAPIServer()
 }
@@ -258,8 +258,8 @@ func (UnimplementedUserAPIServer) ChangePassword(context.Context, *ChangePasswor
 func (UnimplementedUserAPIServer) ChangeProfilePic(context.Context, *ChangeProfilePicRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeProfilePic not implemented")
 }
-func (UnimplementedUserAPIServer) GetUserProfile(context.Context, *GetUserProfileRequests) (*GetUserProfileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+func (UnimplementedUserAPIServer) GetProfile(context.Context, *GetProfileRequests) (*GetProfileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProfile not implemented")
 }
 func (UnimplementedUserAPIServer) GetCities(context.Context, *GetCitiesRequest) (*GetCitiesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCities not implemented")
@@ -529,20 +529,20 @@ func _UserAPI_ChangeProfilePic_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserAPI_GetUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserProfileRequests)
+func _UserAPI_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProfileRequests)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserAPIServer).GetUserProfile(ctx, in)
+		return srv.(UserAPIServer).GetProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/KhanAPI.UserAPI/GetUserProfile",
+		FullMethod: "/KhanAPI.UserAPI/GetProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserAPIServer).GetUserProfile(ctx, req.(*GetUserProfileRequests))
+		return srv.(UserAPIServer).GetProfile(ctx, req.(*GetProfileRequests))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -629,8 +629,8 @@ var UserAPI_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserAPI_ChangeProfilePic_Handler,
 		},
 		{
-			MethodName: "GetUserProfile",
-			Handler:    _UserAPI_GetUserProfile_Handler,
+			MethodName: "GetProfile",
+			Handler:    _UserAPI_GetProfile_Handler,
 		},
 		{
 			MethodName: "GetCities",
