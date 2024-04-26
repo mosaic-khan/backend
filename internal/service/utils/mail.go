@@ -7,7 +7,7 @@ import (
 
 func verificationEmail(code string) (string, error) {
 
-	tmp, err := template.ParseFiles("../../internal/service/utils/templates/verification.gohtml")
+	tmp, err := template.ParseFiles("./internal/service/utils/templates/verification.gohtml")
 	if err != nil {
 		return "", err
 	}
@@ -26,7 +26,7 @@ func verificationEmail(code string) (string, error) {
 
 func forgetPassEmail(url string) (string, error) {
 
-	tmp, err := template.ParseFiles("../../internal/service/utils/templates/forgetPass.gohtml")
+	tmp, err := template.ParseFiles("./internal/service/utils/templates/forgetPass.gohtml")
 	if err != nil {
 		return "", err
 	}
