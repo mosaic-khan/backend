@@ -5,37 +5,39 @@ import (
 	"html/template"
 )
 
-func verificationEmail(code string) ([]byte, error) {
+func verificationEmail(code string) (string, error) {
 
-	tmp, err := template.ParseFiles("./templates/verification.gohtml")
+	tmp, err := template.ParseFiles("../../internal/service/utils/templates/verification.gohtml")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	b := new(bytes.Buffer)
 
 	err = tmp.Execute(b, code)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return b.Bytes(), nil
+	message := string(b.Bytes())
+
+	return message, nil
 }
 
-func forgetPassEmail(url string) ([]byte, error) {
+func forgetPassEmail(url string) (string, error) {
 
-	tmp, err := template.ParseFiles("./templates/forgetPass.gohtml")
+	tmp, err := template.ParseFiles("../../internal/service/utils/templates/forgetPass.gohtml")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	b := new(bytes.Buffer)
 
 	err = tmp.Execute(b, url)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return b.Bytes(), nil
+	return string(b.Bytes()), nil
 
 }
