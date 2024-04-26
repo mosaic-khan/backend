@@ -75,14 +75,14 @@ type Follow struct {
 
 type Profile struct {
 	ID                int64
-	UserID            sql.NullInt64
+	UserID            int64
 	FirstName         sql.NullString
 	LastName          sql.NullString
 	Gender            Gender
 	BirthDay          sql.NullTime
 	ProfilePicAddress sql.NullString
 	CityID            sql.NullInt16
-	Bio               sql.NullString
+	Bio               string
 }
 
 type Signup struct {

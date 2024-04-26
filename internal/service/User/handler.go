@@ -282,17 +282,17 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 
 	userID := ctx.Value("userID").(int64)
 
-	user, err := s.query.GetUserByID(ctx, userID)
+	userInfo, err := s.query.GetUserInfo(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
 
 	fname := sql.NullString{}
 	lname := sql.NullString{}
-	gender := db.NullGender{}
+	gender := db.Gender("")
 	birthDay := sql.NullTime{}
-	city := sql.NullString{}
-	bio := sql.NullString{}
+	city := sql.NullInt16{}
+	bio := ""
 
 	// update first name if one is provided else keep the current first name
 	if in.FName != nil {
@@ -301,7 +301,7 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid:  true,
 		}
 	} else {
-		fname = user.FirstName
+		fname = userInfo.FirstName
 	}
 	// update last name if one is provided else keep the current last name
 	if in.LName != nil {
@@ -310,16 +310,13 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid:  true,
 		}
 	} else {
-		lname = user.LastName
+		lname = userInfo.LastName
 	}
 	// update gender if one is provided else keep the current gender
 	if in.Gender != nil {
-		gender = db.NullGender{
-			Gender: db.Gender(*in.Gender),
-			Valid:  true,
-		}
+		gender = db.Gender(*in.Gender)
 	} else {
-		gender = user.Gender
+		gender = userInfo.Gender
 	}
 	// update birthday if one is provided else keep the current birthday
 	if in.BirthDay != nil {
@@ -332,15 +329,32 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid: true,
 		}
 	} else {
-		birthDay = user.BirthDay
+		birthDay = userInfo.BirthDay
 	}
 
-	err = s.query.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
+	if in.Bio != nil {
+		bio = *in.Bio
+	} else {
+		bio = userInfo.Bio
+	}
+
+	if in.CityID != nil {
+		city = sql.NullInt16{
+			Int16: int16(*in.CityID),
+			Valid: true,
+		}
+	} else {
+		city = userInfo.CityID
+	}
+
+	err = s.query.UpdateProfileInfo(ctx, db.UpdateProfileInfoParams{
 		FirstName: fname,
 		LastName:  lname,
 		Gender:    gender,
 		BirthDay:  birthDay,
-		ID:        userID,
+		Bio:       bio,
+		CityID:    city,
+		UserID:    userID,
 	})
 
 	if err != nil {
@@ -375,7 +389,7 @@ func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfile
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeProfilePic not implemented")
 }
 
-func (s *Server) GetUserProfile(context.Context, *UserAPIService.GetUserProfileRequests) (*UserAPIService.GetUserProfileResponse, error) {
+func (s *Server) GetUserProfile(context.Context, *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
 }
 
