@@ -155,7 +155,6 @@ func SendSignUpEmail(email string, code string) {
 
 	// Putting together the email message with headers and body content.
 	emailMessage := []byte(header + mimeHeaders + "\r\n" + message)
-	println(string(emailMessage))
 
 	// Authentication.
 	auth := smtp.PlainAuth("", username, password, smtpHost)
