@@ -59,12 +59,30 @@ type Account struct {
 	ID           int64
 	Email        string
 	Username     string
-	FirstName    sql.NullString
-	LastName     sql.NullString
-	Gender       NullGender
-	BirthDay     sql.NullTime
 	CreationDate time.Time
 	Password     string
+}
+
+type City struct {
+	ID   int16
+	Name string
+}
+
+type Follow struct {
+	Follower  int64
+	Following int64
+}
+
+type Profile struct {
+	ID                int64
+	UserID            sql.NullInt64
+	FirstName         sql.NullString
+	LastName          sql.NullString
+	Gender            Gender
+	BirthDay          sql.NullTime
+	ProfilePicAddress sql.NullString
+	CityID            sql.NullInt16
+	Bio               sql.NullString
 }
 
 type Signup struct {

@@ -1,7 +1,7 @@
-CREATE TABLE IF NOT EXISTS account (
-    id BIGSERIAL PRIMARY KEY,
-    email VARCHAR(571) NOT NULL UNIQUE,
-    username VARCHAR(32) NOT NULL UNIQUE,
-    creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    password CHAR(60) NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS account (
+        id BIGSERIAL PRIMARY KEY,
+        email VARCHAR(571) NOT NULL UNIQUE,
+        username VARCHAR(32) NOT NULL UNIQUE,
+        creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        password CHAR(60) NOT NULL
+    );

@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const existsUserEmail = `-- name: ExistsUserEmail :one
@@ -37,7 +36,7 @@ func (q *Queries) ExistsUserUsername(ctx context.Context, username string) (int6
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, username, first_name, last_name, gender, birth_day, creation_date, password
+SELECT id, email, username, creation_date, password
 FROM account
 WHERE email = $1
 `
@@ -49,10 +48,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (Account, er
 		&i.ID,
 		&i.Email,
 		&i.Username,
-		&i.FirstName,
-		&i.LastName,
-		&i.Gender,
-		&i.BirthDay,
 		&i.CreationDate,
 		&i.Password,
 	)
@@ -60,7 +55,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (Account, er
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, first_name, last_name, gender, birth_day, creation_date, password
+SELECT id, email, username, creation_date, password
 FROM account
 WHERE id = $1
 `
@@ -72,10 +67,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (Account, error) {
 		&i.ID,
 		&i.Email,
 		&i.Username,
-		&i.FirstName,
-		&i.LastName,
-		&i.Gender,
-		&i.BirthDay,
 		&i.CreationDate,
 		&i.Password,
 	)
@@ -83,7 +74,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (Account, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, username, first_name, last_name, gender, birth_day, creation_date, password
+SELECT id, email, username, creation_date, password
 FROM account
 WHERE username = $1
 `
@@ -95,10 +86,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (Accou
 		&i.ID,
 		&i.Email,
 		&i.Username,
-		&i.FirstName,
-		&i.LastName,
-		&i.Gender,
-		&i.BirthDay,
 		&i.CreationDate,
 		&i.Password,
 	)
@@ -163,33 +150,5 @@ type ResetPasswordParams struct {
 
 func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) error {
 	_, err := q.db.ExecContext(ctx, resetPassword, arg.ID, arg.Password)
-	return err
-}
-
-const updateUserInfo = `-- name: UpdateUserInfo :exec
-UPDATE account
-SET	first_name = $1,
-	last_name  = $2,
-	gender	   = $3,
-	birth_day  = $4
-WHERE id = $5
-`
-
-type UpdateUserInfoParams struct {
-	FirstName sql.NullString
-	LastName  sql.NullString
-	Gender    NullGender
-	BirthDay  sql.NullTime
-	ID        int64
-}
-
-func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserInfo,
-		arg.FirstName,
-		arg.LastName,
-		arg.Gender,
-		arg.BirthDay,
-		arg.ID,
-	)
 	return err
 }
