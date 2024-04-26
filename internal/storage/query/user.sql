@@ -3,14 +3,6 @@ INSERT INTO account (email, username, password)
 VALUES ($1, $2, $3)
 RETURNING id;
 
--- name: UpdateUserInfo :exec
-UPDATE account
-SET	first_name = $1,
-	last_name  = $2,
-	gender	   = $3,
-	birth_day  = $4
-WHERE id = $5;
-
 -- name: GetUserPasswordByEmail :one
 SELECT password
 FROM account
