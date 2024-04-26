@@ -122,7 +122,7 @@ message EditProfileInfoRequest {
   optional string lName = 2;
   optional string gender = 3;
   optional string birthDay = 4;
-  optional string city = 5;
+  optional int32  cityID = 5;
   optional string bio = 6;
 }
 

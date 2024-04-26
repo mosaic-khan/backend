@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -62,9 +63,14 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 			return nil, status.Error(codes.Unauthenticated, "invalid token")
 		}
 
-		userID, err := token.Claims.GetSubject()
+		userIDStr, err := token.Claims.GetSubject()
 		if err != nil {
 			return nil, status.Error(codes.Internal, "error while extracting userID")
+		}
+
+		userID, err := strconv.ParseInt(userIDStr, 10, 64)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "error while converting userID")
 		}
 
 		// Create new context

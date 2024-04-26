@@ -18,6 +18,17 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func (s *Server) RefreshToken(ctx context.Context, in *emptypb.Empty) (*UserAPIService.RefreshTokenResponse, error) {
+	userID := ctx.Value("userID").(int64)
+
+	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(userID, 10), time.Minute*5, s.hmacSecret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while creating Token")
+	}
+
+	return &UserAPIService.RefreshTokenResponse{Token: tokenString}, nil
+}
+
 func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*UserAPIService.LoginResponse, error) {
 
 	// verify user
@@ -53,21 +64,12 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	}
 
 	// generate Token
-	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(user.ID, 10), time.Hour*12, s.hmacSecret)
+	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(user.ID, 10), time.Minute*5, s.hmacSecret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating token")
 	}
 
 	return &UserAPIService.LoginResponse{
-		User: &UserAPIService.User{
-			FName:         user.FirstName.String,
-			LName:         user.LastName.String,
-			Username:      user.Username,
-			Email:         user.Email,
-			BirthDay:      user.BirthDay.Time.String(),
-			Gender:        string(user.Gender.Gender),
-			ProfilePicUrl: "",
-		},
 		JwtToken: tokenString,
 	}, nil
 
@@ -93,7 +95,7 @@ func (s *Server) ForgetPassword(ctx context.Context, in *UserAPIService.ForgetPa
 
 	utils.SendResetPassEmail(in.UserNameOrEmail, tokenStr)
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) NewPasswordWithToken(ctx context.Context, in *UserAPIService.NewPasswordWithTokenRequest) (*emptypb.Empty, error) {
@@ -130,7 +132,7 @@ func (s *Server) NewPasswordWithToken(ctx context.Context, in *UserAPIService.Ne
 		return nil, err
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (*UserAPIService.SignUpResponse, error) {
@@ -179,7 +181,6 @@ func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (
 	}
 
 	go utils.SendSignUpEmail(in.Email, verificationCode)
-
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(signUpExpTime),
@@ -277,23 +278,21 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
 }
 
-func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*UserAPIService.EditProfileInfoResponse, error) {
+func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*emptypb.Empty, error) {
 
-	userIDStr := ctx.Value("userID").(string)
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
+	userID := ctx.Value("userID").(int64)
 
-	user, err := s.query.GetUserByID(ctx, userID)
+	userInfo, err := s.query.GetUserInfo(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
 
 	fname := sql.NullString{}
 	lname := sql.NullString{}
-	gender := db.NullGender{}
+	gender := db.Gender("")
 	birthDay := sql.NullTime{}
+	city := sql.NullInt16{}
+	bio := ""
 
 	// update first name if one is provided else keep the current first name
 	if in.FName != nil {
@@ -302,7 +301,7 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid:  true,
 		}
 	} else {
-		fname = user.FirstName
+		fname = userInfo.FirstName
 	}
 	// update last name if one is provided else keep the current last name
 	if in.LName != nil {
@@ -311,16 +310,13 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid:  true,
 		}
 	} else {
-		lname = user.LastName
+		lname = userInfo.LastName
 	}
 	// update gender if one is provided else keep the current gender
 	if in.Gender != nil {
-		gender = db.NullGender{
-			Gender: db.Gender(*in.Gender),
-			Valid:  true,
-		}
+		gender = db.Gender(*in.Gender)
 	} else {
-		gender = user.Gender
+		gender = userInfo.Gender
 	}
 	// update birthday if one is provided else keep the current birthday
 	if in.BirthDay != nil {
@@ -333,21 +329,70 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 			Valid: true,
 		}
 	} else {
-		birthDay = user.BirthDay
+		birthDay = userInfo.BirthDay
 	}
 
-	err = s.query.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
+	if in.Bio != nil {
+		bio = *in.Bio
+	} else {
+		bio = userInfo.Bio
+	}
+
+	if in.CityID != nil {
+		city = sql.NullInt16{
+			Int16: int16(*in.CityID),
+			Valid: true,
+		}
+	} else {
+		city = userInfo.CityID
+	}
+
+	err = s.query.UpdateProfileInfo(ctx, db.UpdateProfileInfoParams{
 		FirstName: fname,
 		LastName:  lname,
 		Gender:    gender,
 		BirthDay:  birthDay,
-		ID:        userID,
+		Bio:       bio,
+		CityID:    city,
+		UserID:    userID,
 	})
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not update user profile")
 	}
 
-	return &UserAPIService.EditProfileInfoResponse{Ok: true}, nil
+	return &emptypb.Empty{}, nil
 
+}
+
+func (s *Server) GetUserInfo(ctx context.Context, in *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+}
+
+func (s *Server) ChangeUsername(context.Context, *UserAPIService.ChangeUsernameRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeUsername not implemented")
+}
+
+func (s *Server) ChangeEmail(context.Context, *UserAPIService.ChangeEmailRequest) (*UserAPIService.ChangeEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeEmail not implemented")
+}
+
+func (s *Server) ConfirmChangeEmail(context.Context, *UserAPIService.ConfirmChangeEmailRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmChangeEmail not implemented")
+}
+
+func (s *Server) ChangePassword(context.Context, *UserAPIService.ChangePasswordRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
+}
+
+func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfilePicRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeProfilePic not implemented")
+}
+
+func (s *Server) GetUserProfile(context.Context, *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+}
+
+func (s *Server) GetCities(context.Context, *UserAPIService.GetCitiesRequest) (*UserAPIService.GetCitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCities not implemented")
 }
