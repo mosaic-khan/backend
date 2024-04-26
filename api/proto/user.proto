@@ -21,7 +21,7 @@ service UserAPI {
   rpc ConfirmChangeEmail (ConfirmChangeEmailRequest) returns (google.protobuf.Empty);
   rpc ChangePassword (ChangePasswordRequest) returns (google.protobuf.Empty);
   rpc ChangeProfilePic (ChangeProfilePicRequest) returns (google.protobuf.Empty);
-  rpc GetUserProfile (GetUserProfileRequests) returns (GetUserProfileResponse);
+  rpc GetProfile (GetProfileRequests) returns (GetProfileResponse);
   rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
 }
 
@@ -155,11 +155,11 @@ message ChangeProfilePicRequest {
 
 // EditProfile End
 
-message GetUserProfileRequests {
+message GetProfileRequests {
   optional string username = 1;
 }
 
-message GetUserProfileResponse {
+message GetProfileResponse {
   Profile profile = 1;
 }
 
@@ -167,7 +167,12 @@ message GetCitiesRequest {
   string cityPattern = 1;
 }
 
+message City {
+  int32 id = 1;
+  string name = 2;
+}
+
 message GetCitiesResponse {
-  repeated string cities = 1;
+  repeated City cities = 1;
 }
 
