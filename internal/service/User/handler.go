@@ -274,7 +274,7 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 	return &UserAPIService.CodeVerificationResponse{JwtToken: loginToken}, nil
 }
 
-func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*UserAPIService.PersonalInfoCompletionRequest, error) {
+func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PersonalInfoCompletion not implemented")
 }
 
