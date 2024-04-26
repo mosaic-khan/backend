@@ -83,7 +83,7 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 }
 
 func ValidateUsername(username string) bool {
-	var usernameRegex = regexp.MustCompile(`^[a-zA-z0-9_-]{8,32}$`)
+	var usernameRegex = regexp.MustCompile(`^[a-zA-z0-9_-]{3,32}$`)
 	return usernameRegex.MatchString(username)
 }
 
