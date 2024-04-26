@@ -1,7 +1,29 @@
 syntax = "proto3";
 
 package KhanAPI;
+option go_package = "./../../pkg/PostAPIService";
 
 service PostAPI {
+  rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
+  rpc GetPost (GetPostRequest) returns (GetPostResponse);
+}
 
+message Post {
+
+}
+
+message GetProfilePostsRequests {
+  int64 profileID = 1;
+}
+
+message GetProfilePostsResponse {
+  repeated Post post = 1;
+}
+
+message GetPostRequest {
+
+}
+
+message GetPostResponse {
+  Post post = 1;
 }

@@ -7,13 +7,22 @@ package KhanAPI;
 option go_package = "./../../pkg/UserAPIService";
 
 service UserAPI {
+  rpc RefreshToken (google.protobuf.Empty) returns (RefreshTokenResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc ForgetPassword (ForgetPasswordRequest) returns (google.protobuf.Empty);
   rpc NewPasswordWithToken (NewPasswordWithTokenRequest) returns (google.protobuf.Empty);
   rpc SignUp (SignUpRequest) returns (SignUpResponse);
   rpc CodeVerification (CodeVerificationRequest) returns (CodeVerificationResponse);
-  rpc PersonalInfoCompletion (PersonalInfoCompletionRequest) returns (PersonalInfoCompletionRequest);
-  rpc EditProfileInfo (EditProfileInfoRequest) returns (EditProfileInfoResponse);
+  rpc PersonalInfoCompletion (PersonalInfoCompletionRequest) returns (google.protobuf.Empty);
+  rpc EditProfileInfo (EditProfileInfoRequest) returns (google.protobuf.Empty);
+  rpc GetUserInfo (google.protobuf.Empty) returns (GetUserInfoResponse);
+  rpc ChangeUsername (ChangeUsernameRequest) returns (google.protobuf.Empty);
+  rpc ChangeEmail (ChangeEmailRequest) returns (ChangeEmailResponse);
+  rpc ConfirmChangeEmail (ConfirmChangeEmailRequest) returns (google.protobuf.Empty);
+  rpc ChangePassword (ChangePasswordRequest) returns (google.protobuf.Empty);
+  rpc ChangeProfilePic (ChangeProfilePicRequest) returns (google.protobuf.Empty);
+  rpc GetUserProfile (GetUserProfileRequests) returns (GetUserProfileResponse);
+  rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
 }
 
 message User {
@@ -24,7 +33,24 @@ message User {
   string birthDay = 5;
   string gender = 6;
   string profilePicUrl = 7;
+  string city = 8;
+  string bio = 9;
 }
+
+message Profile {
+  string name = 1;
+  string username = 2;
+  int64 profileID = 3;
+  string pronouns = 4;
+  string bio = 5;
+  string city = 6;
+  string profilePicUrl = 7;
+}
+
+message RefreshTokenResponse {
+  string Token = 1;
+}
+
 
 // login begin
 
@@ -34,7 +60,6 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  User user = 1;
   string jwtToken = 2;
 }
 
@@ -80,25 +105,69 @@ message PersonalInfoCompletionRequest {
   string lName = 2;
   string birthDay = 3;
   string gender = 4;
-}
-
-message PersonalInfoCompletionResponse {
-  User user = 1;
+  string bio = 5;
 }
 
 // signUp end
 
-// EditProfie begin
+// EditProfile begin
+
+message GetUserInfoResponse {
+    User user = 1;
+}
 
 message EditProfileInfoRequest {
   optional string fName = 1;
   optional string lName = 2;
   optional string gender = 3;
   optional string birthDay = 4;
+  optional string city = 5;
+  optional string bio = 6;
 }
 
-message EditProfileInfoResponse {
-  bool ok = 1;
+
+message ChangeUsernameRequest {
+  string newUsername = 1;
+}
+
+message ChangeEmailRequest {
+  string newEmail = 1;
+}
+
+message ChangeEmailResponse {
+  string changeEmailToken = 1;
+}
+
+message ConfirmChangeEmailRequest {
+  string changeEmailToken = 1;
+  string code = 2;
+}
+
+message ChangePasswordRequest {
+  string oldPassword = 1;
+  string newPassword = 2;
+}
+
+message ChangeProfilePicRequest {
+  string newProfilePicPath = 1;
+  string accessToken = 2;
 }
 
 // EditProfile End
+
+message GetUserProfileRequests {
+  optional string username = 1;
+}
+
+message GetUserProfileResponse {
+  Profile profile = 1;
+}
+
+message GetCitiesRequest {
+  string cityPattern = 1;
+}
+
+message GetCitiesResponse {
+  repeated string cities = 1;
+}
+
