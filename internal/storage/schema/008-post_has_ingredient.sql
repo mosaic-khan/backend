@@ -1,4 +1,4 @@
-CREATE TABLE post_has_ingredient (
+CREATE TABLE IF NOT EXISTS post_has_ingredient (
 	id BIGSERIAL PRIMARY KEY,
 	amount VARCHAR(64),
 	post_id BIGINT NOT NULL,
