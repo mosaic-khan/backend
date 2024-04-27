@@ -489,7 +489,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 			Pronouns:      "",
 			Bio:           profileDB.Bio,
 			City:          profileDB.CityName,
-			ProfilePicUrl: profile.ProfilePicUrl,
+			ProfilePicUrl: profileDB.ProfilePicAddress,
 		}
 
 		gender = string(profileDB.Gender)

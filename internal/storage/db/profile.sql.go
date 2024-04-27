@@ -17,7 +17,7 @@ WHERE user_id = $2
 `
 
 type ChangeProfilePicParams struct {
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 	UserID            int64
 }
 
@@ -51,7 +51,7 @@ type GetProfileByUserIDRow struct {
 	Bio               string
 	Gender            Gender
 	CityName          string
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetProfileByUserID(ctx context.Context, id int64) (GetProfileByUserIDRow, error) {
@@ -84,7 +84,7 @@ type GetProfileByUsernameRow struct {
 	Bio               string
 	Gender            Gender
 	CityName          string
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetProfileByUsername(ctx context.Context, username string) (GetProfileByUsernameRow, error) {
@@ -121,7 +121,7 @@ type GetUserInfoRow struct {
 	CityName          string
 	CityID            sql.NullInt16
 	Email             string
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetUserInfo(ctx context.Context, userID int64) (GetUserInfoRow, error) {

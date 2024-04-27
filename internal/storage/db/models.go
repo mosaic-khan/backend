@@ -80,7 +80,7 @@ type Profile struct {
 	LastName          string
 	Gender            Gender
 	BirthDay          sql.NullTime
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 	CityID            sql.NullInt16
 	Bio               string
 }
