@@ -1,0 +1,5 @@
+CREATE TABLE ingredient (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(32) NOT NULL UNIQUE,	
+	usage INT NOT NULL DEFAULT 0 CHECK(usage >= 0) 
+);
