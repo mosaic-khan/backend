@@ -397,7 +397,7 @@ func (s *Server) GetUserInfo(ctx context.Context, in *emptypb.Empty) (*UserAPISe
 		Email:         userInfo.Email,
 		BirthDay:      userInfo.BirthDay.Time.String(),
 		Gender:        string(userInfo.Gender),
-		ProfilePicUrl: userInfo.ProfilePicAddress.String,
+		ProfilePicUrl: userInfo.ProfilePicAddress,
 		City:          userInfo.CityName,
 		Bio:           userInfo.Bio,
 	}}, nil
