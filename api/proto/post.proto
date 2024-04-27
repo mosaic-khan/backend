@@ -1,15 +1,25 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package KhanAPI;
 option go_package = "./../../pkg/PostAPIService";
 
 service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
+  rpc SetPost (SetPostRequest) returns (google.protobuf.Empty); 
 }
 
 message Post {
+  string title = 1;
+  map<string, string> ingredients = 2;
+  string description = 3;
+  int32 numImages = 4; 
+}
 
+message SetPostRequest {
+  Post post = 1;
 }
 
 message GetProfilePostsRequests {
