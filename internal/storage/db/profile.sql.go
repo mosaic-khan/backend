@@ -102,6 +102,19 @@ func (q *Queries) GetProfileByUsername(ctx context.Context, username string) (Ge
 	return i, err
 }
 
+const getProfileID = `-- name: GetProfileID :one
+SELECT id
+FROM profile
+WHERE user_id = $1
+`
+
+func (q *Queries) GetProfileID(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getProfileID, userID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getUserInfo = `-- name: GetUserInfo :one
 SELECT account.username, profile.first_name, profile.last_name,
        profile.gender, profile.birth_day, profile.bio,
