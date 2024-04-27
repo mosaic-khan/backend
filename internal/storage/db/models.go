@@ -76,11 +76,11 @@ type Follow struct {
 type Profile struct {
 	ID                int64
 	UserID            int64
-	FirstName         sql.NullString
-	LastName          sql.NullString
+	FirstName         string
+	LastName          string
 	Gender            Gender
 	BirthDay          sql.NullTime
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 	CityID            sql.NullInt16
 	Bio               string
 }

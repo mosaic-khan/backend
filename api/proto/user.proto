@@ -41,7 +41,6 @@ message Profile {
   int64 id = 1;
   string name = 2;
   string username = 3;
-  int64 profileID = 4;
   string pronouns = 5;
   string bio = 6;
   string city = 7;

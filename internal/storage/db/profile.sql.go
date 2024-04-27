@@ -17,7 +17,7 @@ WHERE user_id = $2
 `
 
 type ChangeProfilePicParams struct {
-	ProfilePicAddress sql.NullString
+	ProfilePicAddress string
 	UserID            int64
 }
 
@@ -37,8 +37,8 @@ func (q *Queries) CreateProfile(ctx context.Context, userID int64) error {
 }
 
 const getProfileByUserID = `-- name: GetProfileByUserID :one
-SELECT profile.id, account.username, profile.first_name || profile.last_name AS name,
-       profile.bio, profile.gender, city.name, profile.profile_pic_address
+SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
+       profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
              JOIN city on city.id = profile.city_id
 WHERE account.id = $1
@@ -47,11 +47,11 @@ WHERE account.id = $1
 type GetProfileByUserIDRow struct {
 	ID                int64
 	Username          string
-	Name              string
+	Name              interface{}
 	Bio               string
 	Gender            Gender
-	Name_2            string
-	ProfilePicAddress sql.NullString
+	CityName          string
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetProfileByUserID(ctx context.Context, id int64) (GetProfileByUserIDRow, error) {
@@ -63,15 +63,15 @@ func (q *Queries) GetProfileByUserID(ctx context.Context, id int64) (GetProfileB
 		&i.Name,
 		&i.Bio,
 		&i.Gender,
-		&i.Name_2,
+		&i.CityName,
 		&i.ProfilePicAddress,
 	)
 	return i, err
 }
 
 const getProfileByUsername = `-- name: GetProfileByUsername :one
-SELECT profile.id, account.username, profile.first_name || profile.last_name AS name,
-       profile.bio, profile.gender, city.name, profile.profile_pic_address
+SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
+       profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
     JOIN city on city.id = profile.city_id
 WHERE account.username = $1
@@ -80,11 +80,11 @@ WHERE account.username = $1
 type GetProfileByUsernameRow struct {
 	ID                int64
 	Username          string
-	Name              string
+	Name              interface{}
 	Bio               string
 	Gender            Gender
-	Name_2            string
-	ProfilePicAddress sql.NullString
+	CityName          string
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetProfileByUsername(ctx context.Context, username string) (GetProfileByUsernameRow, error) {
@@ -96,7 +96,7 @@ func (q *Queries) GetProfileByUsername(ctx context.Context, username string) (Ge
 		&i.Name,
 		&i.Bio,
 		&i.Gender,
-		&i.Name_2,
+		&i.CityName,
 		&i.ProfilePicAddress,
 	)
 	return i, err
@@ -105,22 +105,23 @@ func (q *Queries) GetProfileByUsername(ctx context.Context, username string) (Ge
 const getUserInfo = `-- name: GetUserInfo :one
 SELECT account.username, profile.first_name, profile.last_name,
        profile.gender, profile.birth_day, profile.bio,
-       city.name AS city_name, profile.city_id, account.email
+       city.name AS city_name, profile.city_id, account.email, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
     JOIN city on city.id = profile.city_id
 WHERE user_id = $1
 `
 
 type GetUserInfoRow struct {
-	Username  string
-	FirstName sql.NullString
-	LastName  sql.NullString
-	Gender    Gender
-	BirthDay  sql.NullTime
-	Bio       string
-	CityName  string
-	CityID    sql.NullInt16
-	Email     string
+	Username          string
+	FirstName         string
+	LastName          string
+	Gender            Gender
+	BirthDay          sql.NullTime
+	Bio               string
+	CityName          string
+	CityID            sql.NullInt16
+	Email             string
+	ProfilePicAddress string
 }
 
 func (q *Queries) GetUserInfo(ctx context.Context, userID int64) (GetUserInfoRow, error) {
@@ -136,6 +137,7 @@ func (q *Queries) GetUserInfo(ctx context.Context, userID int64) (GetUserInfoRow
 		&i.CityName,
 		&i.CityID,
 		&i.Email,
+		&i.ProfilePicAddress,
 	)
 	return i, err
 }
@@ -152,8 +154,8 @@ WHERE user_id = $7
 `
 
 type UpdateProfileInfoParams struct {
-	FirstName sql.NullString
-	LastName  sql.NullString
+	FirstName string
+	LastName  string
 	Gender    Gender
 	BirthDay  sql.NullTime
 	Bio       string
