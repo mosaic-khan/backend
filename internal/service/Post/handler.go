@@ -15,7 +15,7 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 
 	// get profile id
 	// TODO: proper value
-	profileId := ctx.Value("").(int64)
+	profileId := ctx.Value("ProfileID").(int64)
 
 	tx, err := s.conn.Begin()
 	if err != nil {
