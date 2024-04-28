@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const getPost = `-- name: GetPost :one
@@ -36,7 +35,7 @@ RETURNING id
 
 type InsertPostParams struct {
 	Title       string
-	Description sql.NullString
+	Description string
 	NumImages   int16
 }
 
