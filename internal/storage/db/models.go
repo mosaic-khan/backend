@@ -82,7 +82,7 @@ type Ingredient struct {
 type Post struct {
 	ID          int64
 	Title       string
-	Description sql.NullString
+	Description string
 	NumImages   int16
 }
 
