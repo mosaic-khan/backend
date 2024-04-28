@@ -105,6 +105,12 @@ type Profile struct {
 	Bio               string
 }
 
+type ProfileHasPost struct {
+	ID        int64
+	ProfileID int64
+	PostID    int64
+}
+
 type Signup struct {
 	ID               int32
 	Email            string

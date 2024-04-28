@@ -2,6 +2,11 @@
 INSERT INTO profile (user_id)
 VALUES ($1);
 
+-- name: GetProfileID :one
+SELECT id
+FROM profile
+WHERE user_id = $1;
+
 -- name: GetUserInfo :one
 SELECT account.username, profile.first_name, profile.last_name,
        profile.gender, profile.birth_day, profile.bio,
