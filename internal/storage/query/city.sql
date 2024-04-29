@@ -1,7 +1,7 @@
 -- name: GetCities :many
 SELECT *
 FROM city
-where name like '%$1%'
+WHERE name LIKE '%' || $1 || '%'
 LIMIT 20;
 
 

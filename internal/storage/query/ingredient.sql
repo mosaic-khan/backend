@@ -11,6 +11,6 @@ WHERE name = $1;
 -- name: GetSimilarIngredient :many
 SELECT name
 FROM ingredient
-WHERE name LIKE '%$1%'
+WHERE name LIKE '%' || $1 || '%'
 ORDER BY usage DESC
 LIMIT 10;	
