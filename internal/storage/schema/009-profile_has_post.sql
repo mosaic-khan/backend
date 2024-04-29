@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS profile_has_post (
 	id BIGSERIAL PRIMARY KEY,
-	profile_id BIGSERIAL NOT NULL,
-	post_id BIGSERIAL NOT NULL,
+	profile_id BIGINT NOT NULL,
+	post_id BIGINT NOT NULL,
 	FOREIGN KEY(profile_id) 
 		REFERENCES profile(id)
 		ON DELETE CASCADE
