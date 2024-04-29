@@ -3,6 +3,7 @@ package Post
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
 
@@ -55,7 +56,36 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 	})
 	if err != nil {
 		tx.Rollback()
-		return nil, status.Errorf(codes.Internal, "could not create post")
+		return nil, status.Errorf(codes.Internal, "could not add post to profile")
+	}
+
+	// insert post ingredients
+	for ingredient, amount := range in.Post.Ingredients {
+		ingredientId, err := txQuery.GetIngredientId(ctx, ingredient)
+		if errors.Is(err, sql.ErrNoRows) {
+			// insert ingredient if not exists
+			ingredientId, err = txQuery.InsertIngredient(ctx, ingredient)
+			if err != nil {
+				tx.Rollback()
+				return nil, status.Errorf(codes.Internal, "could not add ingredients")
+			}
+		} else if err != nil {
+			tx.Rollback()
+			return nil, status.Errorf(codes.Internal, "could not add ingredients")
+		}
+
+		err = txQuery.InsertPostHasIngredient(ctx, db.InsertPostHasIngredientParams{
+			PostID:       postId,
+			IngredientID: ingredientId,
+			Amount: sql.NullString{
+				String: amount,
+				Valid:  true,
+			},
+		})
+		if err != nil {
+			tx.Rollback()
+			return nil, status.Errorf(codes.Internal, "coult not insert post ingredients")
+		}
 	}
 
 	return &emptypb.Empty{}, nil
