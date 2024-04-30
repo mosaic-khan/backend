@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *Server) RefreshToken(ctx context.Context, in *emptypb.Empty) (*UserAPIService.RefreshTokenResponse, error) {
+func (s *Server) RefreshToken(ctx context.Context, _ *emptypb.Empty) (*UserAPIService.RefreshTokenResponse, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
 	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Minute*5, s.hmacSecret)
@@ -390,7 +390,7 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 
 }
 
-func (s *Server) GetUserInfo(ctx context.Context, in *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
+func (s *Server) GetUserInfo(ctx context.Context, _ *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
 	profileID := ctx.Value("profileID").(int64)
 
 	userInfo, err := s.query.GetUserInfo(ctx, profileID)
