@@ -1,6 +1,7 @@
--- name: CreateProfile :exec
+-- name: CreateProfile :one
 INSERT INTO profile (user_id)
-VALUES ($1);
+VALUES ($1)
+RETURNING id;
 
 -- name: GetProfileID :one
 SELECT id
@@ -13,7 +14,7 @@ SELECT account.username, profile.first_name, profile.last_name,
        city.name AS city_name, profile.city_id, account.email, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
     JOIN city on city.id = profile.city_id
-WHERE user_id = $1;
+WHERE profile.id = $1;
 
 
 -- name: UpdateProfileInfo :exec
@@ -24,7 +25,7 @@ SET	    first_name = $1,
         birth_day  = $4,
         bio        = $5,
         city_id    = $6
-WHERE user_id = $7;
+WHERE id = $7;
 
 
 -- name: GetProfileByUsername :one
@@ -40,7 +41,7 @@ SELECT profile.id, account.username, (profile.first_name || profile.last_name) A
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
              JOIN city on city.id = profile.city_id
-WHERE account.id = $1;
+WHERE profile.id = $1;
 
 -- name: ChangeProfilePic :exec
 UPDATE profile

@@ -18,10 +18,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *Server) RefreshToken(ctx context.Context, in *emptypb.Empty) (*UserAPIService.RefreshTokenResponse, error) {
-	userID := ctx.Value("userID").(int64)
+func (s *Server) RefreshToken(ctx context.Context, _ *emptypb.Empty) (*UserAPIService.RefreshTokenResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
 
-	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(userID, 10), time.Minute*5, s.hmacSecret)
+	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Minute*5, s.hmacSecret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while creating Token")
 	}
@@ -63,8 +63,10 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 		return nil, status.Errorf(codes.Internal, "Error checking password")
 	}
 
+	profileID, err := s.query.GetProfileID(ctx, user.ID)
+
 	// generate Token
-	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(user.ID, 10), time.Minute*5, s.hmacSecret)
+	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Minute*5, s.hmacSecret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating token")
 	}
@@ -265,7 +267,13 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 		return nil, err
 	}
 
-	loginToken, err := utils.CreateLoginToken(strconv.Itoa(int(userID)), time.Hour*12, s.hmacSecret)
+	profileID, err := TXQuery.CreateProfile(ctx, userID)
+	if err != nil {
+		_ = TX.Rollback()
+		return nil, err
+	}
+
+	loginToken, err := utils.CreateLoginToken(strconv.Itoa(int(profileID)), time.Hour*12, s.hmacSecret)
 	if err != nil {
 		_ = TX.Rollback()
 		return nil, err
@@ -275,7 +283,7 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 }
 
 func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*emptypb.Empty, error) {
-	userID := ctx.Value("userID").(int64)
+	profileID := ctx.Value("profileID").(int64)
 
 	t, err := time.Parse("2006-01-02", in.GetBirthDay())
 	if err != nil {
@@ -293,7 +301,7 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 		BirthDay:  birthDay,
 		Bio:       "",
 		CityID:    sql.NullInt16{},
-		UserID:    userID,
+		ID:        profileID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while updating profile info")
@@ -303,9 +311,9 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 }
 
 func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*emptypb.Empty, error) {
-	userID := ctx.Value("userID").(int64)
+	profileID := ctx.Value("profileID").(int64)
 
-	userInfo, err := s.query.GetUserInfo(ctx, userID)
+	userInfo, err := s.query.GetUserInfo(ctx, profileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
@@ -371,7 +379,7 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 		BirthDay:  birthDay,
 		Bio:       bio,
 		CityID:    city,
-		UserID:    userID,
+		ID:        profileID,
 	})
 
 	if err != nil {
@@ -382,10 +390,10 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 
 }
 
-func (s *Server) GetUserInfo(ctx context.Context, in *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
-	userID := ctx.Value("userID").(int64)
+func (s *Server) GetUserInfo(ctx context.Context, _ *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
+	profileID := ctx.Value("profileID").(int64)
 
-	userInfo, err := s.query.GetUserInfo(ctx, userID)
+	userInfo, err := s.query.GetUserInfo(ctx, profileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
@@ -416,7 +424,12 @@ func (s *Server) ConfirmChangeEmail(context.Context, *UserAPIService.ConfirmChan
 }
 
 func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePasswordRequest) (*emptypb.Empty, error) {
-	userID := ctx.Value("userID").(int64)
+	profileID := ctx.Value("profileID").(int64)
+
+	userID, err := s.query.GetUserIDbyProfileID(ctx, profileID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while fetching userID")
+	}
 
 	bcryptPass, err := bcrypt.GenerateFromPassword([]byte(in.OldPassword), 10)
 	if err != nil {
@@ -453,13 +466,13 @@ func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfile
 }
 
 func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
-	userID := ctx.Value("userID").(int64)
+	profileID := ctx.Value("profileID").(int64)
 
 	var profile *UserAPIService.Profile
 	var gender string
 
 	if in.Username == nil {
-		profileDB, err := s.query.GetProfileByUserID(ctx, userID)
+		profileDB, err := s.query.GetProfileByUserID(ctx, profileID)
 		if err != nil {
 			return nil, err
 		}
@@ -506,7 +519,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 
 func (s *Server) GetCities(ctx context.Context, in *UserAPIService.GetCitiesRequest) (*UserAPIService.GetCitiesResponse, error) {
 
-	citiesDB, err := s.query.GetCities(ctx, in.CityPattern)
+	citiesDB, err := s.query.GetCities(ctx, sql.NullString{String: in.CityPattern, Valid: true})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while retriving cities")
 	}
