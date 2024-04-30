@@ -12,12 +12,12 @@ import (
 const getCities = `-- name: GetCities :many
 SELECT id, name
 FROM city
-where name like '%$1%'
+WHERE name LIKE '%' || $1 || '%'
 LIMIT 20
 `
 
-func (q *Queries) GetCities(ctx context.Context) ([]City, error) {
-	rows, err := q.db.QueryContext(ctx, getCities)
+func (q *Queries) GetCities(ctx context.Context, name string) ([]City, error) {
+	rows, err := q.db.QueryContext(ctx, getCities, name)
 	if err != nil {
 		return nil, err
 	}
