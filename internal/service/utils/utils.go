@@ -63,18 +63,18 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 			return nil, status.Error(codes.Unauthenticated, "invalid token")
 		}
 
-		userIDStr, err := token.Claims.GetSubject()
+		profileIDStr, err := token.Claims.GetSubject()
 		if err != nil {
-			return nil, status.Error(codes.Internal, "error while extracting userID")
+			return nil, status.Error(codes.Internal, "error while extracting profileID")
 		}
 
-		userID, err := strconv.ParseInt(userIDStr, 10, 64)
+		profileID, err := strconv.ParseInt(profileIDStr, 10, 64)
 		if err != nil {
 			return nil, status.Error(codes.Internal, "error while converting userID")
 		}
 
 		// Create new context
-		newCtx := context.WithValue(ctx, "userID", userID)
+		newCtx := context.WithValue(ctx, "userID", profileID)
 
 		// Call handler
 		return handler(newCtx, req)

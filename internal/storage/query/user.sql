@@ -42,3 +42,10 @@ WHERE username = $1;
 UPDATE account
 SET password = $2
 WHERE id = $1;
+
+
+-- name: GetUserIDbyProfileID :one
+SELECT account.id
+FROM account
+    JOIN profile on account.id = profile.user_id
+WHERE profile.id = $1;
