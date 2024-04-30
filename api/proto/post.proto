@@ -8,7 +8,7 @@ option go_package = "./../../pkg/PostAPIService";
 service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
-  rpc SetPost (SetPostRequest) returns (google.protobuf.Empty); 
+  rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -31,7 +31,7 @@ message GetProfilePostsResponse {
 }
 
 message GetPostRequest {
-
+  int64 postID = 1;
 }
 
 message GetPostResponse {

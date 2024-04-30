@@ -15,7 +15,6 @@ import (
 func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*emptypb.Empty, error) {
 
 	// get profile id
-	// TODO: proper value
 	profileId := ctx.Value("ProfileID").(int64)
 
 	tx, err := s.conn.Begin()
@@ -89,5 +88,37 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 	}
 
 	return &emptypb.Empty{}, nil
+
+}
+
+func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest) (*PostAPIService.GetPostResponse, error) {
+
+	// get post
+	post, err := s.query.GetPost(ctx, in.GetPostID())
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Errorf(codes.InvalidArgument, "post id %d doesn't exist\n", in.GetPostID())
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get post with id %d\n", in.GetPostID())
+	}
+
+	// get post ingredients
+	ingredients, err := s.query.GetPostIngredient(ctx, in.GetPostID())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get ingredients of post with id %d\n", in.GetPostID())
+	}
+
+	ingredientsMap := make(map[string]string)
+	for _, i := range ingredients {
+		ingredientsMap[i.Name] = i.Amount.String
+	}
+
+	return &PostAPIService.GetPostResponse{
+		Post: &PostAPIService.Post{
+			Title:       post.Title,
+			Description: post.Description,
+			NumImages:   int32(post.NumImages),
+			Ingredients: ingredientsMap,
+		},
+	}, nil
 
 }
