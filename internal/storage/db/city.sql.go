@@ -17,8 +17,8 @@ WHERE name LIKE '%' || $1 || '%'
 LIMIT 20
 `
 
-func (q *Queries) GetCities(ctx context.Context, dollar_1 sql.NullString) ([]City, error) {
-	rows, err := q.db.QueryContext(ctx, getCities, dollar_1)
+func (q *Queries) GetCities(ctx context.Context, name sql.NullString) ([]City, error) {
+	rows, err := q.db.QueryContext(ctx, getCities, name)
 	if err != nil {
 		return nil, err
 	}

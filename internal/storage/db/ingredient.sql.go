@@ -31,8 +31,8 @@ ORDER BY usage DESC
 LIMIT 10
 `
 
-func (q *Queries) GetSimilarIngredient(ctx context.Context, dollar_1 sql.NullString) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, getSimilarIngredient, dollar_1)
+func (q *Queries) GetSimilarIngredient(ctx context.Context, name sql.NullString) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getSimilarIngredient, name)
 	if err != nil {
 		return nil, err
 	}
