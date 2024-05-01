@@ -3,6 +3,11 @@ INSERT INTO profile (user_id)
 VALUES ($1)
 RETURNING id;
 
+-- name: GetProfileUserID :one
+SELECT user_id
+FROM profile
+WHERE id = $1;
+
 -- name: GetProfileID :one
 SELECT id
 FROM profile
