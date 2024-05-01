@@ -49,3 +49,8 @@ SELECT account.id
 FROM account
     JOIN profile on account.id = profile.user_id
 WHERE profile.id = $1;
+
+-- name: DeleteUser :exec
+DELETE
+FROM account
+WHERE id = $1;

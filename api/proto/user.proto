@@ -23,6 +23,7 @@ service UserAPI {
   rpc ChangeProfilePic (ChangeProfilePicRequest) returns (google.protobuf.Empty);
   rpc GetProfile (GetProfileRequests) returns (GetProfileResponse);
   rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
+  rpc DeleteAccount (google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
 message User {

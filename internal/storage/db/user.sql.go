@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE
+FROM account
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
+}
+
 const existsUserEmail = `-- name: ExistsUserEmail :one
 SELECT count(*)
 FROM account
