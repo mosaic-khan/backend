@@ -26,7 +26,7 @@ func (q *Queries) GetIngredientId(ctx context.Context, name string) (int32, erro
 const getSimilarIngredient = `-- name: GetSimilarIngredient :many
 SELECT name
 FROM ingredient
-WHERE name LIKE '%' || $1 || '%'
+WHERE name LIKE $1 || '%'
 ORDER BY usage DESC
 LIMIT 10
 `

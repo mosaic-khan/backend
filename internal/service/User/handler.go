@@ -66,7 +66,7 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	profileID, err := s.query.GetProfileID(ctx, user.ID)
 
 	// generate Token
-	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Minute*5, s.hmacSecret)
+	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Hour*12, s.hmacSecret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating token")
 	}
@@ -283,7 +283,7 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 }
 
 func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*emptypb.Empty, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	t, err := time.Parse("2006-01-02", in.GetBirthDay())
 	if err != nil {
@@ -311,9 +311,9 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 }
 
 func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditProfileInfoRequest) (*emptypb.Empty, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
-	userInfo, err := s.query.GetUserInfo(ctx, profileID)
+	userInfo, err := s.query.GetProfileInfo(ctx, profileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
@@ -391,9 +391,9 @@ func (s *Server) EditProfileInfo(ctx context.Context, in *UserAPIService.EditPro
 }
 
 func (s *Server) GetUserInfo(ctx context.Context, _ *emptypb.Empty) (*UserAPIService.GetUserInfoResponse, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
-	userInfo, err := s.query.GetUserInfo(ctx, profileID)
+	userInfo, err := s.query.GetProfileInfo(ctx, profileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not retrieve user")
 	}
@@ -406,7 +406,7 @@ func (s *Server) GetUserInfo(ctx context.Context, _ *emptypb.Empty) (*UserAPISer
 		BirthDay:      userInfo.BirthDay.Time.String(),
 		Gender:        string(userInfo.Gender),
 		ProfilePicUrl: userInfo.ProfilePicAddress,
-		City:          userInfo.CityName,
+		City:          userInfo.CityName.String,
 		Bio:           userInfo.Bio,
 	}}, nil
 }
@@ -424,7 +424,7 @@ func (s *Server) ConfirmChangeEmail(context.Context, *UserAPIService.ConfirmChan
 }
 
 func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePasswordRequest) (*emptypb.Empty, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	userID, err := s.query.GetUserIDbyProfileID(ctx, profileID)
 	if err != nil {
@@ -466,13 +466,13 @@ func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfile
 }
 
 func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	var profile *UserAPIService.Profile
 	var gender string
 
 	if in.Username == nil {
-		profileDB, err := s.query.GetProfileByUserID(ctx, profileID)
+		profileDB, err := s.query.GetProfileByProfileID(ctx, profileID)
 		if err != nil {
 			return nil, err
 		}
@@ -483,7 +483,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 			Username:      profileDB.Username,
 			Pronouns:      "",
 			Bio:           profileDB.Bio,
-			City:          profileDB.CityName,
+			City:          profileDB.CityName.String,
 			ProfilePicUrl: profileDB.ProfilePicAddress,
 		}
 
@@ -501,7 +501,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 			Username:      profileDB.Username,
 			Pronouns:      "",
 			Bio:           profileDB.Bio,
-			City:          profileDB.CityName,
+			City:          profileDB.CityName.String,
 			ProfilePicUrl: profileDB.ProfilePicAddress,
 		}
 
