@@ -39,7 +39,7 @@ type UserAPIClient interface {
 	ChangeProfilePic(ctx context.Context, in *ChangeProfilePicRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetProfile(ctx context.Context, in *GetProfileRequests, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	GetCities(ctx context.Context, in *GetCitiesRequest, opts ...grpc.CallOption) (*GetCitiesResponse, error)
-	DeleteAccount(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userAPIClient struct {
@@ -194,7 +194,7 @@ func (c *userAPIClient) GetCities(ctx context.Context, in *GetCitiesRequest, opt
 	return out, nil
 }
 
-func (c *userAPIClient) DeleteAccount(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *userAPIClient) DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/DeleteAccount", in, out, opts...)
 	if err != nil {
@@ -223,7 +223,7 @@ type UserAPIServer interface {
 	ChangeProfilePic(context.Context, *ChangeProfilePicRequest) (*emptypb.Empty, error)
 	GetProfile(context.Context, *GetProfileRequests) (*GetProfileResponse, error)
 	GetCities(context.Context, *GetCitiesRequest) (*GetCitiesResponse, error)
-	DeleteAccount(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	DeleteAccount(context.Context, *DeleteAccountRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserAPIServer()
 }
 
@@ -279,7 +279,7 @@ func (UnimplementedUserAPIServer) GetProfile(context.Context, *GetProfileRequest
 func (UnimplementedUserAPIServer) GetCities(context.Context, *GetCitiesRequest) (*GetCitiesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCities not implemented")
 }
-func (UnimplementedUserAPIServer) DeleteAccount(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+func (UnimplementedUserAPIServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
 }
 func (UnimplementedUserAPIServer) mustEmbedUnimplementedUserAPIServer() {}
@@ -584,7 +584,7 @@ func _UserAPI_GetCities_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _UserAPI_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(DeleteAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -596,7 +596,7 @@ func _UserAPI_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/KhanAPI.UserAPI/DeleteAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserAPIServer).DeleteAccount(ctx, req.(*emptypb.Empty))
+		return srv.(UserAPIServer).DeleteAccount(ctx, req.(*DeleteAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

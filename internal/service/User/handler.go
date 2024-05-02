@@ -533,16 +533,28 @@ func (s *Server) GetCities(ctx context.Context, in *UserAPIService.GetCitiesRequ
 	return &UserAPIService.GetCitiesResponse{Cities: cities}, nil
 }
 
-func (s *Server) DeleteAccount(ctx context.Context, in *emptypb.Empty) (*emptypb.Empty, error) {
+func (s *Server) DeleteAccount(ctx context.Context, in *UserAPIService.DeleteAccountRequest) (*emptypb.Empty, error) {
 
 	profileId := ctx.Value("ProfileID").(int64)
 
-	accountID, err := s.query.GetProfileUserID(ctx, profileId)
+	accountId, err := s.query.GetProfileUserID(ctx, profileId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not get profile's account id")
 	}
 
-	err = s.query.DeleteUser(ctx, accountID)
+	user, err := s.query.GetUserByID(ctx, accountId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not fetch user")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.Password))
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		return nil, status.Errorf(codes.InvalidArgument, "Incorrect password")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error checking password")
+	}
+
+	err = s.query.DeleteUser(ctx, accountId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not delete account")
 	}
