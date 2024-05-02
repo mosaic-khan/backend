@@ -35,16 +35,16 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	// try to get user by email
 	userEmail, err1 := s.query.GetUserByEmail(ctx, in.UserNameOrEmail)
 	if err1 != nil && !errors.Is(err1, sql.ErrNoRows) {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.Internal, "Error retrieving user %s\n", in.UserNameOrEmail)
+		return nil, status.Errorf(codes.Internal, "Error retrieving user %s\n", in.UserNameOrEmail)
 	}
 	// try to get user by username
 	userUsername, err2 := s.query.GetUserByUsername(ctx, in.UserNameOrEmail)
 	if err2 != nil && !errors.Is(err2, sql.ErrNoRows) {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.Internal, "Error retrieving user %s\n", in.UserNameOrEmail)
+		return nil, status.Errorf(codes.Internal, "Error retrieving user %s\n", in.UserNameOrEmail)
 	}
 	// user doesn't exist
 	if err1 != nil && err2 != nil {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.NotFound, "No such user %s\n", in.UserNameOrEmail)
+		return nil, status.Errorf(codes.NotFound, "No such user %s\n", in.UserNameOrEmail)
 	}
 
 	var user db.Account
@@ -58,9 +58,9 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	// compare password
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.Password))
 	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.InvalidArgument, "Incorrect password")
+		return nil, status.Errorf(codes.InvalidArgument, "Incorrect password")
 	} else if err != nil {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.Internal, "Error checking password")
+		return nil, status.Errorf(codes.Internal, "Error checking password")
 	}
 
 	profileID, err := s.query.GetProfileID(ctx, user.ID)
@@ -68,7 +68,7 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	// generate Token
 	tokenString, err := utils.CreateLoginToken(strconv.FormatInt(profileID, 10), time.Hour*12, s.hmacSecret)
 	if err != nil {
-		return &UserAPIService.LoginResponse{}, status.Errorf(codes.Internal, "Error creating token")
+		return nil, status.Errorf(codes.Internal, "Error creating token")
 	}
 
 	return &UserAPIService.LoginResponse{
