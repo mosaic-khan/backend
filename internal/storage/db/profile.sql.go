@@ -39,7 +39,7 @@ func (q *Queries) CreateProfile(ctx context.Context, userID int64) (int64, error
 	return id, err
 }
 
-const getProfileByUserID = `-- name: GetProfileByUserID :one
+const getProfileByProfileID = `-- name: GetProfileByProfileID :one
 SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
@@ -47,7 +47,7 @@ FROM profile JOIN account on account.id = profile.user_id
 WHERE profile.id = $1
 `
 
-type GetProfileByUserIDRow struct {
+type GetProfileByProfileIDRow struct {
 	ID                int64
 	Username          string
 	Name              interface{}
@@ -57,9 +57,9 @@ type GetProfileByUserIDRow struct {
 	ProfilePicAddress string
 }
 
-func (q *Queries) GetProfileByUserID(ctx context.Context, id int64) (GetProfileByUserIDRow, error) {
-	row := q.db.QueryRowContext(ctx, getProfileByUserID, id)
-	var i GetProfileByUserIDRow
+func (q *Queries) GetProfileByProfileID(ctx context.Context, id int64) (GetProfileByProfileIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getProfileByProfileID, id)
+	var i GetProfileByProfileIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -118,20 +118,7 @@ func (q *Queries) GetProfileID(ctx context.Context, userID int64) (int64, error)
 	return id, err
 }
 
-const getProfileUserID = `-- name: GetProfileUserID :one
-SELECT user_id
-FROM profile
-WHERE id = $1
-`
-
-func (q *Queries) GetProfileUserID(ctx context.Context, id int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getProfileUserID, id)
-	var user_id int64
-	err := row.Scan(&user_id)
-	return user_id, err
-}
-
-const getUserInfo = `-- name: GetUserInfo :one
+const getProfileInfo = `-- name: GetProfileInfo :one
 SELECT account.username, profile.first_name, profile.last_name,
        profile.gender, profile.birth_day, profile.bio,
        city.name AS city_name, profile.city_id, account.email, profile.profile_pic_address
@@ -140,7 +127,7 @@ FROM profile JOIN account on account.id = profile.user_id
 WHERE profile.id = $1
 `
 
-type GetUserInfoRow struct {
+type GetProfileInfoRow struct {
 	Username          string
 	FirstName         string
 	LastName          string
@@ -153,9 +140,9 @@ type GetUserInfoRow struct {
 	ProfilePicAddress string
 }
 
-func (q *Queries) GetUserInfo(ctx context.Context, id int64) (GetUserInfoRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserInfo, id)
-	var i GetUserInfoRow
+func (q *Queries) GetProfileInfo(ctx context.Context, id int64) (GetProfileInfoRow, error) {
+	row := q.db.QueryRowContext(ctx, getProfileInfo, id)
+	var i GetProfileInfoRow
 	err := row.Scan(
 		&i.Username,
 		&i.FirstName,
@@ -169,6 +156,19 @@ func (q *Queries) GetUserInfo(ctx context.Context, id int64) (GetUserInfoRow, er
 		&i.ProfilePicAddress,
 	)
 	return i, err
+}
+
+const getProfileUserID = `-- name: GetProfileUserID :one
+SELECT user_id
+FROM profile
+WHERE id = $1
+`
+
+func (q *Queries) GetProfileUserID(ctx context.Context, id int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getProfileUserID, id)
+	var user_id int64
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const updateProfileInfo = `-- name: UpdateProfileInfo :exec
