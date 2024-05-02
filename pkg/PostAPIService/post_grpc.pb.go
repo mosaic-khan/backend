@@ -26,6 +26,7 @@ type PostAPIClient interface {
 	GetProfilePosts(ctx context.Context, in *GetProfilePostsRequests, opts ...grpc.CallOption) (*GetProfilePostsResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
 }
 
 type postAPIClient struct {
@@ -63,6 +64,15 @@ func (c *postAPIClient) SetPost(ctx context.Context, in *SetPostRequest, opts ..
 	return out, nil
 }
 
+func (c *postAPIClient) SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error) {
+	out := new(SuggestIngredientResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SuggestIngredient", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -70,6 +80,7 @@ type PostAPIServer interface {
 	GetProfilePosts(context.Context, *GetProfilePostsRequests) (*GetProfilePostsResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	SetPost(context.Context, *SetPostRequest) (*emptypb.Empty, error)
+	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -85,6 +96,9 @@ func (UnimplementedPostAPIServer) GetPost(context.Context, *GetPostRequest) (*Ge
 }
 func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPost not implemented")
+}
+func (UnimplementedPostAPIServer) SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuggestIngredient not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -153,6 +167,24 @@ func _PostAPI_SetPost_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_SuggestIngredient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SuggestIngredientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).SuggestIngredient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/SuggestIngredient",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).SuggestIngredient(ctx, req.(*SuggestIngredientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +203,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetPost",
 			Handler:    _PostAPI_SetPost_Handler,
+		},
+		{
+			MethodName: "SuggestIngredient",
+			Handler:    _PostAPI_SuggestIngredient_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

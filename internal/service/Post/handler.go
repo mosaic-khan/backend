@@ -122,3 +122,16 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 	}, nil
 
 }
+
+func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.SuggestIngredientRequest) (*PostAPIService.SuggestIngredientResponse, error) {
+
+	suggestions, err := s.query.GetSimilarIngredient(ctx, sql.NullString{String: in.GetName(), Valid: true})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get similar ingredients")
+	}
+
+	return &PostAPIService.SuggestIngredientResponse{
+		Ingerdients: suggestions,
+	}, nil
+
+}

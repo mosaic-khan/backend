@@ -9,6 +9,7 @@ service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
   rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
+  rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
 }
 
 message Post {
@@ -36,4 +37,12 @@ message GetPostRequest {
 
 message GetPostResponse {
   Post post = 1;
+}
+
+message SuggestIngredientRequest {
+  string name = 1;
+}
+
+message SuggestIngredientResponse {
+  repeated string ingerdients = 1;
 }
