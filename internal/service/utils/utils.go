@@ -74,7 +74,7 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 		}
 
 		// Create new context
-		newCtx := context.WithValue(ctx, "userID", profileID)
+		newCtx := context.WithValue(ctx, "profileID", profileID)
 
 		// Call handler
 		return handler(newCtx, req)

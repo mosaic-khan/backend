@@ -299,7 +299,7 @@ func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.
 		LastName:  in.LName,
 		Gender:    db.Gender(in.Gender),
 		BirthDay:  birthDay,
-		Bio:       "",
+		Bio:       in.Bio,
 		CityID:    sql.NullInt16{},
 		ID:        profileID,
 	})
@@ -406,7 +406,7 @@ func (s *Server) GetUserInfo(ctx context.Context, _ *emptypb.Empty) (*UserAPISer
 		BirthDay:      userInfo.BirthDay.Time.String(),
 		Gender:        string(userInfo.Gender),
 		ProfilePicUrl: userInfo.ProfilePicAddress,
-		City:          userInfo.CityName,
+		City:          userInfo.CityName.String,
 		Bio:           userInfo.Bio,
 	}}, nil
 }
@@ -431,21 +431,19 @@ func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePa
 		return nil, status.Errorf(codes.Internal, "error while fetching userID")
 	}
 
-	bcryptPass, err := bcrypt.GenerateFromPassword([]byte(in.OldPassword), 10)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while converting to bcrypt")
-	}
-
 	user, err := s.query.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "error fetching user by user ID")
 	}
 
-	if user.Password != string(bcryptPass) {
-		return nil, status.Errorf(codes.Unauthenticated, "incorrect pass")
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.OldPassword))
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		return nil, status.Errorf(codes.InvalidArgument, "Incorrect password")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error checking password")
 	}
 
-	bcryptPass, err = bcrypt.GenerateFromPassword([]byte(in.NewPassword), 10)
+	bcryptPass, err := bcrypt.GenerateFromPassword([]byte(in.NewPassword), 10)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while converting to bcrypt")
 	}
@@ -483,7 +481,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 			Username:      profileDB.Username,
 			Pronouns:      "",
 			Bio:           profileDB.Bio,
-			City:          profileDB.CityName,
+			City:          profileDB.CityName.String,
 			ProfilePicUrl: profileDB.ProfilePicAddress,
 		}
 
@@ -501,7 +499,7 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 			Username:      profileDB.Username,
 			Pronouns:      "",
 			Bio:           profileDB.Bio,
-			City:          profileDB.CityName,
+			City:          profileDB.CityName.String,
 			ProfilePicUrl: profileDB.ProfilePicAddress,
 		}
 
