@@ -18,7 +18,7 @@ SELECT account.username, profile.first_name, profile.last_name,
        profile.gender, profile.birth_day, profile.bio,
        city.name AS city_name, profile.city_id, account.email, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
-    JOIN city on city.id = profile.city_id
+    LEFT JOIN city on city.id = profile.city_id
 WHERE profile.id = $1;
 
 
@@ -37,7 +37,7 @@ WHERE id = $7;
 SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
-    JOIN city on city.id = profile.city_id
+    LEFT JOIN city on city.id = profile.city_id
 WHERE account.username = $1;
 
 
@@ -45,7 +45,7 @@ WHERE account.username = $1;
 SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
-             JOIN city on city.id = profile.city_id
+             LEFT JOIN city on city.id = profile.city_id
 WHERE profile.id = $1;
 
 -- name: ChangeProfilePic :exec
