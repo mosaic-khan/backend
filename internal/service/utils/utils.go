@@ -110,8 +110,9 @@ func GenerateVerificationCode() string {
 	//const charset = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
 	const charset = `0123456789`
 	// for front test
-	b := make([]byte, 4)
-	for i := 0; i < 6; i++ {
+	const codeLen = 4
+	b := make([]byte, codeLen)
+	for i := 0; i < codeLen; i++ {
 		b[i] = charset[rand.Int()%len(charset)]
 	}
 	return string(b)
