@@ -88,6 +88,17 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	postIDStr := r.PostFormValue("postID")
+	if postIDStr == "" {
+		http.Error(w, "postID is required.", http.StatusBadRequest)
+		return
+	}
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid postID format.", http.StatusBadRequest)
+		return
+	}
+
 	filename := utils.GenerateFileName()
 
 	// Create and write the file
@@ -103,7 +114,7 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	postImageToken, err := utils.CreatePostImageToken(strconv.Itoa(int(profileID)), filename, s.hmacSecret)
+	postImageToken, err := utils.CreatePostImageToken(strconv.Itoa(int(profileID)), strconv.Itoa(int(postID)), filename, s.hmacSecret)
 	if err != nil {
 		http.Error(w, "error while creating Token", http.StatusInternalServerError)
 	}
