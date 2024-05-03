@@ -16,30 +16,6 @@ CREATE TABLE IF NOT EXISTS profile (
         ON UPDATE CASCADE,
     FOREIGN KEY(city_id)
         REFERENCES city(id)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE
 );
-
-
--- related trigger
--- delete all profile's posts
-CREATE FUNCTION delete_profile_post()
-   RETURNS TRIGGER 
-   LANGUAGE PLPGSQL
-AS 
-$$
-BEGIN
-    DELETE
-    FROM post
-    WHERE id IN (
-		SELECT post_id
-		FROM profile_has_post
-		WHERE profile_id = OLD.id
-	);
-	RETURN OLD;
-END;
-$$;
-
-CREATE TRIGGER delete_profile
-	BEFORE DELETE
-	ON profile
-	FOR EACH ROW
-		EXECUTE PROCEDURE delete_profile_post();
