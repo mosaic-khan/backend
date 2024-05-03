@@ -107,10 +107,10 @@ func ValidatePassword(password string) bool {
 }
 
 func GenerateVerificationCode() string {
-	//const charset = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
-	const charset = `0123456789`
-	// for front test
-	const codeLen = 4
+	const charset = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
+	//const charset = `0123456789`
+	//for front test
+	const codeLen = 6
 	b := make([]byte, codeLen)
 	for i := 0; i < codeLen; i++ {
 		b[i] = charset[rand.Int()%len(charset)]
