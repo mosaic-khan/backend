@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/UserAPIService"
@@ -465,8 +466,53 @@ func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePa
 	return nil, nil
 }
 
-func (s *Server) ChangeProfilePic(context.Context, *UserAPIService.ChangeProfilePicRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangeProfilePic not implemented")
+func (s *Server) ChangeProfilePic(ctx context.Context, in *UserAPIService.ChangeProfilePicRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("profileID").(int64)
+
+	// Validate token
+	token, err := jwt.Parse(in.ProfilePicToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.hmacSecret, nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid token")
+	}
+
+	tokenProfileIDStr, err := token.Claims.GetSubject()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error while extracting profileID")
+	}
+
+	tokenProfileID, err := strconv.ParseInt(tokenProfileIDStr, 10, 64)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error while converting userID")
+	}
+
+	if profileID != tokenProfileID {
+		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated user")
+	}
+
+	tokenAud, err := token.Claims.GetAudience()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting token Aud")
+	}
+
+	if tokenAud[0] != "Media ProfilePic" {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+	}
+
+	filepath := tokenAud[1]
+	err = s.query.ChangeProfilePic(ctx, db.ChangeProfilePicParams{
+		ProfilePicAddress: fmt.Sprintf("/KhanAPI.MediaAPI/images/%s", filepath),
+		ID:                profileID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
+	return nil, nil
 }
 
 func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRequests) (*UserAPIService.GetProfileResponse, error) {

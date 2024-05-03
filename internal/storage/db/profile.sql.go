@@ -13,16 +13,16 @@ import (
 const changeProfilePic = `-- name: ChangeProfilePic :exec
 UPDATE profile
 SET profile_pic_address = $1
-WHERE user_id = $2
+WHERE id = $2
 `
 
 type ChangeProfilePicParams struct {
 	ProfilePicAddress string
-	UserID            int64
+	ID                int64
 }
 
 func (q *Queries) ChangeProfilePic(ctx context.Context, arg ChangeProfilePicParams) error {
-	_, err := q.db.ExecContext(ctx, changeProfilePic, arg.ProfilePicAddress, arg.UserID)
+	_, err := q.db.ExecContext(ctx, changeProfilePic, arg.ProfilePicAddress, arg.ID)
 	return err
 }
 
