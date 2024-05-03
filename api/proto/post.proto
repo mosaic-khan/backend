@@ -20,6 +20,8 @@ message Post {
   string description = 4;
   int32 numImages = 5;
   repeated string imageUrls = 6;
+  string username = 7;
+  string profilePicUrl = 8;
 }
 
 message PostPreview {

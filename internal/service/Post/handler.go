@@ -4,8 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
+	"strconv"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -103,12 +106,21 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 		ingredientsMap[i.Name] = i.Amount.String
 	}
 
+	imageUrls, err := s.query.GetPostImages(ctx, in.PostID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get post images")
+	}
+
 	return &PostAPIService.GetPostResponse{
 		Post: &PostAPIService.Post{
-			Title:       post.Title,
-			Description: post.Description,
-			NumImages:   int32(post.NumImages),
-			Ingredients: ingredientsMap,
+			Id:            post.ID,
+			Title:         post.Title,
+			Description:   post.Description,
+			NumImages:     int32(post.NumImages),
+			Ingredients:   ingredientsMap,
+			ImageUrls:     imageUrls,
+			Username:      post.Username,
+			ProfilePicUrl: post.ProfilePicAddress,
 		},
 	}, nil
 
@@ -125,4 +137,91 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 		Ingredients: suggestions,
 	}, nil
 
+}
+
+func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProfilePostsRequests) (*PostAPIService.GetProfilePostsResponse, error) {
+	profileID := ctx.Value("profileID").(int64)
+
+	postsDB, err := s.query.GetPostsPreview(ctx, profileID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching posts")
+	}
+
+	posts := make([]*PostAPIService.PostPreview, len(postsDB))
+
+	for i, post := range postsDB {
+		posts[i] = &PostAPIService.PostPreview{
+			Id:               post.ID,
+			Title:            post.Title,
+			ShortDescription: post.Description,
+			Image:            post.ImageUrl.String,
+		}
+	}
+
+	return &PostAPIService.GetProfilePostsResponse{PostPreview: posts}, nil
+}
+
+func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImageForPostRequest) (*emptypb.Empty, error) {
+
+	profileID := ctx.Value("profileID").(int64)
+
+	// Validate token
+	token, err := jwt.Parse(in.PostImageToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.hmacSecret, nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid token")
+	}
+
+	tokenProfileIDStr, err := token.Claims.GetSubject()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error while extracting profileID")
+	}
+
+	tokenProfileID, err := strconv.ParseInt(tokenProfileIDStr, 10, 64)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error while converting userID")
+	}
+
+	if profileID != tokenProfileID {
+		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated user")
+	}
+
+	tokenAud, err := token.Claims.GetAudience()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting token Aud")
+	}
+
+	if tokenAud[0] != "Media PostImage" {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+	}
+
+	postIDStr := tokenAud[1]
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error line 205")
+	}
+
+	owner, err := s.query.GetPostOwnerProfile(ctx, postID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+	if owner != profileID {
+		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	filepath := tokenAud[1]
+	err = s.query.AddImage(ctx, db.AddImageParams{
+		PostID:   postID,
+		ImageUrl: fmt.Sprintf("/KhanAPI.MediaAPI/images/%s", filepath),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
+	return nil, nil
 }
