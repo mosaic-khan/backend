@@ -3,7 +3,9 @@ package utils
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
+	"net/http"
 	"net/smtp"
 	"os"
 	"regexp"
@@ -209,4 +211,29 @@ func SendResetPassEmail(email string, token string) {
 		fmt.Println(err)
 		return
 	}
+}
+
+func MediaMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Before passing to the handler
+		startTime := time.Now()
+		log.Printf("Started %s %s", r.Method, r.RequestURI)
+
+		// Use a ResponseWriter wrapper to capture the status code
+		wrappedWriter := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		next.ServeHTTP(wrappedWriter, r)
+
+		// After the handler
+		log.Printf("Completed in %v %s %s %d", time.Since(startTime), r.Method, r.RequestURI, wrappedWriter.statusCode)
+	})
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
 }
