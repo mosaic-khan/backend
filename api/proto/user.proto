@@ -150,8 +150,7 @@ message ChangePasswordRequest {
 }
 
 message ChangeProfilePicRequest {
-  string newProfilePicPath = 1;
-  string accessToken = 2;
+  string profilePicToken = 1;
 }
 
 // EditProfile End

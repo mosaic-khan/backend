@@ -1,0 +1,128 @@
+package Media
+
+import (
+	"fmt"
+	"io"
+	"main/internal/service/utils"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+)
+
+const UploadDir = "fileData"
+
+func (s *Server) UploadProfilePicHandler(w http.ResponseWriter, r *http.Request) {
+	profileID := r.Context().Value("profileID").(int64)
+
+	if r.Method != "POST" {
+		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the multipart form, limiting file size to 10MB
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "The uploaded file is too big.", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("uploadFile")
+	if err != nil {
+		http.Error(w, "Could not get uploaded file.", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if !strings.HasPrefix(header.Header.Get("Content-Type"), "image/") {
+		http.Error(w, "The uploaded file must be an image.", http.StatusBadRequest)
+		return
+	}
+
+	filename := utils.GenerateFileName()
+
+	// Create and write the file
+	dst, err := os.Create(fmt.Sprintf("%s/%s", UploadDir, filename))
+	if err != nil {
+		http.Error(w, "Could not create a file.", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, "Failed to save the uploaded file.", http.StatusInternalServerError)
+		return
+	}
+
+	profilePicToken, err := utils.CreateProfilePicToken(strconv.Itoa(int(profileID)), filename, s.hmacSecret)
+	if err != nil {
+		http.Error(w, "error while creating Token", http.StatusInternalServerError)
+	}
+
+	_, _ = w.Write([]byte(profilePicToken))
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request) {
+	profileID := r.Context().Value("profileID").(int64)
+
+	if r.Method != "POST" {
+		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the multipart form, limiting file size to 10MB
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "The uploaded file is too big.", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("uploadFile")
+	if err != nil {
+		http.Error(w, "Could not get uploaded file.", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if !strings.HasPrefix(header.Header.Get("Content-Type"), "image/") {
+		http.Error(w, "The uploaded file must be an image.", http.StatusBadRequest)
+		return
+	}
+
+	filename := utils.GenerateFileName()
+
+	// Create and write the file
+	dst, err := os.Create(fmt.Sprintf("%s/%s", UploadDir, filename))
+	if err != nil {
+		http.Error(w, "Could not create a file.", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, "Failed to save the uploaded file.", http.StatusInternalServerError)
+		return
+	}
+
+	postImageToken, err := utils.CreatePostImageToken(strconv.Itoa(int(profileID)), filename, s.hmacSecret)
+	if err != nil {
+		http.Error(w, "error while creating Token", http.StatusInternalServerError)
+	}
+
+	_, _ = w.Write([]byte(postImageToken))
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) GetImageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	filePath := UploadDir + r.URL.Path[len("/KhanAPI.MediaAPI/images/"):]
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.Error(w, "File not found.", http.StatusNotFound)
+		return
+	}
+
+	http.ServeFile(w, r, filePath)
+}

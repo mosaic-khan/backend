@@ -3,7 +3,9 @@ package utils
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
+	"net/http"
 	"net/smtp"
 	"os"
 	"regexp"
@@ -209,4 +211,82 @@ func SendResetPassEmail(email string, token string) {
 		fmt.Println(err)
 		return
 	}
+}
+
+func MediaMiddleware(next http.Handler) http.Handler {
+	hmacSecret := []byte(os.Getenv("SECRET_KEY"))
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		bearerToken := ""
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			bearerToken = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			log.Printf("No Bearer Token found")
+			return
+		}
+
+		token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
+			// Don't forget to validate the alg is what you expect:
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return hmacSecret, nil
+		})
+		if err != nil {
+			return
+		}
+
+		profileIDStr, err := token.Claims.GetSubject()
+		if err != nil {
+			return
+		}
+
+		profileID, err := strconv.ParseInt(profileIDStr, 10, 64)
+		if err != nil {
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "profileID", profileID)
+		r = r.WithContext(ctx)
+
+		wrappedWriter := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		next.ServeHTTP(wrappedWriter, r.WithContext(ctx))
+	})
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func GenerateFileName() string {
+	const charset = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
+	// for front test
+	const codeLen = 20
+	b := make([]byte, codeLen)
+	for i := 0; i < codeLen; i++ {
+		b[i] = charset[rand.Int()%len(charset)]
+	}
+	return string(b)
+}
+
+func CreateProfilePicToken(profileID string, filename string, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+		Issuer:    "KhanWeb",
+		Subject:   profileID,
+		Audience:  jwt.ClaimStrings{"Media ProfilePic", filename},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2)),
+	})
+
+	return token.SignedString(key)
+}
+
+func CreatePostImageToken(profileID string, filename string, key []byte) (string, error) {
+	return "", nil
 }

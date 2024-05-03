@@ -51,5 +51,5 @@ WHERE profile.id = $1;
 -- name: ChangeProfilePic :exec
 UPDATE profile
 SET profile_pic_address = $1
-WHERE user_id = $2;
+WHERE id = $2;
 
