@@ -10,7 +10,7 @@ service PostAPI {
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
   rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
-  rpc SetImageForPost (SetImageForPostRequest) returns (google.protobuf.Empty);
+  rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -60,6 +60,6 @@ message SuggestIngredientResponse {
   repeated string ingredients = 1;
 }
 
-message SetImageForPostRequest {
+message AddImageForPostRequest {
   string PostImageToken = 1;
 }

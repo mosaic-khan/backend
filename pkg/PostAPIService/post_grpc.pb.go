@@ -23,7 +23,7 @@ type PostAPIClient interface {
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
-	SetImageForPost(ctx context.Context, in *SetImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type postAPIClient struct {
@@ -70,9 +70,9 @@ func (c *postAPIClient) SuggestIngredient(ctx context.Context, in *SuggestIngred
 	return out, nil
 }
 
-func (c *postAPIClient) SetImageForPost(ctx context.Context, in *SetImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *postAPIClient) AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SetImageForPost", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddImageForPost", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ type PostAPIServer interface {
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	SetPost(context.Context, *SetPostRequest) (*emptypb.Empty, error)
 	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
-	SetImageForPost(context.Context, *SetImageForPostRequest) (*emptypb.Empty, error)
+	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -107,8 +107,8 @@ func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*em
 func (UnimplementedPostAPIServer) SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SuggestIngredient not implemented")
 }
-func (UnimplementedPostAPIServer) SetImageForPost(context.Context, *SetImageForPostRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetImageForPost not implemented")
+func (UnimplementedPostAPIServer) AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddImageForPost not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -195,20 +195,20 @@ func _PostAPI_SuggestIngredient_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostAPI_SetImageForPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetImageForPostRequest)
+func _PostAPI_AddImageForPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddImageForPostRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostAPIServer).SetImageForPost(ctx, in)
+		return srv.(PostAPIServer).AddImageForPost(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SetImageForPost",
+		FullMethod: "/KhanAPI.PostAPI/AddImageForPost",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SetImageForPost(ctx, req.(*SetImageForPostRequest))
+		return srv.(PostAPIServer).AddImageForPost(ctx, req.(*AddImageForPostRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -237,8 +237,8 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostAPI_SuggestIngredient_Handler,
 		},
 		{
-			MethodName: "SetImageForPost",
-			Handler:    _PostAPI_SetImageForPost_Handler,
+			MethodName: "AddImageForPost",
+			Handler:    _PostAPI_AddImageForPost_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
