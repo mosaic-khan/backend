@@ -16,7 +16,6 @@ import (
 )
 
 func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*emptypb.Empty, error) {
-
 	// get profile id
 	profileId := ctx.Value("ProfileID").(int64)
 
@@ -86,7 +85,6 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 }
 
 func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest) (*PostAPIService.GetPostResponse, error) {
-
 	// get post
 	post, err := s.query.GetPost(ctx, in.GetPostID())
 	if errors.Is(err, sql.ErrNoRows) {
@@ -140,7 +138,7 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 }
 
 func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProfilePostsRequests) (*PostAPIService.GetProfilePostsResponse, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	postsDB, err := s.query.GetPostsPreview(ctx, profileID)
 	if err != nil {
@@ -163,7 +161,7 @@ func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProf
 
 func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImageForPostRequest) (*emptypb.Empty, error) {
 
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	// Validate token
 	token, err := jwt.Parse(in.PostImageToken, func(token *jwt.Token) (interface{}, error) {
@@ -213,7 +211,7 @@ func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImag
 		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	filepath := tokenAud[1]
+	filepath := tokenAud[2]
 	err = s.query.AddImage(ctx, db.AddImageParams{
 		PostID:   postID,
 		ImageUrl: fmt.Sprintf("/KhanAPI.MediaAPI/images/%s", filepath),
