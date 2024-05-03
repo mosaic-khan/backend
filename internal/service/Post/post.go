@@ -11,8 +11,9 @@ import (
 
 type Server struct {
 	PostAPIService.UnimplementedPostAPIServer
-	conn  *sql.DB
-	query *db.Queries
+	conn       *sql.DB
+	query      *db.Queries
+	hmacSecret []byte
 }
 
 func getQuery() (*db.Queries, *sql.DB, error) {
@@ -39,7 +40,8 @@ func NewServer() *Server {
 	}
 
 	return &Server{
-		conn:  conn,
-		query: q,
+		conn:       conn,
+		query:      q,
+		hmacSecret: []byte(os.Getenv("SECRET_KEY")),
 	}
 }

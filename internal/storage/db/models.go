@@ -94,6 +94,13 @@ type PostHasIngredient struct {
 	IngredientID int32
 }
 
+type PostImage struct {
+	ID        int32
+	PostID    int64
+	ImageUrl  string
+	IsPrimary bool
+}
+
 type Profile struct {
 	ID                int64
 	UserID            int64

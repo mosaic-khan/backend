@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS "post_image";
+DROP TABLE IF EXISTS post_has_ingredient;
+DROP TABLE IF EXISTS ingredient;
+DROP TABLE IF EXISTS "post";
 DROP TABLE IF EXISTS "follow";
 DROP TABLE IF EXISTS "profile";
 DROP TYPE IF EXISTS "gender";

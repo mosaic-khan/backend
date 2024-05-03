@@ -13,7 +13,7 @@ import (
 const getCities = `-- name: GetCities :many
 SELECT id, name
 FROM city
-WHERE name LIKE '%' || $1 || '%'
+WHERE name LIKE $1 || '%'
 LIMIT 20
 `
 

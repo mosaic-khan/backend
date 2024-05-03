@@ -34,7 +34,7 @@ WHERE id = $7;
 
 
 -- name: GetProfileByUsername :one
-SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
+SELECT profile.id, account.username, (profile.first_name || ' ' || profile.last_name) AS name,
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
     LEFT JOIN city on city.id = profile.city_id
@@ -42,7 +42,7 @@ WHERE account.username = $1;
 
 
 -- name: GetProfileByProfileID :one
-SELECT profile.id, account.username, (profile.first_name || profile.last_name) AS name,
+SELECT profile.id, account.username, (profile.first_name || ' ' || profile.last_name) AS name,
        profile.bio, profile.gender, city.name AS city_name, profile.profile_pic_address
 FROM profile JOIN account on account.id = profile.user_id
              LEFT JOIN city on city.id = profile.city_id

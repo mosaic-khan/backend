@@ -1,16 +1,12 @@
 package Media
 
 import (
-	"database/sql"
 	"main/internal/service/utils"
-	"main/internal/storage/db"
 	"net/http"
 	"os"
 )
 
 type Server struct {
-	conn       *sql.DB
-	query      *db.Queries
 	hmacSecret []byte
 }
 

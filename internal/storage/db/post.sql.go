@@ -7,25 +7,146 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
-const getPost = `-- name: GetPost :one
-SELECT id, title, description, num_images, profile_id
-FROM post
-WHERE id = $1
+const addImage = `-- name: AddImage :exec
+WITH post_image_cnt AS (
+    SELECT COUNT(*) as cnt
+    FROM post_image
+    WHERE post_id = $1
+)
+INSERT INTO post_image (post_id, image_url, is_primary)
+SELECT $1, $2, (cnt < 1)::boolean
+FROM post_image_cnt
 `
 
-func (q *Queries) GetPost(ctx context.Context, id int64) (Post, error) {
+type AddImageParams struct {
+	PostID   int64
+	ImageUrl string
+}
+
+func (q *Queries) AddImage(ctx context.Context, arg AddImageParams) error {
+	_, err := q.db.ExecContext(ctx, addImage, arg.PostID, arg.ImageUrl)
+	return err
+}
+
+const getPost = `-- name: GetPost :one
+SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images
+FROM post
+         JOIN profile on profile.id = post.profile_id
+         JOIN account on account.id = profile.user_id
+WHERE post.id = $1
+`
+
+type GetPostRow struct {
+	ID                int64
+	Title             string
+	Description       string
+	Username          string
+	ProfilePicAddress string
+	NumImages         int16
+}
+
+func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
 	row := q.db.QueryRowContext(ctx, getPost, id)
-	var i Post
+	var i GetPostRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
 		&i.Description,
+		&i.Username,
+		&i.ProfilePicAddress,
 		&i.NumImages,
-		&i.ProfileID,
 	)
 	return i, err
+}
+
+const getPostImages = `-- name: GetPostImages :many
+SELECT post_image.image_url
+FROM post_image
+WHERE post_id = $1
+ORDER BY id
+`
+
+func (q *Queries) GetPostImages(ctx context.Context, postID int64) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getPostImages, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var image_url string
+		if err := rows.Scan(&image_url); err != nil {
+			return nil, err
+		}
+		items = append(items, image_url)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostOwnerProfile = `-- name: GetPostOwnerProfile :one
+SELECT post.profile_id AS profile_id
+FROM post
+WHERE id = $1
+`
+
+func (q *Queries) GetPostOwnerProfile(ctx context.Context, id int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getPostOwnerProfile, id)
+	var profile_id int64
+	err := row.Scan(&profile_id)
+	return profile_id, err
+}
+
+const getPostsPreview = `-- name: GetPostsPreview :many
+SELECT post.id, post.title, post.description, post_image.image_url
+FROM post
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post.profile_id = $1 and post_image.is_primary = true
+ORDER BY post.id
+LIMIT 20
+`
+
+type GetPostsPreviewRow struct {
+	ID          int64
+	Title       string
+	Description string
+	ImageUrl    sql.NullString
+}
+
+func (q *Queries) GetPostsPreview(ctx context.Context, profileID int64) ([]GetPostsPreviewRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsPreview, profileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostsPreviewRow
+	for rows.Next() {
+		var i GetPostsPreviewRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertPost = `-- name: InsertPost :one
@@ -51,4 +172,17 @@ func (q *Queries) InsertPost(ctx context.Context, arg InsertPostParams) (int64, 
 	var id int64
 	err := row.Scan(&id)
 	return id, err
+}
+
+const postImageCount = `-- name: PostImageCount :one
+SELECT count(*)
+FROM post_image
+WHERE post_id = $1
+`
+
+func (q *Queries) PostImageCount(ctx context.Context, postID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, postImageCount, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
