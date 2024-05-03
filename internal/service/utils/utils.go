@@ -291,7 +291,7 @@ func CreatePostImageToken(profileID string, postID string, filename string, key 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		Issuer:    "KhanWeb",
 		Subject:   profileID,
-		Audience:  jwt.ClaimStrings{"Media ProfilePic", postID, filename},
+		Audience:  jwt.ClaimStrings{"Media PostImage", postID, filename},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2)),
 	})
 

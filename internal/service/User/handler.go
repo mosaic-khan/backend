@@ -467,7 +467,7 @@ func (s *Server) ChangePassword(ctx context.Context, in *UserAPIService.ChangePa
 }
 
 func (s *Server) ChangeProfilePic(ctx context.Context, in *UserAPIService.ChangeProfilePicRequest) (*emptypb.Empty, error) {
-	profileID := ctx.Value("profileID").(int64)
+	profileID := ctx.Value("ProfileID").(int64)
 
 	// Validate token
 	token, err := jwt.Parse(in.ProfilePicToken, func(token *jwt.Token) (interface{}, error) {

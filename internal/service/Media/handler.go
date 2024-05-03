@@ -99,7 +99,7 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	filename := utils.GenerateFileName()
+	filename := utils.GenerateFileName() + ".png"
 
 	// Create and write the file
 	dst, err := os.Create(fmt.Sprintf("%s/%s", UploadDir, filename))
@@ -129,7 +129,7 @@ func (s *Server) GetImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filePath := UploadDir + r.URL.Path[len("/KhanAPI.MediaAPI/images/"):]
+	filePath := UploadDir + "/" + r.URL.Path[len("/KhanAPI.MediaAPI/images/"):]
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		http.Error(w, "File not found.", http.StatusNotFound)
 		return
