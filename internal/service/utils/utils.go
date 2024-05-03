@@ -287,6 +287,13 @@ func CreateProfilePicToken(profileID string, filename string, key []byte) (strin
 	return token.SignedString(key)
 }
 
-func CreatePostImageToken(profileID string, filename string, key []byte) (string, error) {
-	return "", nil
+func CreatePostImageToken(profileID string, postID string, filename string, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+		Issuer:    "KhanWeb",
+		Subject:   profileID,
+		Audience:  jwt.ClaimStrings{"Media ProfilePic", postID, filename},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2)),
+	})
+
+	return token.SignedString(key)
 }
