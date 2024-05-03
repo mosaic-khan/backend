@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS city (
     name VARCHAR(40) NOT NULL UNIQUE
 );
 
-INSERT INTO city
-( name )
+INSERT INTO city (name)
 VALUES
     ('خسروشاه'),
     ('چویبده'),

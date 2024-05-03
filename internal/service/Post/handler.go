@@ -24,11 +24,11 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 
 	// check post constraints
 	// check title
-	if in.Post.Title == "" {
+	if in.Post.GetTitle() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "post should have a title")
 	}
 	// check num images
-	if in.Post.NumImages < 1 && in.Post.NumImages > 10 {
+	if in.Post.GetNumImages() < 1 && in.Post.GetNumImages() > 10 {
 		return nil, status.Errorf(codes.InvalidArgument, "post should have a least one image but no more than ten")
 	}
 
@@ -42,20 +42,11 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 		Title:       in.Post.GetTitle(),
 		Description: in.Post.GetDescription(),
 		NumImages:   int16(in.Post.GetNumImages()),
+		ProfileID:   profileId,
 	})
 	if err != nil {
 		tx.Rollback()
 		return nil, status.Errorf(codes.Internal, "could not create post")
-	}
-
-	// post and profile relation
-	err = txQuery.InsertProfilerHasPost(ctx, db.InsertProfilerHasPostParams{
-		ProfileID: profileId,
-		PostID:    postId,
-	})
-	if err != nil {
-		tx.Rollback()
-		return nil, status.Errorf(codes.Internal, "could not add post to profile")
 	}
 
 	// insert post ingredients
