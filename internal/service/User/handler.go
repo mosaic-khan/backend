@@ -9,6 +9,7 @@ import (
 	"main/pkg/UserAPIService"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -33,7 +34,7 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 
 	// verify user
 	// try to get user by email
-	userEmail, err1 := s.query.GetUserByEmail(ctx, in.UserNameOrEmail)
+	userEmail, err1 := s.query.GetUserByEmail(ctx, strings.ToLower(in.UserNameOrEmail))
 	if err1 != nil && !errors.Is(err1, sql.ErrNoRows) {
 		return nil, status.Errorf(codes.Internal, "Error retrieving user %s\n", in.UserNameOrEmail)
 	}
@@ -78,6 +79,8 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 }
 
 func (s *Server) ForgetPassword(ctx context.Context, in *UserAPIService.ForgetPasswordRequest) (*emptypb.Empty, error) {
+	// convert email to lower case
+	in.UserNameOrEmail = strings.ToLower(in.UserNameOrEmail)
 
 	user, err := s.query.GetUserByEmail(ctx, in.UserNameOrEmail)
 	if err != nil {
@@ -138,6 +141,9 @@ func (s *Server) NewPasswordWithToken(ctx context.Context, in *UserAPIService.Ne
 }
 
 func (s *Server) SignUp(ctx context.Context, in *UserAPIService.SignUpRequest) (*UserAPIService.SignUpResponse, error) {
+	// convert email to lower case
+	in.Email = strings.ToLower(in.Email)
+
 	if !utils.ValidateEmail(in.Email) {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid email")
 	}
