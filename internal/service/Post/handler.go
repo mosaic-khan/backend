@@ -24,11 +24,11 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 
 	// check post constraints
 	// check title
-	if in.Post.GetTitle() == "" {
+	if in.GetTitle() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "post should have a title")
 	}
 	// check num images
-	if in.Post.GetNumImages() < 1 && in.Post.GetNumImages() > 10 {
+	if in.GetNumImages() < 1 && in.GetNumImages() > 10 {
 		return nil, status.Errorf(codes.InvalidArgument, "post should have a least one image but no more than ten")
 	}
 
@@ -39,9 +39,9 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 
 	// insert post
 	postId, err := txQuery.InsertPost(ctx, db.InsertPostParams{
-		Title:       in.Post.GetTitle(),
-		Description: in.Post.GetDescription(),
-		NumImages:   int16(in.Post.GetNumImages()),
+		Title:       in.GetTitle(),
+		Description: in.GetDescription(),
+		NumImages:   int16(in.GetNumImages()),
 		ProfileID:   profileId,
 	})
 	if err != nil {
@@ -50,7 +50,7 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 	}
 
 	// insert post ingredients
-	for ingredient, amount := range in.Post.Ingredients {
+	for ingredient, amount := range in.Ingredients {
 		ingredientId, err := txQuery.GetIngredientId(ctx, ingredient)
 		if errors.Is(err, sql.ErrNoRows) {
 			// insert ingredient if not exists
@@ -122,7 +122,7 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 	}
 
 	return &PostAPIService.SuggestIngredientResponse{
-		Ingerdients: suggestions,
+		Ingredients: suggestions,
 	}, nil
 
 }

@@ -10,17 +10,30 @@ service PostAPI {
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
   rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
+  rpc SetImageForPost (SetImageForPostRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
-  string title = 1;
-  map<string, string> ingredients = 2;
-  string description = 3;
-  int32 numImages = 4; 
+  int64 id = 1;
+  string title = 2;
+  map<string, string> ingredients = 3;
+  string description = 4;
+  int32 numImages = 5;
+  repeated string imageUrls = 6;
+}
+
+message PostPreview {
+  int64 id = 1;
+  string title = 2;
+  string ShortDescription = 3;
+  string image = 4;
 }
 
 message SetPostRequest {
-  Post post = 1;
+  string title = 1;
+  map<string, string> ingredients = 2;
+  string description = 3;
+  int32 numImages = 4;
 }
 
 message GetProfilePostsRequests {
@@ -28,7 +41,7 @@ message GetProfilePostsRequests {
 }
 
 message GetProfilePostsResponse {
-  repeated Post post = 1;
+  repeated PostPreview postPreview = 1;
 }
 
 message GetPostRequest {
@@ -44,5 +57,9 @@ message SuggestIngredientRequest {
 }
 
 message SuggestIngredientResponse {
-  repeated string ingerdients = 1;
+  repeated string ingredients = 1;
+}
+
+message SetImageForPostRequest {
+  string PostImageToken = 1;
 }
