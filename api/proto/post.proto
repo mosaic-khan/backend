@@ -11,6 +11,7 @@ service PostAPI {
   rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
   rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
+  rpc Like (LikeRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -19,9 +20,11 @@ message Post {
   map<string, string> ingredients = 3;
   string description = 4;
   int32 numImages = 5;
-  repeated string imageUrls = 6;
-  string username = 7;
-  string profilePicUrl = 8;
+  int32 numLikes = 6;
+  bool like = 7;
+  repeated string imageUrls = 8;
+  string username = 9;
+  string profilePicUrl = 10;
 }
 
 message PostPreview {
@@ -64,4 +67,8 @@ message SuggestIngredientResponse {
 
 message AddImageForPostRequest {
   string PostImageToken = 1;
+}
+
+message LikeRequest {
+  int64 post_id = 1;
 }
