@@ -32,7 +32,7 @@ func (q *Queries) AddImage(ctx context.Context, arg AddImageParams) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images
+SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images, post.num_likes
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
@@ -46,6 +46,7 @@ type GetPostRow struct {
 	Username          string
 	ProfilePicAddress string
 	NumImages         int16
+	NumLikes          int32
 }
 
 func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
@@ -58,6 +59,7 @@ func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
 		&i.Username,
 		&i.ProfilePicAddress,
 		&i.NumImages,
+		&i.NumLikes,
 	)
 	return i, err
 }

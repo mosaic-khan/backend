@@ -84,6 +84,7 @@ type Post struct {
 	Title       string
 	Description string
 	NumImages   int16
+	NumLikes    int32
 	ProfileID   int64
 }
 
@@ -111,6 +112,11 @@ type Profile struct {
 	ProfilePicAddress string
 	CityID            sql.NullInt16
 	Bio               string
+}
+
+type ProfileLikePost struct {
+	PostID    int64
+	ProfileID int64
 }
 
 type Signup struct {
