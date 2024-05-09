@@ -29,6 +29,7 @@ type PostAPIClient interface {
 	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
 	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type postAPIClient struct {
@@ -93,6 +94,15 @@ func (c *postAPIClient) Like(ctx context.Context, in *LikeRequest, opts ...grpc.
 	return out, nil
 }
 
+func (c *postAPIClient) Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/Dislike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -103,6 +113,7 @@ type PostAPIServer interface {
 	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
 	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
+	Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -127,6 +138,9 @@ func (UnimplementedPostAPIServer) AddImageForPost(context.Context, *AddImageForP
 }
 func (UnimplementedPostAPIServer) Like(context.Context, *LikeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedPostAPIServer) Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Dislike not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -249,6 +263,24 @@ func _PostAPI_Like_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_Dislike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DislikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).Dislike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/Dislike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).Dislike(ctx, req.(*DislikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -279,6 +311,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Like",
 			Handler:    _PostAPI_Like_Handler,
+		},
+		{
+			MethodName: "Dislike",
+			Handler:    _PostAPI_Dislike_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

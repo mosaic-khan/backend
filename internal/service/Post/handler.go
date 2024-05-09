@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lib/pq"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -248,8 +249,28 @@ func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emp
 	profileID := ctx.Value("ProfileID").(int64)
 
 	err := s.query.LikePost(ctx, db.LikePostParams{ProfileID: profileID, PostID: in.GetPostId()})
+	var driverErr *pq.Error
 	if err != nil {
+		driverErr = err.(*pq.Error)
+	}
+	if driverErr != nil && driverErr.Code == pq.ErrorCode("23503") { // error code 23503 = foreign_key_violation
+		return nil, status.Errorf(codes.InvalidArgument, "post with id %d does not exists", in.GetPostId())
+	} else if driverErr != nil && driverErr.Code == pq.ErrorCode("23505") { // error code 23505 = unique_violation
+		return nil, status.Errorf(codes.InvalidArgument, "already liked post with id %d", in.GetPostId())
+	} else if err != nil {
+		fmt.Println(err.Error())
 		return nil, status.Error(codes.Internal, "could not like post")
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.DislikePost(ctx, db.DislikePostParams{ProfileID: profileID, PostID: in.GetPostId()})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "could not dislike post")
 	}
 
 	return &emptypb.Empty{}, nil

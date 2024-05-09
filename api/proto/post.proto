@@ -12,6 +12,7 @@ service PostAPI {
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
   rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
   rpc Like (LikeRequest) returns (google.protobuf.Empty);
+  rpc Dislike (DislikeRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -70,5 +71,9 @@ message AddImageForPostRequest {
 }
 
 message LikeRequest {
+  int64 post_id = 1;
+}
+
+message DislikeRequest {
   int64 post_id = 1;
 }
