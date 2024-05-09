@@ -613,3 +613,13 @@ func (s *Server) DeleteAccount(ctx context.Context, in *UserAPIService.DeleteAcc
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *Server) SearchUsername(ctx context.Context, in *UserAPIService.SearchUsernameRequest) (*UserAPIService.SearchUsernameResponse, error) {
+
+	usernames, err := s.query.SearchUsername(ctx, in.GetUsername())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error retrieving usernames smiliar to %s\n", in.GetUsername())
+	}
+
+	return &UserAPIService.SearchUsernameResponse{Usernames: usernames}, nil
+}
