@@ -176,3 +176,38 @@ func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) er
 	_, err := q.db.ExecContext(ctx, resetPassword, arg.ID, arg.Password)
 	return err
 }
+
+const searchUsername = `-- name: SearchUsername :many
+WITH username_similarity AS (
+    SELECT username, similarity(username, $1) AS similarity
+    FROM account
+)
+SELECT username
+FROM username_similarity
+WHERE similarity > 0.3
+ORDER BY similarity DESC
+LIMIT 50
+`
+
+func (q *Queries) SearchUsername(ctx context.Context, username string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, searchUsername, username)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			return nil, err
+		}
+		items = append(items, username)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

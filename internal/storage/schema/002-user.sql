@@ -1,3 +1,9 @@
+CREATE EXTENSION pg_trgm;
+
+CREATE INDEX idx_account_username
+ON account
+USING gin (username gin_trgm_ops);
+
 CREATE TABLE IF NOT EXISTS account (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(571) NOT NULL UNIQUE,
