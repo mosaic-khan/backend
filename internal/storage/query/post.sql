@@ -4,7 +4,7 @@ VALUES ($1, $2, $3, $4)
 RETURNING id;
 
 -- name: GetPost :one
-SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images
+SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images, post.num_likes
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
