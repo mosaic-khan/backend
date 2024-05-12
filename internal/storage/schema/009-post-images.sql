@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS post_image (
     id SERIAL PRIMARY KEY,
-    post_id BIGINT REFERENCES "post"(id) NOT NULL,
+    post_id BIGINT REFERENCES "post"(id) ON DELETE CASCADE NOT NULL ,
     image_url VARCHAR(50) UNIQUE NOT NULL,
     is_primary BOOLEAN NOT NULL DEFAULT FALSE
 );
