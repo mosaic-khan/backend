@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  khanmedia:
+    build: .
+    ports:
+      - 9090:9090
+      - 9190:9190
+      - 9290:9290
+    environment:
+      - DB_USER=$DB_USER
+      - DB_PASS=$DB_PASS
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=$DB_NAME
+      - SECRET_KEY=$SECRET_KEY
+    restart: always
+  postgres:
+    image: postgres:16.2-alpine3.19
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASS
+    volumes:
+      - /var/lib/postgresql/data
+    restart: always
+  proxy:
+    image: envoyproxy/envoy:v1.18-latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./api/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    restart: always
+      
