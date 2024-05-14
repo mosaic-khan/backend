@@ -179,29 +179,41 @@ func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) er
 
 const searchUsername = `-- name: SearchUsername :many
 WITH username_similarity AS (
-    SELECT username, similarity(username, $1) AS similarity
-    FROM account
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, $1) AS similarity
+    FROM account INNER JOIN profile on account.id = profile.user_id
 )
-SELECT username
+SELECT id, username, first_name, profile_pic_address
 FROM username_similarity
-WHERE similarity > 0.3
+WHERE similarity > 0.3 
 ORDER BY similarity DESC
 LIMIT 50
 `
 
-func (q *Queries) SearchUsername(ctx context.Context, username string) ([]string, error) {
+type SearchUsernameRow struct {
+	ID                int64
+	Username          string
+	FirstName         string
+	ProfilePicAddress string
+}
+
+func (q *Queries) SearchUsername(ctx context.Context, username string) ([]SearchUsernameRow, error) {
 	rows, err := q.db.QueryContext(ctx, searchUsername, username)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []SearchUsernameRow
 	for rows.Next() {
-		var username string
-		if err := rows.Scan(&username); err != nil {
+		var i SearchUsernameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.FirstName,
+			&i.ProfilePicAddress,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, username)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

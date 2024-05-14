@@ -186,5 +186,12 @@ message SearchUsernameRequest {
 }
 
 message SearchUsernameResponse {
-  repeated string usernames = 1;
+  repeated ProfilePreview ProfilePreview = 1;
+}
+
+message ProfilePreview {
+  int64 profileID = 1;
+  string username = 2;
+  string name = 3;
+  string profilePicUrl = 4;
 }

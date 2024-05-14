@@ -57,11 +57,11 @@ WHERE id = $1;
 
 -- name: SearchUsername :many
 WITH username_similarity AS (
-    SELECT username, similarity(username, sqlc.arg(username)) AS similarity
-    FROM account
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity
+    FROM account INNER JOIN profile on account.id = profile.user_id
 )
-SELECT username
+SELECT id, username, first_name, profile_pic_address
 FROM username_similarity
-WHERE similarity > 0.3
+WHERE similarity > 0.3 
 ORDER BY similarity DESC
 LIMIT 50;
