@@ -54,3 +54,14 @@ WHERE profile.id = $1;
 DELETE
 FROM account
 WHERE id = $1;
+
+-- name: SearchUsername :many
+WITH username_similarity AS (
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity
+    FROM account INNER JOIN profile on account.id = profile.user_id
+)
+SELECT id, username, first_name, profile_pic_address
+FROM username_similarity
+WHERE similarity > 0.3 
+ORDER BY similarity DESC
+LIMIT 50;

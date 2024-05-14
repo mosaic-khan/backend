@@ -24,6 +24,7 @@ service UserAPI {
   rpc GetProfile (GetProfileRequests) returns (GetProfileResponse);
   rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
   rpc DeleteAccount (DeleteAccountRequest) returns (google.protobuf.Empty);
+  rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
 }
 
 message User {
@@ -178,4 +179,19 @@ message GetCitiesResponse {
 
 message DeleteAccountRequest {
   string password = 1;
+}
+
+message SearchUsernameRequest {
+  string username = 1;
+}
+
+message SearchUsernameResponse {
+  repeated ProfilePreview ProfilePreview = 1;
+}
+
+message ProfilePreview {
+  int64 profileID = 1;
+  string username = 2;
+  string name = 3;
+  string profilePicUrl = 4;
 }

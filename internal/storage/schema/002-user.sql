@@ -5,3 +5,9 @@ CREATE TABLE IF NOT EXISTS account (
     creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
     password CHAR(60) NOT NULL
 );
+
+CREATE EXTENSION pg_trgm;
+
+CREATE INDEX idx_account_username
+ON account
+USING gin (username gin_trgm_ops);
