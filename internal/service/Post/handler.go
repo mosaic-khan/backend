@@ -45,12 +45,18 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 	postId, err := txQuery.InsertPost(ctx, db.InsertPostParams{
 		Title:       in.GetTitle(),
 		Description: in.GetDescription(),
+		CategoryID:  int16(in.GetCategoryID()),
 		NumImages:   int16(in.GetNumImages()),
 		ProfileID:   profileId,
 	})
 	if err != nil {
+		driverErr := err.(*pq.Error)
 		tx.Rollback()
-		return nil, status.Errorf(codes.Internal, "could not create post")
+		if driverErr.Code == pq.ErrorCode("23503") {
+			return nil, status.Errorf(codes.InvalidArgument, "category with id %d does not exists", in.GetCategoryID())
+		} else {
+			return nil, status.Errorf(codes.Internal, "could not create post")
+		}
 	}
 
 	// insert post ingredients
@@ -132,6 +138,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			Id:            post.ID,
 			Title:         post.Title,
 			Description:   post.Description,
+			Category:      post.Category,
 			NumImages:     int32(post.NumImages),
 			NumLikes:      post.NumLikes,
 			Like:          like,
