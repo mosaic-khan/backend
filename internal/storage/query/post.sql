@@ -1,13 +1,14 @@
 -- name: InsertPost :one
-INSERT INTO post (title, description, num_images, profile_id)
-VALUES ($1, $2, $3, $4)
+INSERT INTO post (title, description, category_id, num_images, profile_id)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: GetPost :one
-SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images, post.num_likes
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
+         JOIN category on post.category_id = category.id
 WHERE post.id = $1;
 
 -- name: PostImageCount :one

@@ -26,6 +26,7 @@ message Post {
   repeated string imageUrls = 8;
   string username = 9;
   string profilePicUrl = 10;
+  string category = 11;
 }
 
 message PostPreview {
@@ -39,7 +40,8 @@ message SetPostRequest {
   string title = 1;
   map<string, string> ingredients = 2;
   string description = 3;
-  int32 numImages = 4;
+  int32 categoryID = 4;
+  int32 numImages = 5;
 }
 
 message GetProfilePostsRequests {

@@ -32,10 +32,11 @@ func (q *Queries) AddImage(ctx context.Context, arg AddImageParams) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT post.id, post.title, post.description, account.username, profile.profile_pic_address, post.num_images, post.num_likes
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
+         JOIN category on post.category_id = category.id
 WHERE post.id = $1
 `
 
@@ -43,6 +44,7 @@ type GetPostRow struct {
 	ID                int64
 	Title             string
 	Description       string
+	Category          string
 	Username          string
 	ProfilePicAddress string
 	NumImages         int16
@@ -56,6 +58,7 @@ func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
 		&i.ID,
 		&i.Title,
 		&i.Description,
+		&i.Category,
 		&i.Username,
 		&i.ProfilePicAddress,
 		&i.NumImages,
@@ -152,14 +155,15 @@ func (q *Queries) GetPostsPreview(ctx context.Context, profileID int64) ([]GetPo
 }
 
 const insertPost = `-- name: InsertPost :one
-INSERT INTO post (title, description, num_images, profile_id)
-VALUES ($1, $2, $3, $4)
+INSERT INTO post (title, description, category_id, num_images, profile_id)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id
 `
 
 type InsertPostParams struct {
 	Title       string
 	Description string
+	CategoryID  int16
 	NumImages   int16
 	ProfileID   int64
 }
@@ -168,6 +172,7 @@ func (q *Queries) InsertPost(ctx context.Context, arg InsertPostParams) (int64, 
 	row := q.db.QueryRowContext(ctx, insertPost,
 		arg.Title,
 		arg.Description,
+		arg.CategoryID,
 		arg.NumImages,
 		arg.ProfileID,
 	)
