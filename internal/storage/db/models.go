@@ -63,6 +63,13 @@ type Account struct {
 	Password     string
 }
 
+type Category struct {
+	ID     int16
+	Name   string
+	Parent sql.NullInt16
+	Level  sql.NullInt16
+}
+
 type City struct {
 	ID   int16
 	Name string
@@ -83,6 +90,7 @@ type Post struct {
 	ID          int64
 	Title       string
 	Description string
+	CategoryID  int16
 	NumImages   int16
 	NumLikes    int32
 	ProfileID   int64
