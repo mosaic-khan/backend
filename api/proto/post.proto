@@ -15,6 +15,7 @@ service PostAPI {
   rpc Dislike (DislikeRequest) returns (google.protobuf.Empty);
   rpc AddComment (AddCommentRequest) returns (google.protobuf.Empty);
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesRespone);
 }
 
 message Post {
@@ -101,4 +102,15 @@ message Comment {
   string username = 2;
   string profileUrl = 3;
   string comment = 4;
+}
+
+message Category {
+  int32 id = 1;
+  string name = 2;
+  int32 level = 3;
+  optional int32 parent =4;
+}
+
+message GetCategoriesRespone {
+  repeated Category categories = 1;
 }
