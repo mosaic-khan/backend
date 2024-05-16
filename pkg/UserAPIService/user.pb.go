@@ -1822,7 +1822,7 @@ func (x *GetFollowingListRequest) GetProfileID() int64 {
 	return 0
 }
 
-type GetFollowerListRequest struct {
+type GetFollowingListResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1830,57 +1830,10 @@ type GetFollowerListRequest struct {
 	ProfilePreview []*ProfilePreview `protobuf:"bytes,1,rep,name=profilePreview,proto3" json:"profilePreview,omitempty"`
 }
 
-func (x *GetFollowerListRequest) Reset() {
-	*x = GetFollowerListRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[32]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetFollowerListRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetFollowerListRequest) ProtoMessage() {}
-
-func (x *GetFollowerListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[32]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetFollowerListRequest.ProtoReflect.Descriptor instead.
-func (*GetFollowerListRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{32}
-}
-
-func (x *GetFollowerListRequest) GetProfilePreview() []*ProfilePreview {
-	if x != nil {
-		return x.ProfilePreview
-	}
-	return nil
-}
-
-type GetFollowingListResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ProfileID int64 `protobuf:"varint,1,opt,name=profileID,proto3" json:"profileID,omitempty"`
-}
-
 func (x *GetFollowingListResponse) Reset() {
 	*x = GetFollowingListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[33]
+		mi := &file_user_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1893,7 +1846,7 @@ func (x *GetFollowingListResponse) String() string {
 func (*GetFollowingListResponse) ProtoMessage() {}
 
 func (x *GetFollowingListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[33]
+	mi := &file_user_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1906,10 +1859,57 @@ func (x *GetFollowingListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFollowingListResponse.ProtoReflect.Descriptor instead.
 func (*GetFollowingListResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *GetFollowingListResponse) GetProfilePreview() []*ProfilePreview {
+	if x != nil {
+		return x.ProfilePreview
+	}
+	return nil
+}
+
+type GetFollowerListRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProfileID int64 `protobuf:"varint,1,opt,name=profileID,proto3" json:"profileID,omitempty"`
+}
+
+func (x *GetFollowerListRequest) Reset() {
+	*x = GetFollowerListRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_user_proto_msgTypes[33]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetFollowerListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetFollowerListRequest) ProtoMessage() {}
+
+func (x *GetFollowerListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[33]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetFollowerListRequest.ProtoReflect.Descriptor instead.
+func (*GetFollowerListRequest) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{33}
 }
 
-func (x *GetFollowingListResponse) GetProfileID() int64 {
+func (x *GetFollowerListRequest) GetProfileID() int64 {
 	if x != nil {
 		return x.ProfileID
 	}
@@ -2144,14 +2144,14 @@ var file_user_proto_rawDesc = []byte{
 	0x22, 0x37, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67,
 	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x70,
 	0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
-	0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x22, 0x59, 0x0a, 0x16, 0x47, 0x65, 0x74,
-	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x0e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72,
-	0x65, 0x76, 0x69, 0x65, 0x77, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x4b, 0x68,
-	0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65,
-	0x76, 0x69, 0x65, 0x77, 0x52, 0x0e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65,
-	0x76, 0x69, 0x65, 0x77, 0x22, 0x38, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f,
-	0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x22, 0x5b, 0x0a, 0x18, 0x47, 0x65, 0x74,
+	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f, 0x0a, 0x0e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65,
+	0x50, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e,
+	0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50,
+	0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x52, 0x0e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50,
+	0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x22, 0x36, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c,
+	0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x12, 0x1c, 0x0a, 0x09, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x03, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x22, 0x5a,
 	0x0a, 0x17, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73,
@@ -2314,8 +2314,8 @@ var file_user_proto_goTypes = []interface{}{
 	(*FollowRequest)(nil),                 // 29: KhanAPI.FollowRequest
 	(*UnfollowRequest)(nil),               // 30: KhanAPI.UnfollowRequest
 	(*GetFollowingListRequest)(nil),       // 31: KhanAPI.GetFollowingListRequest
-	(*GetFollowerListRequest)(nil),        // 32: KhanAPI.GetFollowerListRequest
-	(*GetFollowingListResponse)(nil),      // 33: KhanAPI.GetFollowingListResponse
+	(*GetFollowingListResponse)(nil),      // 32: KhanAPI.GetFollowingListResponse
+	(*GetFollowerListRequest)(nil),        // 33: KhanAPI.GetFollowerListRequest
 	(*GetFollowerListResponse)(nil),       // 34: KhanAPI.GetFollowerListResponse
 	(*emptypb.Empty)(nil),                 // 35: google.protobuf.Empty
 }
@@ -2324,7 +2324,7 @@ var file_user_proto_depIdxs = []int32{
 	1,  // 1: KhanAPI.GetProfileResponse.profile:type_name -> KhanAPI.Profile
 	23, // 2: KhanAPI.GetCitiesResponse.cities:type_name -> KhanAPI.City
 	28, // 3: KhanAPI.SearchUsernameResponse.ProfilePreview:type_name -> KhanAPI.ProfilePreview
-	28, // 4: KhanAPI.GetFollowerListRequest.profilePreview:type_name -> KhanAPI.ProfilePreview
+	28, // 4: KhanAPI.GetFollowingListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
 	28, // 5: KhanAPI.GetFollowerListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
 	35, // 6: KhanAPI.UserAPI.RefreshToken:input_type -> google.protobuf.Empty
 	3,  // 7: KhanAPI.UserAPI.Login:input_type -> KhanAPI.LoginRequest
@@ -2347,7 +2347,7 @@ var file_user_proto_depIdxs = []int32{
 	29, // 24: KhanAPI.UserAPI.Follow:input_type -> KhanAPI.FollowRequest
 	30, // 25: KhanAPI.UserAPI.Unfollow:input_type -> KhanAPI.UnfollowRequest
 	31, // 26: KhanAPI.UserAPI.GetFollowingList:input_type -> KhanAPI.GetFollowingListRequest
-	32, // 27: KhanAPI.UserAPI.GetFollowerList:input_type -> KhanAPI.GetFollowerListRequest
+	33, // 27: KhanAPI.UserAPI.GetFollowerList:input_type -> KhanAPI.GetFollowerListRequest
 	2,  // 28: KhanAPI.UserAPI.RefreshToken:output_type -> KhanAPI.RefreshTokenResponse
 	4,  // 29: KhanAPI.UserAPI.Login:output_type -> KhanAPI.LoginResponse
 	35, // 30: KhanAPI.UserAPI.ForgetPassword:output_type -> google.protobuf.Empty
@@ -2368,7 +2368,7 @@ var file_user_proto_depIdxs = []int32{
 	27, // 45: KhanAPI.UserAPI.SearchUsername:output_type -> KhanAPI.SearchUsernameResponse
 	35, // 46: KhanAPI.UserAPI.Follow:output_type -> google.protobuf.Empty
 	35, // 47: KhanAPI.UserAPI.Unfollow:output_type -> google.protobuf.Empty
-	33, // 48: KhanAPI.UserAPI.GetFollowingList:output_type -> KhanAPI.GetFollowingListResponse
+	32, // 48: KhanAPI.UserAPI.GetFollowingList:output_type -> KhanAPI.GetFollowingListResponse
 	34, // 49: KhanAPI.UserAPI.GetFollowerList:output_type -> KhanAPI.GetFollowerListResponse
 	28, // [28:50] is the sub-list for method output_type
 	6,  // [6:28] is the sub-list for method input_type
@@ -2768,7 +2768,7 @@ func file_user_proto_init() {
 			}
 		}
 		file_user_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetFollowerListRequest); i {
+			switch v := v.(*GetFollowingListResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2780,7 +2780,7 @@ func file_user_proto_init() {
 			}
 		}
 		file_user_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetFollowingListResponse); i {
+			switch v := v.(*GetFollowerListRequest); i {
 			case 0:
 				return &v.state
 			case 1:

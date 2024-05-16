@@ -564,6 +564,28 @@ func (s *Server) GetProfile(ctx context.Context, in *UserAPIService.GetProfileRe
 		profile.Pronouns = "She/Her"
 	}
 
+	followingCnt, err := s.query.GetFollowingCnt(ctx, profile.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "db error while getting profile following cnt")
+	}
+
+	followerCnt, err := s.query.GetFollowerCnt(ctx, profile.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "db error while getting profile follower cnt")
+	}
+
+	followStat, err := s.query.FollowStatus(ctx, db.FollowStatusParams{
+		Follower:  profileID,
+		Following: profile.Id,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "db error while getting follow status")
+	}
+
+	profile.FollowingCnt = followingCnt
+	profile.FollowerCnt = followerCnt
+	profile.IsFollowed = followStat
+
 	return &UserAPIService.GetProfileResponse{Profile: profile}, nil
 }
 
@@ -633,22 +655,69 @@ func (s *Server) SearchUsername(ctx context.Context, in *UserAPIService.SearchUs
 func (s *Server) Follow(ctx context.Context, in *UserAPIService.FollowRequest) (*emptypb.Empty, error) {
 	profileId := ctx.Value("ProfileID").(int64)
 
-	s.query.Follow(ctx, profileId, in.ProfileID)
-	return nil, status.Errorf(codes.Unimplemented, "method Follow not implemented")
+	err := s.query.Follow(ctx, db.FollowParams{
+		Follower:  profileId,
+		Following: in.ProfileID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "database error while following uesr")
+	}
+
+	return nil, nil
 }
 
 func (s *Server) Unfollow(ctx context.Context, in *UserAPIService.UnfollowRequest) (*emptypb.Empty, error) {
 	profileId := ctx.Value("ProfileID").(int64)
 
-	s.query.Unfollow(ctx, profileId, in.ProfileID)
+	err := s.query.Unfollow(ctx, db.UnfollowParams{
+		Follower:  profileId,
+		Following: in.ProfileID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "database error while unfollowing uesr")
+	}
 
 	return nil, nil
 }
 
 func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFollowingListRequest) (*UserAPIService.GetFollowingListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFollowingList not implemented")
+	profileId := ctx.Value("ProfileID").(int64)
+
+	dbList, err := s.query.FollowingList(ctx, profileId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
+	}
+
+	followingList := make([]*UserAPIService.ProfilePreview, len(dbList))
+	for i, row := range dbList {
+		followingList[i] = &UserAPIService.ProfilePreview{
+			ProfileID:     row.ID,
+			Username:      row.Username,
+			Name:          row.Name.(string),
+			ProfilePicUrl: row.ProfilePicAddress,
+		}
+	}
+
+	return &UserAPIService.GetFollowingListResponse{ProfilePreview: followingList}, nil
 }
 
 func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFollowerListRequest) (*UserAPIService.GetFollowerListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFollowerList not implemented")
+	profileId := ctx.Value("ProfileID").(int64)
+
+	dbList, err := s.query.FollowerList(ctx, profileId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
+	}
+
+	followingList := make([]*UserAPIService.ProfilePreview, len(dbList))
+	for i, row := range dbList {
+		followingList[i] = &UserAPIService.ProfilePreview{
+			ProfileID:     row.ID,
+			Username:      row.Username,
+			Name:          row.Name.(string),
+			ProfilePicUrl: row.ProfilePicAddress,
+		}
+	}
+
+	return &UserAPIService.GetFollowerListResponse{ProfilePreview: followingList}, nil
 }

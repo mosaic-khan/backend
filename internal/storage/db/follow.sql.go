@@ -44,7 +44,7 @@ func (q *Queries) FollowStatus(ctx context.Context, arg FollowStatusParams) (boo
 }
 
 const followerList = `-- name: FollowerList :many
-SELECT profile.id, account.username,  profile.first_name || ' ' || profile.last_name, profile.profile_pic_address
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
 FROM follow join profile on follow.follower = profile.id
 JOIN account on profile.user_id = account.id
 WHERE following = $1
@@ -53,7 +53,7 @@ WHERE following = $1
 type FollowerListRow struct {
 	ID                int64
 	Username          string
-	Column3           interface{}
+	Name              interface{}
 	ProfilePicAddress string
 }
 
@@ -69,7 +69,7 @@ func (q *Queries) FollowerList(ctx context.Context, following int64) ([]Follower
 		if err := rows.Scan(
 			&i.ID,
 			&i.Username,
-			&i.Column3,
+			&i.Name,
 			&i.ProfilePicAddress,
 		); err != nil {
 			return nil, err
@@ -86,7 +86,7 @@ func (q *Queries) FollowerList(ctx context.Context, following int64) ([]Follower
 }
 
 const followingList = `-- name: FollowingList :many
-SELECT profile.id, account.username,  profile.first_name || ' ' || profile.last_name, profile.profile_pic_address
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
 FROM follow JOIN profile on follow.following = profile.id
 JOIN account on profile.user_id = account.id
 WHERE follower = $1
@@ -95,7 +95,7 @@ WHERE follower = $1
 type FollowingListRow struct {
 	ID                int64
 	Username          string
-	Column3           interface{}
+	Name              interface{}
 	ProfilePicAddress string
 }
 
@@ -111,7 +111,7 @@ func (q *Queries) FollowingList(ctx context.Context, follower int64) ([]Followin
 		if err := rows.Scan(
 			&i.ID,
 			&i.Username,
-			&i.Column3,
+			&i.Name,
 			&i.ProfilePicAddress,
 		); err != nil {
 			return nil, err

@@ -215,11 +215,11 @@ message GetFollowingListRequest {
   int64 profileID = 1;
 }
 
-message GetFollowerListRequest {
+message GetFollowingListResponse {
   repeated ProfilePreview profilePreview = 1;
 }
 
-message GetFollowingListResponse {
+message GetFollowerListRequest {
   int64 profileID = 1;
 }
 
