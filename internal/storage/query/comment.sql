@@ -31,8 +31,7 @@ WHERE comment.parent_id IS NULL and comment.post_id = $2;
 
 -- name: GetReplies :many
 SELECT account.username, profile.profile_pic_address, comment.comment,
-       (lk.isLiked IS NOT NULL),
-       comment.time,
+       (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
                     WHERE c.parent_id = comment.id
