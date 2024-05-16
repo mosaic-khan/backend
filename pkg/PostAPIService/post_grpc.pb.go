@@ -31,7 +31,7 @@ type PostAPIClient interface {
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesRespone, error)
+	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
 }
 
 type postAPIClient struct {
@@ -150,8 +150,8 @@ func (c *postAPIClient) LikeComment(ctx context.Context, in *LikeCommentRequest,
 	return out, nil
 }
 
-func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesRespone, error) {
-	out := new(GetCategoriesRespone)
+func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
+	out := new(GetCategoriesResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ type PostAPIServer interface {
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
-	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesRespone, error)
+	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -219,7 +219,7 @@ func (UnimplementedPostAPIServer) GetReplies(context.Context, *GetRepliesRequest
 func (UnimplementedPostAPIServer) LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LikeComment not implemented")
 }
-func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesRespone, error) {
+func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}

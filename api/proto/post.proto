@@ -18,7 +18,7 @@ service PostAPI {
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
-  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesRespone);
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
 }
 
 message Post {
@@ -135,6 +135,6 @@ message Category {
   optional int32 parent =4;
 }
 
-message GetCategoriesRespone {
+message GetCategoriesResponse {
   repeated Category categories = 1;
 }

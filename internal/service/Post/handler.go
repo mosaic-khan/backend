@@ -389,7 +389,7 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 	return nil, nil
 }
 
-func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetCategoriesRespone, error) {
+func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
 
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {
@@ -409,5 +409,5 @@ func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPI
 		categories = append(categories, temp)
 	}
 
-	return &PostAPIService.GetCategoriesRespone{Categories: categories}, nil
+	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
 }
