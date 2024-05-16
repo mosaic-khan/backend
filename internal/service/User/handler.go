@@ -629,3 +629,26 @@ func (s *Server) SearchUsername(ctx context.Context, in *UserAPIService.SearchUs
 
 	return &UserAPIService.SearchUsernameResponse{ProfilePreview: r}, nil
 }
+
+func (s *Server) Follow(ctx context.Context, in *UserAPIService.FollowRequest) (*emptypb.Empty, error) {
+	profileId := ctx.Value("ProfileID").(int64)
+
+	s.query.Follow(ctx, profileId, in.ProfileID)
+	return nil, status.Errorf(codes.Unimplemented, "method Follow not implemented")
+}
+
+func (s *Server) Unfollow(ctx context.Context, in *UserAPIService.UnfollowRequest) (*emptypb.Empty, error) {
+	profileId := ctx.Value("ProfileID").(int64)
+
+	s.query.Unfollow(ctx, profileId, in.ProfileID)
+
+	return nil, nil
+}
+
+func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFollowingListRequest) (*UserAPIService.GetFollowingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFollowingList not implemented")
+}
+
+func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFollowerListRequest) (*UserAPIService.GetFollowerListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFollowerList not implemented")
+}
