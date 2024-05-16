@@ -75,6 +75,15 @@ type City struct {
 	Name string
 }
 
+type Comment struct {
+	ID        int64
+	ParentID  sql.NullInt64
+	PostID    int64
+	ProfileID int64
+	Comment   string
+	Time      time.Time
+}
+
 type Follow struct {
 	Follower  int64
 	Following int64
@@ -84,6 +93,12 @@ type Ingredient struct {
 	ID    int32
 	Name  string
 	Usage int32
+}
+
+type LikeComment struct {
+	ID        int64
+	ProfileID int64
+	CommentID int64
 }
 
 type Post struct {
