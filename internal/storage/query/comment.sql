@@ -12,7 +12,7 @@ INSERT INTO like_comment(profile_id, comment_id)
 VALUES ($1, $2);
 
 -- name: GetPostsComments :many
-SELECT account.username, profile.profile_pic_address, comment.comment,
+SELECT account.username, profile.first_name, profile.profile_pic_address, comment.comment,
        (SELECT EXISTS
            (SELECT 1 FROM like_comment
             WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
@@ -30,7 +30,7 @@ WHERE comment.parent_id IS NULL and comment.post_id = $2;
 
 
 -- name: GetReplies :many
-SELECT account.username, profile.profile_pic_address, comment.comment,
+SELECT account.username,profile.first_name, profile.profile_pic_address, comment.comment,
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c

@@ -331,7 +331,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
-			Name:       comment.Comment,
+			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
 			Comment:    comment.Comment,
@@ -362,7 +362,7 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
-			Name:       comment.Comment,
+			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
 			Comment:    comment.Comment,

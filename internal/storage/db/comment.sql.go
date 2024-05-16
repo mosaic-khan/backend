@@ -50,7 +50,7 @@ func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) error {
 }
 
 const getPostsComments = `-- name: GetPostsComments :many
-SELECT account.username, profile.profile_pic_address, comment.comment,
+SELECT account.username, profile.first_name, profile.profile_pic_address, comment.comment,
        (SELECT EXISTS
            (SELECT 1 FROM like_comment
             WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
@@ -74,6 +74,7 @@ type GetPostsCommentsParams struct {
 
 type GetPostsCommentsRow struct {
 	Username          string
+	FirstName         string
 	ProfilePicAddress string
 	Comment           string
 	Isliked           bool
@@ -92,6 +93,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 		var i GetPostsCommentsRow
 		if err := rows.Scan(
 			&i.Username,
+			&i.FirstName,
 			&i.ProfilePicAddress,
 			&i.Comment,
 			&i.Isliked,
@@ -112,7 +114,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 }
 
 const getReplies = `-- name: GetReplies :many
-SELECT account.username, profile.profile_pic_address, comment.comment,
+SELECT account.username,profile.first_name, profile.profile_pic_address, comment.comment,
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
@@ -138,6 +140,7 @@ type GetRepliesParams struct {
 
 type GetRepliesRow struct {
 	Username          string
+	FirstName         string
 	ProfilePicAddress string
 	Comment           string
 	Isliked           interface{}
@@ -156,6 +159,7 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 		var i GetRepliesRow
 		if err := rows.Scan(
 			&i.Username,
+			&i.FirstName,
 			&i.ProfilePicAddress,
 			&i.Comment,
 			&i.Isliked,
