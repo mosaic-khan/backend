@@ -282,3 +282,19 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *Server) AddComment(context.Context, *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+}
+
+func (s *Server) GetComments(context.Context, *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
+}
+
+func (s *Server) GetReplies(context.Context, *PostAPIService.GetRepliesRequest) (*PostAPIService.GetRepliesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
+}
+
+func (s *Server) LikeComment(context.Context, *PostAPIService.LikeCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LikeComment not implemented")
+}

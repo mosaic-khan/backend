@@ -879,6 +879,7 @@ type Comment struct {
 	Username   string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	ProfileUrl string `protobuf:"bytes,3,opt,name=profileUrl,proto3" json:"profileUrl,omitempty"`
 	Comment    string `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	Time       string `protobuf:"bytes,5,opt,name=time,proto3" json:"time,omitempty"`
 }
 
 func (x *Comment) Reset() {
@@ -939,6 +940,154 @@ func (x *Comment) GetComment() string {
 		return x.Comment
 	}
 	return ""
+}
+
+func (x *Comment) GetTime() string {
+	if x != nil {
+		return x.Time
+	}
+	return ""
+}
+
+type GetRepliesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	CommentID int64 `protobuf:"varint,1,opt,name=commentID,proto3" json:"commentID,omitempty"`
+}
+
+func (x *GetRepliesRequest) Reset() {
+	*x = GetRepliesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_post_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRepliesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRepliesRequest) ProtoMessage() {}
+
+func (x *GetRepliesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_post_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRepliesRequest.ProtoReflect.Descriptor instead.
+func (*GetRepliesRequest) Descriptor() ([]byte, []int) {
+	return file_post_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetRepliesRequest) GetCommentID() int64 {
+	if x != nil {
+		return x.CommentID
+	}
+	return 0
+}
+
+type GetRepliesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Comments []*Comment `protobuf:"bytes,1,rep,name=comments,proto3" json:"comments,omitempty"`
+}
+
+func (x *GetRepliesResponse) Reset() {
+	*x = GetRepliesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_post_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRepliesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRepliesResponse) ProtoMessage() {}
+
+func (x *GetRepliesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_post_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRepliesResponse.ProtoReflect.Descriptor instead.
+func (*GetRepliesResponse) Descriptor() ([]byte, []int) {
+	return file_post_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetRepliesResponse) GetComments() []*Comment {
+	if x != nil {
+		return x.Comments
+	}
+	return nil
+}
+
+type LikeCommentRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	CommentID int64 `protobuf:"varint,1,opt,name=commentID,proto3" json:"commentID,omitempty"`
+}
+
+func (x *LikeCommentRequest) Reset() {
+	*x = LikeCommentRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_post_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LikeCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LikeCommentRequest) ProtoMessage() {}
+
+func (x *LikeCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_post_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LikeCommentRequest.ProtoReflect.Descriptor instead.
+func (*LikeCommentRequest) Descriptor() ([]byte, []int) {
+	return file_post_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *LikeCommentRequest) GetCommentID() int64 {
+	if x != nil {
+		return x.CommentID
+	}
+	return 0
 }
 
 var File_post_proto protoreflect.FileDescriptor
@@ -1040,14 +1189,26 @@ var file_post_proto_rawDesc = []byte{
 	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x08, 0x63, 0x6f, 0x6d, 0x6d, 0x65,
 	0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x4b, 0x68, 0x61, 0x6e,
 	0x41, 0x50, 0x49, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x08, 0x63, 0x6f, 0x6d,
-	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x22, 0x73, 0x0a, 0x07, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74,
-	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
-	0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55, 0x72, 0x6c, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55, 0x72, 0x6c,
-	0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x32, 0x80, 0x05, 0x0a, 0x07, 0x50,
+	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x22, 0x87, 0x01, 0x0a, 0x07, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e,
+	0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
+	0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55, 0x72, 0x6c, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x55, 0x72,
+	0x6c, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x74,
+	0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x22,
+	0x31, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x49,
+	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74,
+	0x49, 0x44, 0x22, 0x42, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x08, 0x63, 0x6f, 0x6d, 0x6d,
+	0x65, 0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x4b, 0x68, 0x61,
+	0x6e, 0x41, 0x50, 0x49, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x08, 0x63, 0x6f,
+	0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x22, 0x32, 0x0a, 0x12, 0x4c, 0x69, 0x6b, 0x65, 0x43, 0x6f,
+	0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09,
+	0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x44, 0x32, 0x8b, 0x06, 0x0a, 0x07, 0x50,
 	0x6f, 0x73, 0x74, 0x41, 0x50, 0x49, 0x12, 0x55, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f,
 	0x66, 0x69, 0x6c, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x20, 0x2e, 0x4b, 0x68, 0x61, 0x6e,
 	0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x6f,
@@ -1087,10 +1248,18 @@ var file_post_proto_rawDesc = []byte{
 	0x74, 0x73, 0x12, 0x1b, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74,
 	0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x1c, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6d,
-	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1c, 0x5a,
-	0x1a, 0x2e, 0x2f, 0x2e, 0x2e, 0x2f, 0x2e, 0x2e, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x50, 0x6f, 0x73,
-	0x74, 0x41, 0x50, 0x49, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x45, 0x0a,
+	0x0a, 0x47, 0x65, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73, 0x12, 0x1a, 0x2e, 0x4b, 0x68,
+	0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50,
+	0x49, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x42, 0x0a, 0x0b, 0x4c, 0x69, 0x6b, 0x65, 0x43, 0x6f, 0x6d, 0x6d,
+	0x65, 0x6e, 0x74, 0x12, 0x1b, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x4c, 0x69,
+	0x6b, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x1c, 0x5a, 0x1a, 0x2e, 0x2f, 0x2e, 0x2e,
+	0x2f, 0x2e, 0x2e, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x50, 0x6f, 0x73, 0x74, 0x41, 0x50, 0x49, 0x53,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1105,7 +1274,7 @@ func file_post_proto_rawDescGZIP() []byte {
 	return file_post_proto_rawDescData
 }
 
-var file_post_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_post_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_post_proto_goTypes = []interface{}{
 	(*Post)(nil),                      // 0: KhanAPI.Post
 	(*PostPreview)(nil),               // 1: KhanAPI.PostPreview
@@ -1123,39 +1292,47 @@ var file_post_proto_goTypes = []interface{}{
 	(*GetCommentsRequest)(nil),        // 13: KhanAPI.GetCommentsRequest
 	(*GetCommentsResponse)(nil),       // 14: KhanAPI.GetCommentsResponse
 	(*Comment)(nil),                   // 15: KhanAPI.Comment
-	nil,                               // 16: KhanAPI.Post.IngredientsEntry
-	nil,                               // 17: KhanAPI.SetPostRequest.IngredientsEntry
-	(*emptypb.Empty)(nil),             // 18: google.protobuf.Empty
+	(*GetRepliesRequest)(nil),         // 16: KhanAPI.GetRepliesRequest
+	(*GetRepliesResponse)(nil),        // 17: KhanAPI.GetRepliesResponse
+	(*LikeCommentRequest)(nil),        // 18: KhanAPI.LikeCommentRequest
+	nil,                               // 19: KhanAPI.Post.IngredientsEntry
+	nil,                               // 20: KhanAPI.SetPostRequest.IngredientsEntry
+	(*emptypb.Empty)(nil),             // 21: google.protobuf.Empty
 }
 var file_post_proto_depIdxs = []int32{
-	16, // 0: KhanAPI.Post.ingredients:type_name -> KhanAPI.Post.IngredientsEntry
-	17, // 1: KhanAPI.SetPostRequest.ingredients:type_name -> KhanAPI.SetPostRequest.IngredientsEntry
+	19, // 0: KhanAPI.Post.ingredients:type_name -> KhanAPI.Post.IngredientsEntry
+	20, // 1: KhanAPI.SetPostRequest.ingredients:type_name -> KhanAPI.SetPostRequest.IngredientsEntry
 	1,  // 2: KhanAPI.GetProfilePostsResponse.postPreview:type_name -> KhanAPI.PostPreview
 	0,  // 3: KhanAPI.GetPostResponse.post:type_name -> KhanAPI.Post
 	15, // 4: KhanAPI.GetCommentsResponse.comments:type_name -> KhanAPI.Comment
-	3,  // 5: KhanAPI.PostAPI.GetProfilePosts:input_type -> KhanAPI.GetProfilePostsRequests
-	5,  // 6: KhanAPI.PostAPI.GetPost:input_type -> KhanAPI.GetPostRequest
-	2,  // 7: KhanAPI.PostAPI.SetPost:input_type -> KhanAPI.SetPostRequest
-	7,  // 8: KhanAPI.PostAPI.SuggestIngredient:input_type -> KhanAPI.SuggestIngredientRequest
-	9,  // 9: KhanAPI.PostAPI.AddImageForPost:input_type -> KhanAPI.AddImageForPostRequest
-	10, // 10: KhanAPI.PostAPI.Like:input_type -> KhanAPI.LikeRequest
-	11, // 11: KhanAPI.PostAPI.Dislike:input_type -> KhanAPI.DislikeRequest
-	12, // 12: KhanAPI.PostAPI.AddComment:input_type -> KhanAPI.AddCommentRequest
-	13, // 13: KhanAPI.PostAPI.GetComments:input_type -> KhanAPI.GetCommentsRequest
-	4,  // 14: KhanAPI.PostAPI.GetProfilePosts:output_type -> KhanAPI.GetProfilePostsResponse
-	6,  // 15: KhanAPI.PostAPI.GetPost:output_type -> KhanAPI.GetPostResponse
-	18, // 16: KhanAPI.PostAPI.SetPost:output_type -> google.protobuf.Empty
-	8,  // 17: KhanAPI.PostAPI.SuggestIngredient:output_type -> KhanAPI.SuggestIngredientResponse
-	18, // 18: KhanAPI.PostAPI.AddImageForPost:output_type -> google.protobuf.Empty
-	18, // 19: KhanAPI.PostAPI.Like:output_type -> google.protobuf.Empty
-	18, // 20: KhanAPI.PostAPI.Dislike:output_type -> google.protobuf.Empty
-	18, // 21: KhanAPI.PostAPI.AddComment:output_type -> google.protobuf.Empty
-	14, // 22: KhanAPI.PostAPI.GetComments:output_type -> KhanAPI.GetCommentsResponse
-	14, // [14:23] is the sub-list for method output_type
-	5,  // [5:14] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	15, // 5: KhanAPI.GetRepliesResponse.comments:type_name -> KhanAPI.Comment
+	3,  // 6: KhanAPI.PostAPI.GetProfilePosts:input_type -> KhanAPI.GetProfilePostsRequests
+	5,  // 7: KhanAPI.PostAPI.GetPost:input_type -> KhanAPI.GetPostRequest
+	2,  // 8: KhanAPI.PostAPI.SetPost:input_type -> KhanAPI.SetPostRequest
+	7,  // 9: KhanAPI.PostAPI.SuggestIngredient:input_type -> KhanAPI.SuggestIngredientRequest
+	9,  // 10: KhanAPI.PostAPI.AddImageForPost:input_type -> KhanAPI.AddImageForPostRequest
+	10, // 11: KhanAPI.PostAPI.Like:input_type -> KhanAPI.LikeRequest
+	11, // 12: KhanAPI.PostAPI.Dislike:input_type -> KhanAPI.DislikeRequest
+	12, // 13: KhanAPI.PostAPI.AddComment:input_type -> KhanAPI.AddCommentRequest
+	13, // 14: KhanAPI.PostAPI.GetComments:input_type -> KhanAPI.GetCommentsRequest
+	16, // 15: KhanAPI.PostAPI.GetReplies:input_type -> KhanAPI.GetRepliesRequest
+	18, // 16: KhanAPI.PostAPI.LikeComment:input_type -> KhanAPI.LikeCommentRequest
+	4,  // 17: KhanAPI.PostAPI.GetProfilePosts:output_type -> KhanAPI.GetProfilePostsResponse
+	6,  // 18: KhanAPI.PostAPI.GetPost:output_type -> KhanAPI.GetPostResponse
+	21, // 19: KhanAPI.PostAPI.SetPost:output_type -> google.protobuf.Empty
+	8,  // 20: KhanAPI.PostAPI.SuggestIngredient:output_type -> KhanAPI.SuggestIngredientResponse
+	21, // 21: KhanAPI.PostAPI.AddImageForPost:output_type -> google.protobuf.Empty
+	21, // 22: KhanAPI.PostAPI.Like:output_type -> google.protobuf.Empty
+	21, // 23: KhanAPI.PostAPI.Dislike:output_type -> google.protobuf.Empty
+	21, // 24: KhanAPI.PostAPI.AddComment:output_type -> google.protobuf.Empty
+	14, // 25: KhanAPI.PostAPI.GetComments:output_type -> KhanAPI.GetCommentsResponse
+	17, // 26: KhanAPI.PostAPI.GetReplies:output_type -> KhanAPI.GetRepliesResponse
+	21, // 27: KhanAPI.PostAPI.LikeComment:output_type -> google.protobuf.Empty
+	17, // [17:28] is the sub-list for method output_type
+	6,  // [6:17] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_post_proto_init() }
@@ -1356,6 +1533,42 @@ func file_post_proto_init() {
 				return nil
 			}
 		}
+		file_post_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRepliesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_post_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRepliesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_post_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LikeCommentRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1363,7 +1576,7 @@ func file_post_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_post_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

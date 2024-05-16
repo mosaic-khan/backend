@@ -15,8 +15,13 @@ VALUES ($1, $2);
 SELECT account.username, profile.profile_pic_address, comment.comment,
        (SELECT EXISTS
            (SELECT 1 FROM like_comment
-            where like_comment.comment_id = comment.id and like_comment.profile_id = $1)
+            WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
        ) AS isLiked,
+       (SELECT EXISTS
+           (SELECT 1 FROM comment c
+                WHERE c.parent_id = comment.id
+           )
+       ) AS has_replies,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
@@ -27,6 +32,12 @@ WHERE comment.parent_id IS NULL and comment.post_id = $2;
 -- name: GetReplies :many
 SELECT account.username, profile.profile_pic_address, comment.comment,
        (lk.isLiked IS NOT NULL),
+       comment.time,
+       (SELECT EXISTS
+                   (SELECT 1 FROM comment c
+                    WHERE c.parent_id = comment.id
+                   )
+       ) AS has_replies,
        comment.time
 FROM comment
          JOIN profile on comment.profile_id = profile.id

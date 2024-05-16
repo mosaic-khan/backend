@@ -15,6 +15,8 @@ service PostAPI {
   rpc Dislike (DislikeRequest) returns (google.protobuf.Empty);
   rpc AddComment (AddCommentRequest) returns (google.protobuf.Empty);
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
+  rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
+  rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -101,4 +103,18 @@ message Comment {
   string username = 2;
   string profileUrl = 3;
   string comment = 4;
+  string time = 5;
+  bool hasReplies = 6;
+}
+
+message GetRepliesRequest {
+  int64 commentID = 1;
+}
+
+message GetRepliesResponse {
+  repeated Comment comments = 1;
+}
+
+message LikeCommentRequest {
+  int64 commentID = 1;
 }

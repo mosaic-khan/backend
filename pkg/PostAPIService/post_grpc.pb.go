@@ -28,6 +28,8 @@ type PostAPIClient interface {
 	Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
+	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
+	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type postAPIClient struct {
@@ -119,6 +121,24 @@ func (c *postAPIClient) GetComments(ctx context.Context, in *GetCommentsRequest,
 	return out, nil
 }
 
+func (c *postAPIClient) GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error) {
+	out := new(GetRepliesResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetReplies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postAPIClient) LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/LikeComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -132,6 +152,8 @@ type PostAPIServer interface {
 	Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error)
 	AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
+	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
+	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -165,6 +187,12 @@ func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest
 }
 func (UnimplementedPostAPIServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
+}
+func (UnimplementedPostAPIServer) GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
+}
+func (UnimplementedPostAPIServer) LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LikeComment not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -341,6 +369,42 @@ func _PostAPI_GetComments_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_GetReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRepliesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).GetReplies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/GetReplies",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).GetReplies(ctx, req.(*GetRepliesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostAPI_LikeComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LikeCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).LikeComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/LikeComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).LikeComment(ctx, req.(*LikeCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -383,6 +447,14 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetComments",
 			Handler:    _PostAPI_GetComments_Handler,
+		},
+		{
+			MethodName: "GetReplies",
+			Handler:    _PostAPI_GetReplies_Handler,
+		},
+		{
+			MethodName: "LikeComment",
+			Handler:    _PostAPI_LikeComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

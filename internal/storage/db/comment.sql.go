@@ -53,8 +53,13 @@ const getPostsComments = `-- name: GetPostsComments :many
 SELECT account.username, profile.profile_pic_address, comment.comment,
        (SELECT EXISTS
            (SELECT 1 FROM like_comment
-            where like_comment.comment_id = comment.id and like_comment.profile_id = $1)
+            WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
        ) AS isLiked,
+       (SELECT EXISTS
+           (SELECT 1 FROM comment c
+                WHERE c.parent_id = comment.id
+           )
+       ) AS has_replies,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
@@ -72,6 +77,7 @@ type GetPostsCommentsRow struct {
 	ProfilePicAddress string
 	Comment           string
 	Isliked           bool
+	HasReplies        bool
 	Time              time.Time
 }
 
@@ -89,6 +95,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 			&i.ProfilePicAddress,
 			&i.Comment,
 			&i.Isliked,
+			&i.HasReplies,
 			&i.Time,
 		); err != nil {
 			return nil, err
@@ -107,6 +114,12 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 const getReplies = `-- name: GetReplies :many
 SELECT account.username, profile.profile_pic_address, comment.comment,
        (lk.isLiked IS NOT NULL),
+       comment.time,
+       (SELECT EXISTS
+                   (SELECT 1 FROM comment c
+                    WHERE c.parent_id = comment.id
+                   )
+       ) AS has_replies,
        comment.time
 FROM comment
          JOIN profile on comment.profile_id = profile.id
@@ -131,6 +144,8 @@ type GetRepliesRow struct {
 	Comment           string
 	Column4           interface{}
 	Time              time.Time
+	HasReplies        bool
+	Time_2            time.Time
 }
 
 func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRepliesRow, error) {
@@ -148,6 +163,8 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 			&i.Comment,
 			&i.Column4,
 			&i.Time,
+			&i.HasReplies,
+			&i.Time_2,
 		); err != nil {
 			return nil, err
 		}
