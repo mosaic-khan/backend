@@ -67,7 +67,7 @@ type Category struct {
 	ID     int16
 	Name   string
 	Parent sql.NullInt16
-	Level  sql.NullInt16
+	Level  int16
 }
 
 type City struct {

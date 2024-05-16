@@ -2,7 +2,7 @@ CREATE TABLE category (
     id SMALLSERIAL PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
     parent SMALLINT,
-    level SMALLINT,
+    level SMALLINT NOT NULL,
     FOREIGN KEY(parent)
         REFERENCES category(id)
         ON UPDATE CASCADE
