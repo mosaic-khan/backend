@@ -252,7 +252,6 @@ func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImag
 }
 
 func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emptypb.Empty, error) {
-
 	profileID := ctx.Value("ProfileID").(int64)
 
 	err := s.query.LikePost(ctx, db.LikePostParams{ProfileID: profileID, PostID: in.GetPostId()})
@@ -283,8 +282,10 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) AddComment(context.Context, *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	s.query
 }
 
 func (s *Server) GetComments(context.Context, *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {

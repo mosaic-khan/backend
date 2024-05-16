@@ -27,6 +27,7 @@ type PostAPIClient interface {
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -112,6 +113,15 @@ func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, o
 	return out, nil
 }
 
+func (c *postAPIClient) AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddReply", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postAPIClient) GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error) {
 	out := new(GetCommentsResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetComments", in, out, opts...)
@@ -151,6 +161,7 @@ type PostAPIServer interface {
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
 	Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error)
 	AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error)
+	AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
@@ -184,6 +195,9 @@ func (UnimplementedPostAPIServer) Dislike(context.Context, *DislikeRequest) (*em
 }
 func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+}
+func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddReply not implemented")
 }
 func (UnimplementedPostAPIServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
@@ -351,6 +365,24 @@ func _PostAPI_AddComment_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_AddReply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddReplyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).AddReply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/AddReply",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).AddReply(ctx, req.(*AddReplyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostAPI_GetComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCommentsRequest)
 	if err := dec(in); err != nil {
@@ -443,6 +475,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddComment",
 			Handler:    _PostAPI_AddComment_Handler,
+		},
+		{
+			MethodName: "AddReply",
+			Handler:    _PostAPI_AddReply_Handler,
 		},
 		{
 			MethodName: "GetComments",
