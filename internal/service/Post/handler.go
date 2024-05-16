@@ -282,3 +282,26 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetCategoriesRespone, error) {
+
+	categoriesDB, err := s.query.GetCategories(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "could not get categories")
+	}
+
+	categories := []*PostAPIService.Category{}
+
+	for _, c := range categoriesDB {
+		temp := &PostAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
+		if c.Parent.Valid {
+			p := int32(c.Parent.Int16)
+			temp.Parent = &p
+		} else {
+			temp.Parent = nil
+		}
+		categories = append(categories, temp)
+	}
+
+	return &PostAPIService.GetCategoriesRespone{Categories: categories}, nil
+}
