@@ -20,6 +20,8 @@ service PostAPI {
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
+  rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
+  rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
 }
 
 message Post {
@@ -155,4 +157,23 @@ message SearchCategoriesRequest {
 
 message SearchCategoriesResponse {
   repeated PostPreviewExplore posts = 1;
+}
+
+message SearchFoodByNameRequest {
+  string name = 1;
+  optional int32 pageNumber = 2;
+}
+
+message SearchFoodByNameResponse {
+  repeated PostPreview postPreview = 1;
+}
+
+message SearchFoodByIngredientRequest {
+    repeated string include = 1;
+    repeated string exclude = 2;
+    optional int32 pageNumber = 3;
+}
+
+message SearchFoodByIngredientResponse {
+  repeated PostPreview postPreview = 1;
 }
