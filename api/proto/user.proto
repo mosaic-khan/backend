@@ -25,6 +25,10 @@ service UserAPI {
   rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
   rpc DeleteAccount (DeleteAccountRequest) returns (google.protobuf.Empty);
   rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
+  rpc Follow (FollowRequest) returns (google.protobuf.Empty);
+  rpc Unfollow (UnfollowRequest) returns (google.protobuf.Empty);
+  rpc GetFollowingList (GetFollowingListRequest) returns (GetFollowingListResponse);
+  rpc GetFollowerList (GetFollowerListRequest) returns (GetFollowerListResponse);
 }
 
 message User {
@@ -47,6 +51,9 @@ message Profile {
   string bio = 6;
   string city = 7;
   string profilePicUrl = 8;
+  int64 followerCnt = 9;
+  int64 followingCnt = 10;
+  bool isFollowed = 11;
 }
 
 message RefreshTokenResponse {
@@ -194,4 +201,28 @@ message ProfilePreview {
   string username = 2;
   string name = 3;
   string profilePicUrl = 4;
+}
+
+message FollowRequest {
+  int64 profileID = 1;
+}
+
+message UnfollowRequest {
+  int64 profileID = 1;
+}
+
+message GetFollowingListRequest {
+  int64 profileID = 1;
+}
+
+message GetFollowingListResponse {
+  repeated ProfilePreview profilePreview = 1;
+}
+
+message GetFollowerListRequest {
+  int64 profileID = 1;
+}
+
+message GetFollowerListResponse {
+  repeated ProfilePreview profilePreview = 1;
 }
