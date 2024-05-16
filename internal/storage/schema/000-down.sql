@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS "like_comment";
+DROP TABLE IF EXISTS "comment";
+
 DROP TABLE IF EXISTS "profile_like_post";
 DROP TABLE IF EXISTS "post_image";
 DROP TABLE IF EXISTS "post_has_ingredient";
