@@ -93,7 +93,8 @@ message AddCommentRequest {
 
 message AddReplyRequest {
   string comment = 1;
-  int64 commentID = 2;
+  int64 postID = 2;
+  int64 commentID = 3;
 }
 
 message GetCommentsRequest {
