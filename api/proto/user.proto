@@ -216,13 +216,13 @@ message GetFollowingListRequest {
 }
 
 message GetFollowerListRequest {
-
+  repeated ProfilePreview profilePreview = 1;
 }
 
 message GetFollowingListResponse {
-
+  int64 profileID = 1;
 }
 
 message GetFollowerListResponse {
-
+  repeated ProfilePreview profilePreview = 1;
 }
