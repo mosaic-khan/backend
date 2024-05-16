@@ -112,6 +112,7 @@ message Comment {
   string comment = 4;
   string time = 5;
   bool hasReplies = 6;
+  bool isLiked = 7;
 }
 
 message GetRepliesRequest {

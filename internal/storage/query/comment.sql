@@ -7,7 +7,7 @@ INSERT INTO comment(parent_id, post_id, profile_id, comment)
 VALUES ($1, $2, $3, $4);
 
 
--- LikeCommentOrReply :exec
+-- name: LikeCommentOrReply :exec
 INSERT INTO like_comment(profile_id, comment_id)
 VALUES ($1, $2);
 
@@ -46,4 +46,4 @@ FROM comment
             FROM like_comment
             WHERE like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $3 and comment.post_id = $2;
+WHERE comment.parent_id = $2;

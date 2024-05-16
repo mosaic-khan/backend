@@ -285,17 +285,106 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	s.query
+	err := s.query.AddComment(ctx, db.AddCommentParams{
+		PostID:    in.PostID,
+		ProfileID: profileID,
+		Comment:   in.Comment,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while adding a comment")
+	}
+
+	return nil, nil
 }
 
-func (s *Server) GetComments(context.Context, *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
+func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.AddReply(ctx, db.AddReplyParams{
+		ParentID: sql.NullInt64{
+			Int64: in.CommentID,
+			Valid: true,
+		},
+		PostID:    in.PostID,
+		ProfileID: profileID,
+		Comment:   in.Comment,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while adding a reply")
+	}
+
+	return nil, nil
 }
 
-func (s *Server) GetReplies(context.Context, *PostAPIService.GetRepliesRequest) (*PostAPIService.GetRepliesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
+func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	commentsDB, err := s.query.GetPostsComments(ctx, db.GetPostsCommentsParams{
+		ProfileID: profileID,
+		PostID:    in.PostID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting posts comments")
+	}
+
+	comments := make([]*PostAPIService.Comment, len(commentsDB))
+
+	for i, comment := range commentsDB {
+		comments[i] = &PostAPIService.Comment{
+			Name:       comment.Comment,
+			Username:   comment.Username,
+			ProfileUrl: comment.ProfilePicAddress,
+			Comment:    comment.Comment,
+			Time:       comment.Time.GoString(),
+			HasReplies: comment.HasReplies,
+			IsLiked:    comment.Isliked,
+		}
+	}
+
+	return &PostAPIService.GetCommentsResponse{Comments: comments}, nil
 }
 
-func (s *Server) LikeComment(context.Context, *PostAPIService.LikeCommentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LikeComment not implemented")
+func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRequest) (*PostAPIService.GetRepliesResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	commentsDB, err := s.query.GetReplies(ctx, db.GetRepliesParams{
+		ProfileID: profileID,
+		ParentID: sql.NullInt64{
+			Int64: in.CommentID,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting replies")
+	}
+
+	comments := make([]*PostAPIService.Comment, len(commentsDB))
+
+	for i, comment := range commentsDB {
+		comments[i] = &PostAPIService.Comment{
+			Name:       comment.Comment,
+			Username:   comment.Username,
+			ProfileUrl: comment.ProfilePicAddress,
+			Comment:    comment.Comment,
+			Time:       comment.Time.GoString(),
+			HasReplies: comment.HasReplies,
+			IsLiked:    comment.Isliked.(bool),
+		}
+	}
+
+	return &PostAPIService.GetRepliesResponse{Comments: comments}, nil
+}
+
+func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.LikeCommentOrReply(ctx, db.LikeCommentOrReplyParams{
+		ProfileID: profileID,
+		CommentID: in.CommentID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while liking comment")
+	}
+
+	return nil, nil
 }

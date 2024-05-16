@@ -113,8 +113,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 
 const getReplies = `-- name: GetReplies :many
 SELECT account.username, profile.profile_pic_address, comment.comment,
-       (lk.isLiked IS NOT NULL),
-       comment.time,
+       (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
                     WHERE c.parent_id = comment.id
@@ -129,12 +128,11 @@ FROM comment
             FROM like_comment
             WHERE like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $3 and comment.post_id = $2
+WHERE comment.parent_id = $2
 `
 
 type GetRepliesParams struct {
 	ProfileID int64
-	PostID    int64
 	ParentID  sql.NullInt64
 }
 
@@ -142,14 +140,13 @@ type GetRepliesRow struct {
 	Username          string
 	ProfilePicAddress string
 	Comment           string
-	Column4           interface{}
-	Time              time.Time
+	Isliked           interface{}
 	HasReplies        bool
-	Time_2            time.Time
+	Time              time.Time
 }
 
 func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRepliesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getReplies, arg.ProfileID, arg.PostID, arg.ParentID)
+	rows, err := q.db.QueryContext(ctx, getReplies, arg.ProfileID, arg.ParentID)
 	if err != nil {
 		return nil, err
 	}
@@ -161,10 +158,9 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 			&i.Username,
 			&i.ProfilePicAddress,
 			&i.Comment,
-			&i.Column4,
-			&i.Time,
+			&i.Isliked,
 			&i.HasReplies,
-			&i.Time_2,
+			&i.Time,
 		); err != nil {
 			return nil, err
 		}
@@ -177,4 +173,19 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 		return nil, err
 	}
 	return items, nil
+}
+
+const likeCommentOrReply = `-- name: LikeCommentOrReply :exec
+INSERT INTO like_comment(profile_id, comment_id)
+VALUES ($1, $2)
+`
+
+type LikeCommentOrReplyParams struct {
+	ProfileID int64
+	CommentID int64
+}
+
+func (q *Queries) LikeCommentOrReply(ctx context.Context, arg LikeCommentOrReplyParams) error {
+	_, err := q.db.ExecContext(ctx, likeCommentOrReply, arg.ProfileID, arg.CommentID)
+	return err
 }
