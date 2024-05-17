@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PostAPIClient interface {
 	GetProfilePosts(ctx context.Context, in *GetProfilePostsRequests, opts ...grpc.CallOption) (*GetProfilePostsResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
-	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error)
 	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
 	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -63,8 +63,8 @@ func (c *postAPIClient) GetPost(ctx context.Context, in *GetPostRequest, opts ..
 	return out, nil
 }
 
-func (c *postAPIClient) SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *postAPIClient) SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error) {
+	out := new(SetPostResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SetPost", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -195,7 +195,7 @@ func (c *postAPIClient) SearchFoodByIngredient(ctx context.Context, in *SearchFo
 type PostAPIServer interface {
 	GetProfilePosts(context.Context, *GetProfilePostsRequests) (*GetProfilePostsResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
-	SetPost(context.Context, *SetPostRequest) (*emptypb.Empty, error)
+	SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error)
 	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
 	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
@@ -222,7 +222,7 @@ func (UnimplementedPostAPIServer) GetProfilePosts(context.Context, *GetProfilePo
 func (UnimplementedPostAPIServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
-func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*emptypb.Empty, error) {
+func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPost not implemented")
 }
 func (UnimplementedPostAPIServer) SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error) {

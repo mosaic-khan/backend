@@ -8,7 +8,7 @@ option go_package = "./../../pkg/PostAPIService";
 service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
-  rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
+  rpc SetPost (SetPostRequest) returns (SetPostResponse);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
   rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
   rpc Like (LikeRequest) returns (google.protobuf.Empty);
@@ -60,6 +60,10 @@ message SetPostRequest {
   string description = 3;
   int32 categoryID = 4;
   int32 numImages = 5;
+}
+
+message SetPostResponse {
+  int64 id = 1;
 }
 
 message GetProfilePostsRequests {

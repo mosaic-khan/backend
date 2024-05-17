@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*emptypb.Empty, error) {
+func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*PostAPIService.SetPostResponse, error) {
 	// get profile id
 	profileId := ctx.Value("ProfileID").(int64)
 
@@ -90,7 +90,7 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 		}
 	}
 
-	return &emptypb.Empty{}, nil
+	return &PostAPIService.SetPostResponse{Id: postId}, nil
 
 }
 
