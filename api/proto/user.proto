@@ -69,7 +69,8 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string jwtToken = 2;
+  string jwtToken = 1;
+  string refreshToken = 2;
 }
 
 // login end
@@ -106,6 +107,7 @@ message CodeVerificationRequest {
 
 message CodeVerificationResponse {
   string jwtToken = 1;
+  string refreshToken = 2;
 }
 
 // token in header

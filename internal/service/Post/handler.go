@@ -220,7 +220,7 @@ func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImag
 		return nil, status.Errorf(codes.Internal, "error while getting token Aud")
 	}
 
-	if tokenAud[0] != "Media PostImage" {
+	if len(tokenAud) < 1 || tokenAud[0] != "Media PostImage" {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 	}
 

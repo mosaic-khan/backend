@@ -78,6 +78,19 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 		// Create new context
 		newCtx := context.WithValue(ctx, "ProfileID", profileID)
 
+		aud, err := token.Claims.GetAudience()
+		if err != nil || len(aud) < 1 {
+			return nil, status.Error(codes.Unauthenticated, "error while fetching audience")
+		}
+
+		if aud[0] == "Refresh" && info.FullMethod == "/KhanAPI.UserAPI/RefreshToken" {
+			return handler(ctx, req)
+		}
+
+		if aud[0] != "Login" {
+			return nil, status.Error(codes.Unauthenticated, "invalid token")
+		}
+
 		// Call handler
 		return handler(newCtx, req)
 	}
@@ -293,6 +306,17 @@ func CreatePostImageToken(profileID string, postID string, filename string, key 
 		Subject:   profileID,
 		Audience:  jwt.ClaimStrings{"Media PostImage", postID, filename},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2)),
+	})
+
+	return token.SignedString(key)
+}
+
+func CreateRefreshToken(userID string, duration time.Duration, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
+		Issuer:    "KhanWeb",
+		Subject:   userID,
+		Audience:  jwt.ClaimStrings{"Refresh"},
 	})
 
 	return token.SignedString(key)
