@@ -71,4 +71,3 @@ LIMIT 20;
 
 
 -- name: SearchIngredient :many
->>>>>>> c6ce331 (search name query)

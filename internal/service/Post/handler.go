@@ -440,7 +440,6 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	s.query.
 	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
 }
 
