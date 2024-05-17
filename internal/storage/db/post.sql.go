@@ -8,6 +8,8 @@ package db
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
 
 const addImage = `-- name: AddImage :exec
@@ -140,6 +142,54 @@ func (q *Queries) GetPostsPreview(ctx context.Context, profileID int64) ([]GetPo
 			&i.Title,
 			&i.Description,
 			&i.ImageUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsWithCategory = `-- name: GetPostsWithCategory :many
+SELECT post.id, title, description, post_image.image_url as post_image, username, profile_pic_address
+FROM post
+	INNER JOIN profile ON post.profile_id = profile.id
+	LEFT JOIN post_image ON post.id = post_image.post_id
+	INNER JOIN account ON profile.user_id = account.id
+WHERE category_id = ANY($1::int[]) and is_primary = true
+`
+
+type GetPostsWithCategoryRow struct {
+	ID                int64
+	Title             string
+	Description       string
+	PostImage         sql.NullString
+	Username          string
+	ProfilePicAddress string
+}
+
+func (q *Queries) GetPostsWithCategory(ctx context.Context, dollar_1 []int32) ([]GetPostsWithCategoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsWithCategory, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostsWithCategoryRow
+	for rows.Next() {
+		var i GetPostsWithCategoryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.PostImage,
+			&i.Username,
+			&i.ProfilePicAddress,
 		); err != nil {
 			return nil, err
 		}
