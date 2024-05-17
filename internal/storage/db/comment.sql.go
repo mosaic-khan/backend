@@ -50,10 +50,10 @@ func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) error {
 }
 
 const getPostsComments = `-- name: GetPostsComments :many
-SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment,
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (SELECT EXISTS
-           (SELECT 1 FROM like_comment
-            WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
+           (SELECT 1 FROM profile_like_comment
+            WHERE profile_like_comment.comment_id = comment.id and profile_like_comment.profile_id = $1)
        ) AS isLiked,
        (SELECT EXISTS
            (SELECT 1 FROM comment c
@@ -78,6 +78,7 @@ type GetPostsCommentsRow struct {
 	FirstName         string
 	ProfilePicAddress string
 	Comment           string
+	NumLikes          int32
 	Isliked           bool
 	HasReplies        bool
 	Time              time.Time
@@ -98,6 +99,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 			&i.FirstName,
 			&i.ProfilePicAddress,
 			&i.Comment,
+			&i.NumLikes,
 			&i.Isliked,
 			&i.HasReplies,
 			&i.Time,
@@ -116,7 +118,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 }
 
 const getReplies = `-- name: GetReplies :many
-SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment,
+SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
@@ -129,8 +131,8 @@ FROM comment
          JOIN account on profile.user_id = account.id
          LEFT JOIN (
             SELECT comment_id AS cmnt_id, 1 AS isLiked
-            FROM like_comment
-            WHERE like_comment.profile_id = $1
+            FROM profile_like_comment
+            WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
 WHERE comment.parent_id = $2
 `
@@ -184,7 +186,7 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 }
 
 const likeCommentOrReply = `-- name: LikeCommentOrReply :exec
-INSERT INTO like_comment(profile_id, comment_id)
+INSERT INTO profile_like_comment(profile_id, comment_id)
 VALUES ($1, $2)
 `
 

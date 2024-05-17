@@ -143,6 +143,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			Category:      post.Category,
 			NumImages:     int32(post.NumImages),
 			NumLikes:      post.NumLikes,
+			NumComments:   post.NumComments,
 			Like:          like,
 			Ingredients:   ingredientsMap,
 			ImageUrls:     imageUrls,
@@ -364,6 +365,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 			Time:       comment.Time.GoString(),
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked,
+			NumLikes:   comment.NumLikes,
 		}
 	}
 

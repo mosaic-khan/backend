@@ -8,14 +8,14 @@ VALUES ($1, $2, $3, $4);
 
 
 -- name: LikeCommentOrReply :exec
-INSERT INTO like_comment(profile_id, comment_id)
+INSERT INTO profile_like_comment(profile_id, comment_id)
 VALUES ($1, $2);
 
 -- name: GetPostsComments :many
-SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment,
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (SELECT EXISTS
-           (SELECT 1 FROM like_comment
-            WHERE like_comment.comment_id = comment.id and like_comment.profile_id = $1)
+           (SELECT 1 FROM profile_like_comment
+            WHERE profile_like_comment.comment_id = comment.id and profile_like_comment.profile_id = $1)
        ) AS isLiked,
        (SELECT EXISTS
            (SELECT 1 FROM comment c
@@ -30,7 +30,7 @@ WHERE comment.parent_id IS NULL and comment.post_id = $2;
 
 
 -- name: GetReplies :many
-SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment,
+SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
@@ -43,7 +43,7 @@ FROM comment
          JOIN account on profile.user_id = account.id
          LEFT JOIN (
             SELECT comment_id AS cmnt_id, 1 AS isLiked
-            FROM like_comment
-            WHERE like_comment.profile_id = $1
+            FROM profile_like_comment
+            WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
 WHERE comment.parent_id = $2;
