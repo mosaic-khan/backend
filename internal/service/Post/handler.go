@@ -51,9 +51,10 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 		ProfileID:   profileId,
 	})
 	if err != nil {
-		driverErr := err.(*pq.Error)
-		tx.Rollback()
-		if driverErr.Code == pq.ErrorCode("23503") {
+		var driverErr *pq.Error
+		errors.As(err, &driverErr)
+		_ = tx.Rollback()
+		if driverErr.Code == ("23503") {
 			return nil, status.Errorf(codes.InvalidArgument, "category with id %d does not exists", in.GetCategoryID())
 		} else {
 			return nil, status.Errorf(codes.Internal, "could not create post")
@@ -67,11 +68,11 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 			// insert ingredient if not exists
 			ingredientId, err = txQuery.InsertIngredient(ctx, ingredient)
 			if err != nil {
-				tx.Rollback()
+				_ = tx.Rollback()
 				return nil, status.Errorf(codes.Internal, "could not add ingredients")
 			}
 		} else if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return nil, status.Errorf(codes.Internal, "could not add ingredients")
 		}
 
@@ -84,7 +85,7 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 			},
 		})
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return nil, status.Errorf(codes.Internal, "coult not insert post ingredients")
 		}
 	}
@@ -166,9 +167,7 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 }
 
 func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProfilePostsRequests) (*PostAPIService.GetProfilePostsResponse, error) {
-	profileID := ctx.Value("ProfileID").(int64)
-
-	postsDB, err := s.query.GetPostsPreview(ctx, profileID)
+	postsDB, err := s.query.GetPostsPreview(ctx, in.ProfileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching posts")
 	}
@@ -258,11 +257,11 @@ func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emp
 	err := s.query.LikePost(ctx, db.LikePostParams{ProfileID: profileID, PostID: in.GetPostId()})
 	var driverErr *pq.Error
 	if err != nil {
-		driverErr = err.(*pq.Error)
+		errors.As(err, &driverErr)
 	}
-	if driverErr != nil && driverErr.Code == pq.ErrorCode("23503") { // error code 23503 = foreign_key_violation
+	if driverErr != nil && driverErr.Code == ("23503") { // error code 23503 = foreign_key_violation
 		return nil, status.Errorf(codes.InvalidArgument, "post with id %d does not exists", in.GetPostId())
-	} else if driverErr != nil && driverErr.Code == pq.ErrorCode("23505") { // error code 23505 = unique_violation
+	} else if driverErr != nil && driverErr.Code == ("23505") { // error code 23505 = unique_violation
 		return nil, status.Errorf(codes.InvalidArgument, "already liked post with id %d", in.GetPostId())
 	} else if err != nil {
 		fmt.Println(err.Error())
@@ -283,7 +282,6 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
-
 func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.SearchCategoriesRequest) (*PostAPIService.SearchCategoriesResponse, error) {
 
 	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
@@ -292,7 +290,7 @@ func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.Search
 		return nil, status.Error(codes.Internal, "could not get posts")
 	}
 
-	posts := []*PostAPIService.PostPreviewExplore{}
+	var posts []*PostAPIService.PostPreviewExplore
 
 	for _, p := range postsDB {
 		posts = append(posts, &PostAPIService.PostPreviewExplore{
@@ -416,14 +414,14 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 	return nil, nil
 }
 
-func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
+func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
 
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "could not get categories")
 	}
 
-	categories := []*PostAPIService.Category{}
+	var categories []*PostAPIService.Category
 
 	for _, c := range categoriesDB {
 		temp := &PostAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
