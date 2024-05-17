@@ -165,7 +165,7 @@ message SearchFoodByNameRequest {
 }
 
 message SearchFoodByNameResponse {
-  repeated PostPreview postPreview = 1;
+  repeated PostPreviewExplore postPreview = 1;
 }
 
 message SearchFoodByIngredientRequest {
@@ -175,5 +175,5 @@ message SearchFoodByIngredientRequest {
 }
 
 message SearchFoodByIngredientResponse {
-  repeated PostPreview postPreview = 1;
+  repeated PostPreviewExplore postPreview = 1;
 }
