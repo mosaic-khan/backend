@@ -1,15 +1,22 @@
 #!/bin/sh
 
-MIGRATION_DIR=internal/storage/schema
+MIGRATION_DIR="/internal/storage/schema"
 
 export PGPASSWORD=$DB_PASS
-DB_ARGS="-h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT"
+COMMON_DB_ARGS="-h $DB_HOST -U $DB_USER -p $DB_PORT"
+
+# Create the database unconditionally
+echo "Creating database $DB_NAME..."
+CREATEDB_CMD="CREATE DATABASE \"$DB_NAME\";"
+psql $COMMON_DB_ARGS -c "$CREATEDB_CMD"
+
+# Apply the migration scripts
+DB_ARGS="$COMMON_DB_ARGS -d $DB_NAME"
 
 for migration in "$MIGRATION_DIR"/*.sql; do
   echo "Applying migration: $migration"
 
-  if ! psql $DB_ARGS -f "$migration"
-  then
+  if ! psql $DB_ARGS -f "$migration"; then
     echo "Migration failed: $migration"
     exit 1
   fi
