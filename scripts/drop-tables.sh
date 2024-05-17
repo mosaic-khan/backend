@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MIGRATION_DIR=../internal/storage/schema
+MIGRATION_DIR=internal/storage/schema
 
 export PGPASSWORD=$DB_PASS
 DB_ARGS="-h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT"

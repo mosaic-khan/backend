@@ -72,9 +72,14 @@ func (s *Server) Login(ctx context.Context, in *UserAPIService.LoginRequest) (*U
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error creating token")
 	}
+	refreshTokenString, err := utils.CreateRefreshToken(strconv.FormatInt(profileID, 10), time.Hour*100, s.hmacSecret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while creating refresh token")
+	}
 
 	return &UserAPIService.LoginResponse{
-		JwtToken: tokenString,
+		JwtToken:     tokenString,
+		RefreshToken: refreshTokenString,
 	}, nil
 
 }
@@ -285,8 +290,15 @@ func (s *Server) CodeVerification(ctx context.Context, in *UserAPIService.CodeVe
 		_ = TX.Rollback()
 		return nil, err
 	}
+	refreshTokenString, err := utils.CreateRefreshToken(strconv.FormatInt(profileID, 10), time.Hour*100, s.hmacSecret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while creating refresh token")
+	}
 
-	return &UserAPIService.CodeVerificationResponse{JwtToken: loginToken}, nil
+	return &UserAPIService.CodeVerificationResponse{
+		JwtToken:     loginToken,
+		RefreshToken: refreshTokenString,
+	}, nil
 }
 
 func (s *Server) PersonalInfoCompletion(ctx context.Context, in *UserAPIService.PersonalInfoCompletionRequest) (*emptypb.Empty, error) {

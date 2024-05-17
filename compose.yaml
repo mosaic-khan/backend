@@ -30,4 +30,16 @@ services:
     volumes:
       - ./api/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
     restart: always
-      
+  init-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.init-db
+    depends_on:
+      - db
+    environment:
+      - DB_USER=$DB_USER
+      - DB_PASS=$DB_PASS
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=$DB_NAME
+    restart: "no"
