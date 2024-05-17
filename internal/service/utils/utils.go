@@ -83,11 +83,11 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 			return nil, status.Error(codes.Unauthenticated, "error while fetching audience")
 		}
 
-		if aud[0] == "Refresh" && info.FullMethod == "/KhanAPI.UserAPI/RefreshToken" {
-			return handler(ctx, req)
+		if string(aud[0]) == "Refresh" && info.FullMethod == "/KhanAPI.UserAPI/RefreshToken" {
+			return handler(newCtx, req)
 		}
 
-		if aud[0] != "Login" {
+		if string(aud[0]) != "Login" {
 			return nil, status.Error(codes.Unauthenticated, "invalid token")
 		}
 
