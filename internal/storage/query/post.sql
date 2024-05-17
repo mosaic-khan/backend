@@ -47,7 +47,6 @@ SELECT post.profile_id AS profile_id
 FROM post
 WHERE id = $1;
 
-<<<<<<< HEAD
 -- name: GetPostsWithCategory :many
 SELECT post.id, title, description, post_image.image_url as post_image, username, profile_pic_address
 FROM post
@@ -55,7 +54,7 @@ FROM post
 	LEFT JOIN post_image ON post.id = post_image.post_id
 	INNER JOIN account ON profile.user_id = account.id
 WHERE category_id = ANY($1::int[]) and is_primary = true;
-=======
+
 
 -- name: SearchName :many
 SELECT post.id, post.title, post.description, post_image.image_url,
