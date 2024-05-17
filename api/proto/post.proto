@@ -119,13 +119,14 @@ message GetCommentsResponse {
 }
 
 message Comment {
-  string name = 1;
-  string username = 2;
-  string profileUrl = 3;
-  string comment = 4;
-  string time = 5;
-  bool hasReplies = 6;
-  bool isLiked = 7;
+  int64 ID = 1;
+  string name = 2;
+  string username = 3;
+  string profileUrl = 4;
+  string comment = 5;
+  string time = 6;
+  bool hasReplies = 7;
+  bool isLiked = 8;
 }
 
 message GetRepliesRequest {

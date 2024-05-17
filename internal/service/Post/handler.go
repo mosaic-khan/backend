@@ -356,6 +356,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
+			ID:         comment.ID,
 			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
@@ -387,6 +388,7 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
+			ID:         comment.ID,
 			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
@@ -415,7 +417,6 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 }
 
 func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
-
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "could not get categories")
@@ -438,11 +439,59 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 }
 
 func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
-	profileID := ctx.Value("ProfileID").(int64)
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
 
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
+	searchResult, err := s.query.SearchName(ctx, db.SearchNameParams{
+		Name: in.Name,
+		Page: (in.GetPageNumber() - 1) * 20,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while searching for posts")
+	}
+
+	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
+
+	for i, row := range searchResult {
+		posts[i] = &PostAPIService.PostPreviewExplore{
+			Id:               row.ID,
+			Title:            row.Title,
+			ShortDescription: row.Description,
+			PostImage:        row.ImageUrl.String,
+			Username:         row.Username,
+			ProfilePicUrl:    row.ProfilePicAddress,
+		}
+	}
+
+	return &PostAPIService.SearchFoodByNameResponse{PostPreview: posts}, nil
 }
 
-func (s *Server) SearchFoodByIngredient(context.Context, *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByIngredient not implemented")
+func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
+
+	searchResult, err := s.query.SearchIngredient(ctx, db.SearchIngredientParams{
+		Page:       (in.GetPageNumber() - 1) * 20,
+		Include:    in.Include,
+		Includecnt: int32(len(in.Include)),
+		Exclude:    in.Exclude,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while searching for posts")
+	}
+
+	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
+
+	for i, row := range searchResult {
+		posts[i] = &PostAPIService.PostPreviewExplore{
+			Id:               row.ID,
+			Title:            row.Title,
+			ShortDescription: row.Description,
+			PostImage:        row.ImageUrl.String,
+			Username:         row.Username,
+			ProfilePicUrl:    row.ProfilePicAddress,
+		}
+	}
+
+	return &PostAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
 }

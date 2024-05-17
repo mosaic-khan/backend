@@ -69,5 +69,32 @@ OFFSET sqlc.arg(page)
 LIMIT 20;
 
 
-
 -- name: SearchIngredient :many
+WITH selected_post_id AS (
+      SELECT post_has_ingredient.post_id AS p_id
+      FROM post_has_ingredient
+               JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+      WHERE ingredient.name = ANY (sqlc.arg(include)::TEXT[])
+      GROUP BY post_has_ingredient.post_id
+      HAVING COUNT(DISTINCT ingredient.id) = sqlc.arg(includeCnt)
+      INTERSECT
+      SELECT post_has_ingredient.post_id AS p_id
+      FROM post_has_ingredient
+               JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+      WHERE NOT EXISTS (SELECT 1
+                        FROM post_has_ingredient phi
+                            JOIN ingredient ing on phi.ingredient_id = ing.id
+                        WHERE phi.post_id = post_has_ingredient.post_id
+                            and ing.name = ANY (sqlc.arg(exclude)::TEXT[]))
+)
+SELECT post.id, post.title, post.description,
+       post_image.image_url, account.username, profile.profile_pic_address
+FROM selected_post_id
+    JOIN post on post.id = selected_post_id.p_id
+    JOIN profile on post.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true
+ORDER BY post.num_likes DESC
+OFFSET sqlc.arg(page)
+LIMIT 20;
