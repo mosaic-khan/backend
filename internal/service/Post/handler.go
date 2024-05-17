@@ -421,9 +421,9 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 		return nil, status.Error(codes.Internal, "could not get categories")
 	}
 
-	var categories []*PostAPIService.Category
+	categories := make([]*PostAPIService.Category, len(categoriesDB))
 
-	for _, c := range categoriesDB {
+	for i, c := range categoriesDB {
 		temp := &PostAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
 		if c.Parent.Valid {
 			p := int32(c.Parent.Int16)
@@ -431,8 +431,19 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 		} else {
 			temp.Parent = nil
 		}
-		categories = append(categories, temp)
+		categories[i] = temp
 	}
 
 	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
+}
+
+func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	s.query.
+	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
+}
+
+func (s *Server) SearchFoodByIngredient(context.Context, *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByIngredient not implemented")
 }
