@@ -1,0 +1,17 @@
+# Use a lightweight base image
+FROM alpine:3.15
+
+# Install necessary dependencies including PostgreSQL client
+RUN apk add --no-cache bash postgresql-client
+
+# Copy your shell script into the image
+COPY scripts/create-tables.sh /usr/local/bin/init-db.sh
+
+# Copy the schema directory into the image
+COPY internal/storage/schema /internal/storage/schema
+
+# Ensure the script has execution permissions
+RUN chmod +x /usr/local/bin/init-db.sh
+
+# Set the entrypoint to your shell script
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/init-db.sh"]

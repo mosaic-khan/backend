@@ -67,12 +67,21 @@ type Category struct {
 	ID     int16
 	Name   string
 	Parent sql.NullInt16
-	Level  sql.NullInt16
+	Level  int16
 }
 
 type City struct {
 	ID   int16
 	Name string
+}
+
+type Comment struct {
+	ID        int64
+	ParentID  sql.NullInt64
+	PostID    int64
+	ProfileID int64
+	Comment   string
+	Time      time.Time
 }
 
 type Follow struct {
@@ -84,6 +93,12 @@ type Ingredient struct {
 	ID    int32
 	Name  string
 	Usage int32
+}
+
+type LikeComment struct {
+	ID        int64
+	ProfileID int64
+	CommentID int64
 }
 
 type Post struct {

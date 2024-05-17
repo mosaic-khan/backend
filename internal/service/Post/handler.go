@@ -221,7 +221,7 @@ func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImag
 		return nil, status.Errorf(codes.Internal, "error while getting token Aud")
 	}
 
-	if tokenAud[0] != "Media PostImage" {
+	if len(tokenAud) < 1 || tokenAud[0] != "Media PostImage" {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 	}
 
@@ -253,7 +253,6 @@ func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImag
 }
 
 func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emptypb.Empty, error) {
-
 	profileID := ctx.Value("ProfileID").(int64)
 
 	err := s.query.LikePost(ctx, db.LikePostParams{ProfileID: profileID, PostID: in.GetPostId()})
@@ -284,6 +283,7 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
+
 func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.SearchCategoriesRequest) (*PostAPIService.SearchCategoriesResponse, error) {
 
 	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
@@ -307,4 +307,134 @@ func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.Search
 
 	return &PostAPIService.SearchCategoriesResponse{Posts: posts}, nil
 
+}
+
+func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.AddComment(ctx, db.AddCommentParams{
+		PostID:    in.PostID,
+		ProfileID: profileID,
+		Comment:   in.Comment,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while adding a comment")
+	}
+
+	return nil, nil
+}
+
+func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.AddReply(ctx, db.AddReplyParams{
+		ParentID: sql.NullInt64{
+			Int64: in.CommentID,
+			Valid: true,
+		},
+		PostID:    in.PostID,
+		ProfileID: profileID,
+		Comment:   in.Comment,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while adding a reply")
+	}
+
+	return nil, nil
+}
+
+func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	commentsDB, err := s.query.GetPostsComments(ctx, db.GetPostsCommentsParams{
+		ProfileID: profileID,
+		PostID:    in.PostID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting posts comments")
+	}
+
+	comments := make([]*PostAPIService.Comment, len(commentsDB))
+
+	for i, comment := range commentsDB {
+		comments[i] = &PostAPIService.Comment{
+			Name:       comment.FirstName,
+			Username:   comment.Username,
+			ProfileUrl: comment.ProfilePicAddress,
+			Comment:    comment.Comment,
+			Time:       comment.Time.GoString(),
+			HasReplies: comment.HasReplies,
+			IsLiked:    comment.Isliked,
+		}
+	}
+
+	return &PostAPIService.GetCommentsResponse{Comments: comments}, nil
+}
+
+func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRequest) (*PostAPIService.GetRepliesResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	commentsDB, err := s.query.GetReplies(ctx, db.GetRepliesParams{
+		ProfileID: profileID,
+		ParentID: sql.NullInt64{
+			Int64: in.CommentID,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while getting replies")
+	}
+
+	comments := make([]*PostAPIService.Comment, len(commentsDB))
+
+	for i, comment := range commentsDB {
+		comments[i] = &PostAPIService.Comment{
+			Name:       comment.FirstName,
+			Username:   comment.Username,
+			ProfileUrl: comment.ProfilePicAddress,
+			Comment:    comment.Comment,
+			Time:       comment.Time.GoString(),
+			HasReplies: comment.HasReplies,
+			IsLiked:    comment.Isliked.(bool),
+		}
+	}
+
+	return &PostAPIService.GetRepliesResponse{Comments: comments}, nil
+}
+
+func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.LikeCommentOrReply(ctx, db.LikeCommentOrReplyParams{
+		ProfileID: profileID,
+		CommentID: in.CommentID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while liking comment")
+	}
+
+	return nil, nil
+}
+
+func (s *Server) GetCategories(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
+
+	categoriesDB, err := s.query.GetCategories(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "could not get categories")
+	}
+
+	categories := []*PostAPIService.Category{}
+
+	for _, c := range categoriesDB {
+		temp := &PostAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
+		if c.Parent.Valid {
+			p := int32(c.Parent.Int16)
+			temp.Parent = &p
+		} else {
+			temp.Parent = nil
+		}
+		categories = append(categories, temp)
+	}
+
+	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
 }

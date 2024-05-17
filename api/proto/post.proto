@@ -14,8 +14,12 @@ service PostAPI {
   rpc Like (LikeRequest) returns (google.protobuf.Empty);
   rpc Dislike (DislikeRequest) returns (google.protobuf.Empty);
   rpc AddComment (AddCommentRequest) returns (google.protobuf.Empty);
+  rpc AddReply (AddReplyRequest) returns (google.protobuf.Empty);
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
+  rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
+  rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
 }
 
 message Post {
@@ -98,6 +102,12 @@ message AddCommentRequest {
   int64 postID = 2;
 }
 
+message AddReplyRequest {
+  string comment = 1;
+  int64 postID = 2;
+  int64 commentID = 3;
+}
+
 message GetCommentsRequest {
   int64 postID = 1;
 }
@@ -119,4 +129,31 @@ message SearchCategoriesRequest {
 
 message SearchCategoriesResponse {
   repeated PostPreviewExplore posts = 1;
+}
+  string time = 5;
+  bool hasReplies = 6;
+  bool isLiked = 7;
+}
+
+message GetRepliesRequest {
+  int64 commentID = 1;
+}
+
+message GetRepliesResponse {
+  repeated Comment comments = 1;
+}
+
+message LikeCommentRequest {
+  int64 commentID = 1;
+}
+
+message Category {
+  int32 id = 1;
+  string name = 2;
+  int32 level = 3;
+  optional int32 parent =4;
+}
+
+message GetCategoriesResponse {
+  repeated Category categories = 1;
 }
