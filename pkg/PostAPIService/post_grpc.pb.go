@@ -29,6 +29,7 @@ type PostAPIClient interface {
 	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
+	SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
@@ -132,6 +133,15 @@ func (c *postAPIClient) GetComments(ctx context.Context, in *GetCommentsRequest,
 	return out, nil
 }
 
+func (c *postAPIClient) SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error) {
+	out := new(SearchCategoriesResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchCategories", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postAPIClient) GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error) {
 	out := new(GetRepliesResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetReplies", in, out, opts...)
@@ -173,6 +183,7 @@ type PostAPIServer interface {
 	AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error)
 	AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
+	SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
@@ -212,6 +223,9 @@ func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*
 }
 func (UnimplementedPostAPIServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetComments not implemented")
+}
+func (UnimplementedPostAPIServer) SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchCategories not implemented")
 }
 func (UnimplementedPostAPIServer) GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
@@ -415,6 +429,24 @@ func _PostAPI_GetComments_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_SearchCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchCategoriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).SearchCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/SearchCategories",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).SearchCategories(ctx, req.(*SearchCategoriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostAPI_GetReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetRepliesRequest)
 	if err := dec(in); err != nil {
@@ -515,6 +547,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetComments",
 			Handler:    _PostAPI_GetComments_Handler,
+		},
+		{
+			MethodName: "SearchCategories",
+			Handler:    _PostAPI_SearchCategories_Handler,
 		},
 		{
 			MethodName: "GetReplies",

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
 	"strconv"
@@ -280,6 +281,32 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+
+func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.SearchCategoriesRequest) (*PostAPIService.SearchCategoriesResponse, error) {
+
+	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
+	if err != nil {
+		log.Println(err.Error())
+		return nil, status.Error(codes.Internal, "could not get posts")
+	}
+
+	posts := []*PostAPIService.PostPreviewExplore{}
+
+	for _, p := range postsDB {
+		posts = append(posts, &PostAPIService.PostPreviewExplore{
+			Id:               p.ID,
+			Title:            p.Title,
+			ShortDescription: p.Description,
+			PostImage:        p.PostImage.String,
+			Username:         p.Username,
+			ProfilePicUrl:    p.ProfilePicAddress,
+		})
+	}
+
+	return &PostAPIService.SearchCategoriesResponse{Posts: posts}, nil
+
 }
 
 func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
