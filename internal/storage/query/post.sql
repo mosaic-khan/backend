@@ -47,6 +47,7 @@ SELECT post.profile_id AS profile_id
 FROM post
 WHERE id = $1;
 
+<<<<<<< HEAD
 -- name: GetPostsWithCategory :many
 SELECT post.id, title, description, post_image.image_url as post_image, username, profile_pic_address
 FROM post
@@ -54,3 +55,21 @@ FROM post
 	LEFT JOIN post_image ON post.id = post_image.post_id
 	INNER JOIN account ON profile.user_id = account.id
 WHERE category_id = ANY($1::int[]) and is_primary = true;
+=======
+
+-- name: SearchName :many
+SELECT post.id, post.title, post.description, post_image.image_url,
+       profile.profile_pic_address, account.username
+FROM post
+    JOIN profile on post.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true and similarity(post.title, sqlc.arg(name)) > 0.5
+ORDER BY (similarity(post.title, sqlc.arg(name)), post.num_likes) DESC
+OFFSET sqlc.arg(page)
+LIMIT 20;
+
+
+
+-- name: SearchIngredient :many
+>>>>>>> c6ce331 (search name query)
