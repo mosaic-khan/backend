@@ -121,15 +121,6 @@ message Comment {
   string username = 2;
   string profileUrl = 3;
   string comment = 4;
-}
-
-message SearchCategoriesRequest {
-  repeated int32 categoryID = 1;
-}
-
-message SearchCategoriesResponse {
-  repeated PostPreviewExplore posts = 1;
-}
   string time = 5;
   bool hasReplies = 6;
   bool isLiked = 7;
@@ -156,4 +147,12 @@ message Category {
 
 message GetCategoriesResponse {
   repeated Category categories = 1;
+}
+
+message SearchCategoriesRequest {
+  repeated int32 categoryID = 1;
+}
+
+message SearchCategoriesResponse {
+  repeated PostPreviewExplore posts = 1;
 }
