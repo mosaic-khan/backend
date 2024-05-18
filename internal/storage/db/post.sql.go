@@ -243,3 +243,142 @@ func (q *Queries) PostImageCount(ctx context.Context, postID int64) (int64, erro
 	err := row.Scan(&count)
 	return count, err
 }
+
+const searchIngredient = `-- name: SearchIngredient :many
+WITH selected_post_id AS (
+      SELECT post_has_ingredient.post_id AS p_id
+      FROM post_has_ingredient
+               JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+      WHERE ingredient.name = ANY ($2::TEXT[])
+      GROUP BY post_has_ingredient.post_id
+      HAVING COUNT(DISTINCT ingredient.id) = $3
+      INTERSECT
+      SELECT post_has_ingredient.post_id AS p_id
+      FROM post_has_ingredient
+               JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+      WHERE NOT EXISTS (SELECT 1
+                        FROM post_has_ingredient phi
+                            JOIN ingredient ing on phi.ingredient_id = ing.id
+                        WHERE phi.post_id = post_has_ingredient.post_id
+                            and ing.name = ANY ($4::TEXT[]))
+)
+SELECT post.id, post.title, post.description,
+       post_image.image_url, account.username, profile.profile_pic_address
+FROM selected_post_id
+    JOIN post on post.id = selected_post_id.p_id
+    JOIN profile on post.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true
+ORDER BY post.num_likes DESC
+OFFSET $1
+LIMIT 20
+`
+
+type SearchIngredientParams struct {
+	Page       int32
+	Include    []string
+	Includecnt int32
+	Exclude    []string
+}
+
+type SearchIngredientRow struct {
+	ID                int64
+	Title             string
+	Description       string
+	ImageUrl          sql.NullString
+	Username          string
+	ProfilePicAddress string
+}
+
+func (q *Queries) SearchIngredient(ctx context.Context, arg SearchIngredientParams) ([]SearchIngredientRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchIngredient,
+		arg.Page,
+		pq.Array(arg.Include),
+		arg.Includecnt,
+		pq.Array(arg.Exclude),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchIngredientRow
+	for rows.Next() {
+		var i SearchIngredientRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.Username,
+			&i.ProfilePicAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchName = `-- name: SearchName :many
+SELECT post.id, post.title, post.description, post_image.image_url,
+       profile.profile_pic_address, account.username
+FROM post
+    JOIN profile on post.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true and similarity(post.title, $1) > 0.5
+ORDER BY (similarity(post.title, $1), post.num_likes) DESC
+OFFSET $2
+LIMIT 20
+`
+
+type SearchNameParams struct {
+	Name string
+	Page int32
+}
+
+type SearchNameRow struct {
+	ID                int64
+	Title             string
+	Description       string
+	ImageUrl          sql.NullString
+	ProfilePicAddress string
+	Username          string
+}
+
+func (q *Queries) SearchName(ctx context.Context, arg SearchNameParams) ([]SearchNameRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchName, arg.Name, arg.Page)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchNameRow
+	for rows.Next() {
+		var i SearchNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.ProfilePicAddress,
+			&i.Username,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

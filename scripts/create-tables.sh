@@ -14,12 +14,15 @@ psql $COMMON_DB_ARGS -c "$CREATEDB_CMD"
 DB_ARGS="$COMMON_DB_ARGS -d $DB_NAME"
 
 for migration in "$MIGRATION_DIR"/*.sql; do
-  echo "Applying migration: $migration"
+  if [ "$migration" != "internal/storage/schema/000-down.sql" ]; then
 
-  if ! psql $DB_ARGS -f "$migration"; then
-    echo "Migration failed: $migration"
-    exit 1
-  fi
+    echo "Applying migration: $migration"
+
+    if ! psql $DB_ARGS -f "$migration"; then
+      echo "Migration failed: $migration"
+      exit 1
+    fi
+  fi;
 done
 
 unset PGPASSWORD

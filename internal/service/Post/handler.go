@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*emptypb.Empty, error) {
+func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest) (*PostAPIService.SetPostResponse, error) {
 	// get profile id
 	profileId := ctx.Value("ProfileID").(int64)
 
@@ -90,7 +90,7 @@ func (s *Server) SetPost(ctx context.Context, in *PostAPIService.SetPostRequest)
 		}
 	}
 
-	return &emptypb.Empty{}, nil
+	return &PostAPIService.SetPostResponse{Id: postId}, nil
 
 }
 
@@ -356,6 +356,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
+			ID:         comment.ID,
 			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
@@ -387,6 +388,7 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 
 	for i, comment := range commentsDB {
 		comments[i] = &PostAPIService.Comment{
+			ID:         comment.ID,
 			Name:       comment.FirstName,
 			Username:   comment.Username,
 			ProfileUrl: comment.ProfilePicAddress,
@@ -415,15 +417,14 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 }
 
 func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
-
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "could not get categories")
 	}
 
-	var categories []*PostAPIService.Category
+	categories := make([]*PostAPIService.Category, len(categoriesDB))
 
-	for _, c := range categoriesDB {
+	for i, c := range categoriesDB {
 		temp := &PostAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
 		if c.Parent.Valid {
 			p := int32(c.Parent.Int16)
@@ -431,8 +432,66 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 		} else {
 			temp.Parent = nil
 		}
-		categories = append(categories, temp)
+		categories[i] = temp
 	}
 
 	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
+}
+
+func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
+
+	searchResult, err := s.query.SearchName(ctx, db.SearchNameParams{
+		Name: in.Name,
+		Page: (in.GetPageNumber() - 1) * 20,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while searching for posts")
+	}
+
+	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
+
+	for i, row := range searchResult {
+		posts[i] = &PostAPIService.PostPreviewExplore{
+			Id:               row.ID,
+			Title:            row.Title,
+			ShortDescription: row.Description,
+			PostImage:        row.ImageUrl.String,
+			Username:         row.Username,
+			ProfilePicUrl:    row.ProfilePicAddress,
+		}
+	}
+
+	return &PostAPIService.SearchFoodByNameResponse{PostPreview: posts}, nil
+}
+
+func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
+
+	searchResult, err := s.query.SearchIngredient(ctx, db.SearchIngredientParams{
+		Page:       (in.GetPageNumber() - 1) * 20,
+		Include:    in.Include,
+		Includecnt: int32(len(in.Include)),
+		Exclude:    in.Exclude,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while searching for posts")
+	}
+
+	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
+
+	for i, row := range searchResult {
+		posts[i] = &PostAPIService.PostPreviewExplore{
+			Id:               row.ID,
+			Title:            row.Title,
+			ShortDescription: row.Description,
+			PostImage:        row.ImageUrl.String,
+			Username:         row.Username,
+			ProfilePicUrl:    row.ProfilePicAddress,
+		}
+	}
+
+	return &PostAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
 }

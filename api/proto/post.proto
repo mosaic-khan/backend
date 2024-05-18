@@ -8,7 +8,7 @@ option go_package = "./../../pkg/PostAPIService";
 service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
-  rpc SetPost (SetPostRequest) returns (google.protobuf.Empty);
+  rpc SetPost (SetPostRequest) returns (SetPostResponse);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
   rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
   rpc Like (LikeRequest) returns (google.protobuf.Empty);
@@ -20,6 +20,8 @@ service PostAPI {
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
+  rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
+  rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
 }
 
 message Post {
@@ -58,6 +60,10 @@ message SetPostRequest {
   string description = 3;
   int32 categoryID = 4;
   int32 numImages = 5;
+}
+
+message SetPostResponse {
+  int64 id = 1;
 }
 
 message GetProfilePostsRequests {
@@ -117,13 +123,14 @@ message GetCommentsResponse {
 }
 
 message Comment {
-  string name = 1;
-  string username = 2;
-  string profileUrl = 3;
-  string comment = 4;
-  string time = 5;
-  bool hasReplies = 6;
-  bool isLiked = 7;
+  int64 ID = 1;
+  string name = 2;
+  string username = 3;
+  string profileUrl = 4;
+  string comment = 5;
+  string time = 6;
+  bool hasReplies = 7;
+  bool isLiked = 8;
 }
 
 message GetRepliesRequest {
@@ -155,4 +162,23 @@ message SearchCategoriesRequest {
 
 message SearchCategoriesResponse {
   repeated PostPreviewExplore posts = 1;
+}
+
+message SearchFoodByNameRequest {
+  string name = 1;
+  optional int32 pageNumber = 2;
+}
+
+message SearchFoodByNameResponse {
+  repeated PostPreviewExplore postPreview = 1;
+}
+
+message SearchFoodByIngredientRequest {
+    repeated string include = 1;
+    repeated string exclude = 2;
+    optional int32 pageNumber = 3;
+}
+
+message SearchFoodByIngredientResponse {
+  repeated PostPreviewExplore postPreview = 1;
 }
