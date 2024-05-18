@@ -80,6 +80,7 @@ type Comment struct {
 	ParentID  sql.NullInt64
 	PostID    int64
 	ProfileID int64
+	NumLikes  int32
 	Comment   string
 	Time      time.Time
 }
@@ -95,12 +96,6 @@ type Ingredient struct {
 	Usage int32
 }
 
-type LikeComment struct {
-	ID        int64
-	ProfileID int64
-	CommentID int64
-}
-
 type Post struct {
 	ID          int64
 	Title       string
@@ -108,6 +103,7 @@ type Post struct {
 	CategoryID  int16
 	NumImages   int16
 	NumLikes    int32
+	NumComments int32
 	ProfileID   int64
 }
 
@@ -135,6 +131,12 @@ type Profile struct {
 	ProfilePicAddress string
 	CityID            sql.NullInt16
 	Bio               string
+}
+
+type ProfileLikeComment struct {
+	ID        int64
+	ProfileID int64
+	CommentID int64
 }
 
 type ProfileLikePost struct {

@@ -143,6 +143,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			Category:      post.Category,
 			NumImages:     int32(post.NumImages),
 			NumLikes:      post.NumLikes,
+			NumComments:   post.NumComments,
 			Like:          like,
 			Ingredients:   ingredientsMap,
 			ImageUrls:     imageUrls,
@@ -364,6 +365,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 			Time:       comment.Time.GoString(),
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked,
+			NumLikes:   comment.NumLikes,
 		}
 	}
 
@@ -411,6 +413,20 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while liking comment")
+	}
+
+	return nil, nil
+}
+
+func (s *Server) DislikeComment(ctx context.Context, in *PostAPIService.DislikeCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.DislikeCommentOrReply(ctx, db.DislikeCommentOrReplyParams{
+		ProfileID: profileID,
+		CommentID: in.CommentID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while disliking comment")
 	}
 
 	return nil, nil

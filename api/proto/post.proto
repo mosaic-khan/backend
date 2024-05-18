@@ -19,6 +19,7 @@ service PostAPI {
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
+  rpc DislikeComment (DislikeCommentRequest) returns (google.protobuf.Empty);
   rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
@@ -31,11 +32,12 @@ message Post {
   string description = 4;
   int32 numImages = 5;
   int32 numLikes = 6;
-  bool like = 7;
-  repeated string imageUrls = 8;
-  string username = 9;
-  string profilePicUrl = 10;
-  string category = 11;
+  int32 numComments = 7;
+  bool like = 8;
+  repeated string imageUrls = 9;
+  string username = 10;
+  string profilePicUrl = 11;
+  string category = 12;
 }
 
 message PostPreview {
@@ -131,6 +133,7 @@ message Comment {
   string time = 6;
   bool hasReplies = 7;
   bool isLiked = 8;
+  int32 numLikes = 9;
 }
 
 message GetRepliesRequest {
@@ -142,6 +145,10 @@ message GetRepliesResponse {
 }
 
 message LikeCommentRequest {
+  int64 commentID = 1;
+}
+
+message DislikeCommentRequest {
   int64 commentID = 1;
 }
 
