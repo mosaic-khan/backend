@@ -418,6 +418,20 @@ func (s *Server) LikeComment(ctx context.Context, in *PostAPIService.LikeComment
 	return nil, nil
 }
 
+func (s *Server) DislikeComment(ctx context.Context, in *PostAPIService.DislikeCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.DislikeCommentOrReply(ctx, db.DislikeCommentOrReplyParams{
+		ProfileID: profileID,
+		CommentID: in.CommentID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while disliking comment")
+	}
+
+	return nil, nil
+}
+
 func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIService.GetCategoriesResponse, error) {
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {

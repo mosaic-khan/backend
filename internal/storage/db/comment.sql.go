@@ -49,6 +49,22 @@ func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) error {
 	return err
 }
 
+const dislikeCommentOrReply = `-- name: DislikeCommentOrReply :exec
+DELETE
+FROM profile_like_comment
+WHERE profile_id = $1 and comment_id = $2
+`
+
+type DislikeCommentOrReplyParams struct {
+	ProfileID int64
+	CommentID int64
+}
+
+func (q *Queries) DislikeCommentOrReply(ctx context.Context, arg DislikeCommentOrReplyParams) error {
+	_, err := q.db.ExecContext(ctx, dislikeCommentOrReply, arg.ProfileID, arg.CommentID)
+	return err
+}
+
 const getPostsComments = `-- name: GetPostsComments :many
 SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (SELECT EXISTS

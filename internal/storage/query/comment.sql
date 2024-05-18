@@ -11,6 +11,12 @@ VALUES ($1, $2, $3, $4);
 INSERT INTO profile_like_comment(profile_id, comment_id)
 VALUES ($1, $2);
 
+-- name: DislikeCommentOrReply :exec
+DELETE
+FROM profile_like_comment
+WHERE profile_id = $1 and comment_id = $2;
+
+
 -- name: GetPostsComments :many
 SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (SELECT EXISTS
