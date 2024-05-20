@@ -168,7 +168,12 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 }
 
 func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProfilePostsRequests) (*PostAPIService.GetProfilePostsResponse, error) {
-	postsDB, err := s.query.GetPostsPreview(ctx, in.ProfileID)
+	profileID := ctx.Value("ProfileID").(int64)
+
+	postsDB, err := s.query.GetPostsPreview(ctx, db.GetPostsPreviewParams{
+		ProfileID:   in.ProfileID,
+		ProfileID_2: profileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching posts")
 	}
@@ -181,6 +186,9 @@ func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProf
 			Title:            post.Title,
 			ShortDescription: post.Description,
 			Image:            post.ImageUrl.String,
+			NumLikes:         post.NumLikes,
+			NumComments:      post.NumComments,
+			IsLiked:          post.Isliked,
 		}
 	}
 

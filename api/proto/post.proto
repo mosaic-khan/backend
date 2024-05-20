@@ -16,13 +16,13 @@ service PostAPI {
   rpc AddComment (AddCommentRequest) returns (google.protobuf.Empty);
   rpc AddReply (AddReplyRequest) returns (google.protobuf.Empty);
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
-  rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc DislikeComment (DislikeCommentRequest) returns (google.protobuf.Empty);
   rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
+  rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
 }
 
 message Post {
@@ -45,6 +45,9 @@ message PostPreview {
   string title = 2;
   string ShortDescription = 3;
   string image = 4;
+  int32 numLikes = 6;
+  int32 numComments = 7;
+  bool isLiked = 8;
 }
 
 message PostPreviewExplore {

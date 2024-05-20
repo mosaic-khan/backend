@@ -115,7 +115,11 @@ func (q *Queries) GetPostOwnerProfile(ctx context.Context, id int64) (int64, err
 }
 
 const getPostsPreview = `-- name: GetPostsPreview :many
-SELECT post.id, post.title, post.description, post_image.image_url
+SELECT post.id, post.title, post.description, post_image.image_url, post.num_likes, post.num_comments,
+       (SELECT EXISTS
+                   (SELECT 1 FROM profile_like_post
+                    WHERE profile_like_post.profile_id = $2 AND post_id = post.id)
+       ) AS isLiked
 FROM post
     LEFT JOIN post_image on post.id = post_image.post_id
 WHERE post.profile_id = $1 and post_image.is_primary = true
@@ -123,15 +127,23 @@ ORDER BY post.id
 LIMIT 20
 `
 
+type GetPostsPreviewParams struct {
+	ProfileID   int64
+	ProfileID_2 int64
+}
+
 type GetPostsPreviewRow struct {
 	ID          int64
 	Title       string
 	Description string
 	ImageUrl    sql.NullString
+	NumLikes    int32
+	NumComments int32
+	Isliked     bool
 }
 
-func (q *Queries) GetPostsPreview(ctx context.Context, profileID int64) ([]GetPostsPreviewRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsPreview, profileID)
+func (q *Queries) GetPostsPreview(ctx context.Context, arg GetPostsPreviewParams) ([]GetPostsPreviewRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsPreview, arg.ProfileID, arg.ProfileID_2)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +156,9 @@ func (q *Queries) GetPostsPreview(ctx context.Context, profileID int64) ([]GetPo
 			&i.Title,
 			&i.Description,
 			&i.ImageUrl,
+			&i.NumLikes,
+			&i.NumComments,
+			&i.Isliked,
 		); err != nil {
 			return nil, err
 		}

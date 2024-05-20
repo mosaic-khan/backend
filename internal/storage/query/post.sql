@@ -34,7 +34,11 @@ WHERE post_id = $1
 ORDER BY id;
 
 -- name: GetPostsPreview :many
-SELECT post.id, post.title, post.description, post_image.image_url
+SELECT post.id, post.title, post.description, post_image.image_url, post.num_likes, post.num_comments,
+       (SELECT EXISTS
+                   (SELECT 1 FROM profile_like_post
+                    WHERE profile_like_post.profile_id = $2 AND post_id = post.id)
+       ) AS isLiked
 FROM post
     LEFT JOIN post_image on post.id = post_image.post_id
 WHERE post.profile_id = $1 and post_image.is_primary = true
