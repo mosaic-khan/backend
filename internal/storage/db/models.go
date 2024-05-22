@@ -83,6 +83,7 @@ type Comment struct {
 	NumLikes  int32
 	Comment   string
 	Time      time.Time
+	NumReport int32
 }
 
 type Follow struct {
@@ -142,6 +143,12 @@ type ProfileLikeComment struct {
 type ProfileLikePost struct {
 	PostID    int64
 	ProfileID int64
+}
+
+type ReportComment struct {
+	ID        int32
+	ProfileID int64
+	CommentID int64
 }
 
 type Signup struct {

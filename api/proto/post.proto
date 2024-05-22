@@ -19,6 +19,7 @@ service PostAPI {
   rpc GetReplies (GetRepliesRequest) returns (GetRepliesResponse);
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc DislikeComment (DislikeCommentRequest) returns (google.protobuf.Empty);
+  rpc ReportComment (RepostCommentRequest) returns (google.protobuf.Empty);
   rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
@@ -153,6 +154,10 @@ message LikeCommentRequest {
 
 message DislikeCommentRequest {
   int64 commentID = 1;
+}
+
+message RepostCommentRequest {
+  int64 id = 1;
 }
 
 message Category {

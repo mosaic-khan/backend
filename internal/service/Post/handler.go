@@ -519,3 +519,14 @@ func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.
 
 	return &PostAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
 }
+
+func (s *Server) ReportComment(ctx context.Context, in *PostAPIService.RepostCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	_ = s.query.ReportComment(ctx, db.ReportCommentParams{
+		ProfileID: profileID,
+		CommentID: in.Id,
+	})
+
+	return nil, nil
+}
