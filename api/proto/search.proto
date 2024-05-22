@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+package KhanAPI;
+option go_package = "./../../pkg/SearchAPIService";
+
+service SearchAPI {
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
+  rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
+  rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
+  rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
+
+}
+
+message PostPreviewExplore {
+  int64 id = 1;
+  string title = 2;
+  string shortDescription = 3;
+  string postImage = 4;
+  string username = 5;
+  string profile_pic_url = 6;
+}
+
+message Category {
+  int32 id = 1;
+  string name = 2;
+  int32 level = 3;
+  optional int32 parent =4;
+}
+
+message GetCategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message SearchCategoriesRequest {
+  repeated int32 categoryID = 1;
+}
+
+message SearchCategoriesResponse {
+  repeated PostPreviewExplore posts = 1;
+}
+
+message SearchFoodByNameRequest {
+  string name = 1;
+  optional int32 pageNumber = 2;
+}
+
+message SearchFoodByNameResponse {
+  repeated PostPreviewExplore postPreview = 1;
+}
+
+message SearchFoodByIngredientRequest {
+  repeated string include = 1;
+  repeated string exclude = 2;
+  optional int32 pageNumber = 3;
+}
+
+message SearchFoodByIngredientResponse {
+  repeated PostPreviewExplore postPreview = 1;
+}
