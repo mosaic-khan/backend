@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
 	"strconv"
@@ -293,7 +294,14 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	err := s.query.AddComment(ctx, db.AddCommentParams{
+	safe, err := utils.CommentClient.IsSafe(in.GetComment())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not check comment regarding swears")
+	} else if !safe {
+		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
+	}
+
+	err = s.query.AddComment(ctx, db.AddCommentParams{
 		PostID:    in.PostID,
 		ProfileID: profileID,
 		Comment:   in.Comment,
@@ -302,13 +310,20 @@ func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRe
 		return nil, status.Errorf(codes.Internal, "error while adding a comment")
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*emptypb.Empty, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	err := s.query.AddReply(ctx, db.AddReplyParams{
+	safe, err := utils.CommentClient.IsSafe(in.GetComment())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not check comment regarding swears")
+	} else if !safe {
+		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
+	}
+
+	err = s.query.AddReply(ctx, db.AddReplyParams{
 		ParentID: sql.NullInt64{
 			Int64: in.CommentID,
 			Valid: true,
@@ -321,7 +336,7 @@ func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyReques
 		return nil, status.Errorf(codes.Internal, "error while adding a reply")
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
