@@ -57,7 +57,10 @@ FROM post
 	INNER JOIN profile ON post.profile_id = profile.id
 	LEFT JOIN post_image ON post.id = post_image.post_id
 	INNER JOIN account ON profile.user_id = account.id
-WHERE category_id = ANY($1::int[]) and is_primary = true;
+WHERE category_id = ANY($1::int[]) and is_primary = true
+ORDER BY post.num_likes
+OFFSET $2
+LIMIT 20;
 
 
 -- name: SearchName :many
@@ -124,7 +127,7 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE category_id = ANY(sqlc.arg(categories)::int[])
+    WHERE category_id = ANY(sqlc.arg(categories)::int[]) OR array_length(sqlc.arg(categories)::int[], 1) = 0
     INTERSECT
     SELECT post.id
     FROM post

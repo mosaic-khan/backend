@@ -33,8 +33,15 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*SearchAP
 }
 
 func (s *Server) SearchCategories(ctx context.Context, in *SearchAPIService.SearchCategoriesRequest) (*SearchAPIService.SearchCategoriesResponse, error) {
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
 
-	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
+	postsDB, err := s.query.GetPostsWithCategory(ctx, db.GetPostsWithCategoryParams{
+		Column1: in.GetCategoryID(),
+		Offset:  (in.GetPageNumber() - 1) * 20,
+	})
 	if err != nil {
 		log.Println(err.Error())
 		return nil, status.Error(codes.Internal, "could not get posts")
@@ -53,7 +60,7 @@ func (s *Server) SearchCategories(ctx context.Context, in *SearchAPIService.Sear
 		})
 	}
 
-	return &SearchAPIService.SearchCategoriesResponse{Posts: posts}, nil
+	return &SearchAPIService.SearchCategoriesResponse{Posts: posts, PageNumber: in.GetPageNumber()}, nil
 
 }
 
@@ -84,7 +91,7 @@ func (s *Server) SearchFoodByName(ctx context.Context, in *SearchAPIService.Sear
 		}
 	}
 
-	return &SearchAPIService.SearchFoodByNameResponse{PostPreview: posts}, nil
+	return &SearchAPIService.SearchFoodByNameResponse{PostPreview: posts, PageNumber: in.GetPageNumber()}, nil
 }
 
 func (s *Server) SearchFoodByIngredient(ctx context.Context, in *SearchAPIService.SearchFoodByIngredientRequest) (*SearchAPIService.SearchFoodByIngredientResponse, error) {
@@ -116,7 +123,7 @@ func (s *Server) SearchFoodByIngredient(ctx context.Context, in *SearchAPIServic
 		}
 	}
 
-	return &SearchAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
+	return &SearchAPIService.SearchFoodByIngredientResponse{PostPreview: posts, PageNumber: in.GetPageNumber()}, nil
 }
 
 func (s *Server) SearchUsername(ctx context.Context, in *SearchAPIService.SearchUsernameRequest) (*SearchAPIService.SearchUsernameResponse, error) {

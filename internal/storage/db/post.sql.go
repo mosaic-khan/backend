@@ -180,7 +180,15 @@ FROM post
 	LEFT JOIN post_image ON post.id = post_image.post_id
 	INNER JOIN account ON profile.user_id = account.id
 WHERE category_id = ANY($1::int[]) and is_primary = true
+ORDER BY post.num_likes
+OFFSET $2
+LIMIT 20
 `
+
+type GetPostsWithCategoryParams struct {
+	Column1 []int32
+	Offset  int32
+}
 
 type GetPostsWithCategoryRow struct {
 	ID                int64
@@ -191,8 +199,8 @@ type GetPostsWithCategoryRow struct {
 	ProfilePicAddress string
 }
 
-func (q *Queries) GetPostsWithCategory(ctx context.Context, dollar_1 []int32) ([]GetPostsWithCategoryRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsWithCategory, pq.Array(dollar_1))
+func (q *Queries) GetPostsWithCategory(ctx context.Context, arg GetPostsWithCategoryParams) ([]GetPostsWithCategoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsWithCategory, pq.Array(arg.Column1), arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +276,7 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE category_id = ANY($5::int[])
+    WHERE category_id = ANY($5::int[]) OR array_length($5::int[], 1) = 0
     INTERSECT
     SELECT post.id
     FROM post
@@ -360,7 +368,7 @@ WITH selected_post_id AS (
       SELECT post_has_ingredient.post_id AS p_id
       FROM post_has_ingredient
                JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
-      WHERE ($2 < 1 OR ingredient.name = ANY ($3::TEXT[]))
+      WHERE ($2 = 0 OR ingredient.name = ANY ($3::TEXT[]))
       GROUP BY post_has_ingredient.post_id
       HAVING COUNT(DISTINCT ingredient.id) >= $2
       INTERSECT
