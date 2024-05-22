@@ -248,6 +248,100 @@ func (q *Queries) InsertPost(ctx context.Context, arg InsertPostParams) (int64, 
 	return id, err
 }
 
+const mixedSearch = `-- name: MixedSearch :many
+WITH selected_post_id AS (
+    SELECT post_has_ingredient.post_id AS p_id
+    FROM post_has_ingredient
+             JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+    WHERE ($2 = 0 OR ingredient.name = ANY ($3::TEXT[]))
+    GROUP BY post_has_ingredient.post_id
+    HAVING COUNT(DISTINCT ingredient.id) >= $2
+    INTERSECT
+    SELECT post_has_ingredient.post_id AS p_id
+    FROM post_has_ingredient
+             JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+    WHERE NOT EXISTS (SELECT 1
+                      FROM post_has_ingredient phi
+                               JOIN ingredient ing on phi.ingredient_id = ing.id
+                      WHERE phi.post_id = post_has_ingredient.post_id
+                        and ing.name = ANY ($4::TEXT[]))
+    INTERSECT
+    SELECT post.id
+    FROM post
+    WHERE category_id = ANY($5::int[])
+    INTERSECT
+    SELECT post.id
+    FROM post
+    WHERE post.title = '' OR similarity(post.title, $6) > 0.5
+)
+SELECT post.id, post.title, post.description,
+       post_image.image_url, account.username, profile.profile_pic_address
+FROM selected_post_id
+         JOIN post on post.id = selected_post_id.p_id
+         JOIN profile on post.profile_id = profile.id
+         JOIN account on profile.user_id = account.id
+         LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true
+ORDER BY post.num_likes DESC
+OFFSET $1
+    LIMIT 20
+`
+
+type MixedSearchParams struct {
+	Page       int32
+	Includecnt interface{}
+	Include    []string
+	Exclude    []string
+	Categories []int32
+	Name       string
+}
+
+type MixedSearchRow struct {
+	ID                int64
+	Title             string
+	Description       string
+	ImageUrl          sql.NullString
+	Username          string
+	ProfilePicAddress string
+}
+
+func (q *Queries) MixedSearch(ctx context.Context, arg MixedSearchParams) ([]MixedSearchRow, error) {
+	rows, err := q.db.QueryContext(ctx, mixedSearch,
+		arg.Page,
+		arg.Includecnt,
+		pq.Array(arg.Include),
+		pq.Array(arg.Exclude),
+		pq.Array(arg.Categories),
+		arg.Name,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MixedSearchRow
+	for rows.Next() {
+		var i MixedSearchRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.Username,
+			&i.ProfilePicAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const postImageCount = `-- name: PostImageCount :one
 SELECT count(*)
 FROM post_image
@@ -266,9 +360,9 @@ WITH selected_post_id AS (
       SELECT post_has_ingredient.post_id AS p_id
       FROM post_has_ingredient
                JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
-      WHERE ingredient.name = ANY ($2::TEXT[])
+      WHERE ($2 < 1 OR ingredient.name = ANY ($3::TEXT[]))
       GROUP BY post_has_ingredient.post_id
-      HAVING COUNT(DISTINCT ingredient.id) = $3
+      HAVING COUNT(DISTINCT ingredient.id) >= $2
       INTERSECT
       SELECT post_has_ingredient.post_id AS p_id
       FROM post_has_ingredient
@@ -294,8 +388,8 @@ LIMIT 20
 
 type SearchIngredientParams struct {
 	Page       int32
+	Includecnt interface{}
 	Include    []string
-	Includecnt int32
 	Exclude    []string
 }
 
@@ -311,8 +405,8 @@ type SearchIngredientRow struct {
 func (q *Queries) SearchIngredient(ctx context.Context, arg SearchIngredientParams) ([]SearchIngredientRow, error) {
 	rows, err := q.db.QueryContext(ctx, searchIngredient,
 		arg.Page,
-		pq.Array(arg.Include),
 		arg.Includecnt,
+		pq.Array(arg.Include),
 		pq.Array(arg.Exclude),
 	)
 	if err != nil {

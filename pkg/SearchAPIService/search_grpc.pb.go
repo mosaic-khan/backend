@@ -24,6 +24,7 @@ type SearchAPIClient interface {
 	SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error)
 	SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error)
 	SearchUsername(ctx context.Context, in *SearchUsernameRequest, opts ...grpc.CallOption) (*SearchUsernameResponse, error)
+	MixedSearch(ctx context.Context, in *MixedSearchRequest, opts ...grpc.CallOption) (*MixedSearchResponse, error)
 }
 
 type searchAPIClient struct {
@@ -79,6 +80,15 @@ func (c *searchAPIClient) SearchUsername(ctx context.Context, in *SearchUsername
 	return out, nil
 }
 
+func (c *searchAPIClient) MixedSearch(ctx context.Context, in *MixedSearchRequest, opts ...grpc.CallOption) (*MixedSearchResponse, error) {
+	out := new(MixedSearchResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.SearchAPI/MixedSearch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SearchAPIServer is the server API for SearchAPI service.
 // All implementations must embed UnimplementedSearchAPIServer
 // for forward compatibility
@@ -88,6 +98,7 @@ type SearchAPIServer interface {
 	SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error)
 	SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error)
 	SearchUsername(context.Context, *SearchUsernameRequest) (*SearchUsernameResponse, error)
+	MixedSearch(context.Context, *MixedSearchRequest) (*MixedSearchResponse, error)
 	mustEmbedUnimplementedSearchAPIServer()
 }
 
@@ -109,6 +120,9 @@ func (UnimplementedSearchAPIServer) SearchCategories(context.Context, *SearchCat
 }
 func (UnimplementedSearchAPIServer) SearchUsername(context.Context, *SearchUsernameRequest) (*SearchUsernameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchUsername not implemented")
+}
+func (UnimplementedSearchAPIServer) MixedSearch(context.Context, *MixedSearchRequest) (*MixedSearchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MixedSearch not implemented")
 }
 func (UnimplementedSearchAPIServer) mustEmbedUnimplementedSearchAPIServer() {}
 
@@ -213,6 +227,24 @@ func _SearchAPI_SearchUsername_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SearchAPI_MixedSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MixedSearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchAPIServer).MixedSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.SearchAPI/MixedSearch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchAPIServer).MixedSearch(ctx, req.(*MixedSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SearchAPI_ServiceDesc is the grpc.ServiceDesc for SearchAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -239,6 +271,10 @@ var SearchAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchUsername",
 			Handler:    _SearchAPI_SearchUsername_Handler,
+		},
+		{
+			MethodName: "MixedSearch",
+			Handler:    _SearchAPI_MixedSearch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -12,6 +12,7 @@ service SearchAPI {
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
   rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
+  rpc MixedSearch (MixedSearchRequest) returns (MixedSearchResponse);
 }
 
 message PostPreviewExplore {
@@ -44,10 +45,12 @@ message GetCategoriesResponse {
 
 message SearchCategoriesRequest {
   repeated int32 categoryID = 1;
+  optional int32 pageNumber = 2;
 }
 
 message SearchCategoriesResponse {
   repeated PostPreviewExplore posts = 1;
+  int32 pageNumber = 2;
 }
 
 message SearchFoodByNameRequest {
@@ -57,6 +60,7 @@ message SearchFoodByNameRequest {
 
 message SearchFoodByNameResponse {
   repeated PostPreviewExplore postPreview = 1;
+  int32 pageNumber = 2;
 }
 
 message SearchFoodByIngredientRequest {
@@ -67,6 +71,7 @@ message SearchFoodByIngredientRequest {
 
 message SearchFoodByIngredientResponse {
   repeated PostPreviewExplore postPreview = 1;
+  int32 pageNumber = 2;
 }
 
 
@@ -76,4 +81,18 @@ message SearchUsernameRequest {
 
 message SearchUsernameResponse {
   repeated ProfilePreviewExplore profilePreview = 1;
+}
+
+
+message MixedSearchRequest {
+  string name = 1;
+  repeated int32 categoryID = 2;
+  repeated string includeIng = 3;
+  repeated string excludeIng = 4;
+  optional int32 pageNumber = 5;
+}
+
+message MixedSearchResponse {
+  repeated PostPreviewExplore posts = 1;
+  int32 pageNumber = 2;
 }

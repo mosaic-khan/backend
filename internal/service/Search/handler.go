@@ -88,6 +88,10 @@ func (s *Server) SearchFoodByName(ctx context.Context, in *SearchAPIService.Sear
 }
 
 func (s *Server) SearchFoodByIngredient(ctx context.Context, in *SearchAPIService.SearchFoodByIngredientRequest) (*SearchAPIService.SearchFoodByIngredientResponse, error) {
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
 
 	searchResult, err := s.query.SearchIngredient(ctx, db.SearchIngredientParams{
 		Page:       (in.GetPageNumber() - 1) * 20,
@@ -129,4 +133,41 @@ func (s *Server) SearchUsername(ctx context.Context, in *SearchAPIService.Search
 	}
 
 	return &SearchAPIService.SearchUsernameResponse{ProfilePreview: r}, nil
+}
+
+func (s *Server) MixedSearch(ctx context.Context, in *SearchAPIService.MixedSearchRequest) (*SearchAPIService.MixedSearchResponse, error) {
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
+
+	searchResult, err := s.query.MixedSearch(ctx, db.MixedSearchParams{
+		Page:       (in.GetPageNumber() - 1) * 20,
+		Includecnt: len(in.IncludeIng),
+		Include:    in.IncludeIng,
+		Exclude:    in.ExcludeIng,
+		Categories: in.CategoryID,
+		Name:       in.Name,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while mixed searching in db")
+	}
+
+	posts := make([]*SearchAPIService.PostPreviewExplore, len(searchResult))
+
+	for i, row := range searchResult {
+		posts[i] = &SearchAPIService.PostPreviewExplore{
+			Id:               row.ID,
+			Title:            row.Title,
+			ShortDescription: row.Description,
+			PostImage:        row.ImageUrl.String,
+			Username:         row.Username,
+			ProfilePicUrl:    row.ProfilePicAddress,
+		}
+	}
+
+	return &SearchAPIService.MixedSearchResponse{
+		Posts:      posts,
+		PageNumber: in.GetPageNumber(),
+	}, nil
 }
