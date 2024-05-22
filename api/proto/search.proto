@@ -11,7 +11,7 @@ service SearchAPI {
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
-
+  rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
 }
 
 message PostPreviewExplore {
@@ -21,6 +21,14 @@ message PostPreviewExplore {
   string postImage = 4;
   string username = 5;
   string profile_pic_url = 6;
+}
+
+message ProfilePreviewExplore {
+  int64 profileID = 1;
+  string username = 2;
+  string name = 3;
+  string profilePicUrl = 4;
+  int64 isFollowed = 5;
 }
 
 message Category {
@@ -59,4 +67,13 @@ message SearchFoodByIngredientRequest {
 
 message SearchFoodByIngredientResponse {
   repeated PostPreviewExplore postPreview = 1;
+}
+
+
+message SearchUsernameRequest {
+  string username = 1;
+}
+
+message SearchUsernameResponse {
+  repeated ProfilePreviewExplore profilePreview = 1;
 }

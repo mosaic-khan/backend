@@ -9,6 +9,7 @@ service PostAPI {
   rpc GetProfilePosts (GetProfilePostsRequests) returns (GetProfilePostsResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
   rpc SetPost (SetPostRequest) returns (SetPostResponse);
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
   rpc SuggestIngredient (SuggestIngredientRequest) returns (SuggestIngredientResponse);
   rpc AddImageForPost (AddImageForPostRequest) returns (google.protobuf.Empty);
   rpc Like (LikeRequest) returns (google.protobuf.Empty);
@@ -20,7 +21,6 @@ service PostAPI {
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc DislikeComment (DislikeCommentRequest) returns (google.protobuf.Empty);
   rpc ReportComment (RepostCommentRequest) returns (google.protobuf.Empty);
-  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
 }
 
 message Post {
