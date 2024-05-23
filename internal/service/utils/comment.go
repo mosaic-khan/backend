@@ -79,7 +79,6 @@ func (c *commentClient) swearWordTagger(comment string) (map[string]string, erro
 		if resp.StatusCode == http.StatusOK {
 			break
 		} else if resp.StatusCode == http.StatusUnauthorized {
-			fmt.Println("token was expired")
 			c.getToken()
 		}
 
