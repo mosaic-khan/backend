@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -19,8 +20,7 @@ type commentClient struct {
 
 func (c *commentClient) getToken() error {
 
-	// req, err := http.NewRequest(http.MethodGet, c.baseUrl+"/Token/GetToken?apikey="+os.Getenv("apikey"), nil)
-	req, err := http.NewRequest(http.MethodGet, c.baseUrl+"/Token/GetToken?apikey="+"5acec106-ae16-ef11-af5d-00163e6496fc", nil)
+	req, err := http.NewRequest(http.MethodGet, c.baseUrl+"/Token/GetToken?apikey="+os.Getenv("apikey"), nil)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *commentClient) IsSafe(comment string) (bool, error) {
 		} else if v == "MildSwearWord" {
 			mildCount++
 		}
-		if mildCount > 2 {
+		if mildCount > 1 {
 			return false, nil
 		}
 	}

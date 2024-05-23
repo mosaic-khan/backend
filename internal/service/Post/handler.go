@@ -273,7 +273,6 @@ func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emp
 	} else if driverErr != nil && driverErr.Code == ("23505") { // error code 23505 = unique_violation
 		return nil, status.Errorf(codes.InvalidArgument, "already liked post with id %d", in.GetPostId())
 	} else if err != nil {
-		fmt.Println(err.Error())
 		return nil, status.Error(codes.Internal, "could not like post")
 	}
 
@@ -291,7 +290,7 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
+func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*PostAPIService.Comment, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
 	safe, err := utils.CommentClient.IsSafe(in.GetComment())
@@ -301,19 +300,40 @@ func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRe
 		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
 	}
 
-	err = s.query.AddComment(ctx, db.AddCommentParams{
+	id, err := s.query.AddComment(ctx, db.AddCommentParams{
 		PostID:    in.PostID,
 		ProfileID: profileID,
 		Comment:   in.Comment,
 	})
+	var driverErr *pq.Error
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while adding a comment")
+		errors.As(err, &driverErr)
+	}
+	if driverErr != nil && driverErr.Code == ("23503") { // error code 23503 = foreign_key_violation
+		return nil, status.Errorf(codes.InvalidArgument, "post with id %d does not exists", in.GetPostID())
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, "error while adding comment")
 	}
 
-	return &emptypb.Empty{}, nil
+	comment, err := s.query.GetComment(ctx, db.GetCommentParams{ID: id, ProfileID: profileID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get comment with id %d", id)
+	}
+
+	return &PostAPIService.Comment{
+		ID:         id,
+		Name:       comment.FirstName,
+		Username:   comment.Username,
+		ProfileUrl: comment.ProfilePicAddress,
+		Comment:    comment.Comment,
+		Time:       comment.Time.GoString(),
+		HasReplies: comment.HasReplies,
+		IsLiked:    comment.Isliked,
+		NumLikes:   comment.NumLikes,
+	}, nil
 }
 
-func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*emptypb.Empty, error) {
+func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*PostAPIService.Comment, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
 	safe, err := utils.CommentClient.IsSafe(in.GetComment())
@@ -323,20 +343,40 @@ func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyReques
 		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
 	}
 
-	err = s.query.AddReply(ctx, db.AddReplyParams{
+	id, err := s.query.AddReply(ctx, db.AddReplyParams{
 		ParentID: sql.NullInt64{
 			Int64: in.CommentID,
 			Valid: true,
 		},
-		PostID:    in.PostID,
 		ProfileID: profileID,
 		Comment:   in.Comment,
 	})
+	var driverErr *pq.Error
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while adding a reply")
+		errors.As(err, &driverErr)
+	}
+	if driverErr != nil && driverErr.Code == ("23503") { // error code 23503 = foreign_key_violation
+		return nil, status.Errorf(codes.InvalidArgument, "comment or post does not exist")
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, "error while adding reply")
 	}
 
-	return &emptypb.Empty{}, nil
+	comment, err := s.query.GetComment(ctx, db.GetCommentParams{ID: id, ProfileID: profileID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get comment with id %d", id)
+	}
+
+	return &PostAPIService.Comment{
+		ID:         id,
+		Name:       comment.FirstName,
+		Username:   comment.Username,
+		ProfileUrl: comment.ProfilePicAddress,
+		Comment:    comment.Comment,
+		Time:       comment.Time.GoString(),
+		HasReplies: comment.HasReplies,
+		IsLiked:    comment.Isliked,
+		NumLikes:   comment.NumLikes,
+	}, nil
 }
 
 func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
