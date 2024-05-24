@@ -23,6 +23,9 @@ service PostAPI {
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
+  rpc PinPost (PinPostRequest) returns (google.protobuf.Empty);
+  rpc UnpinPost (UnpinPostRequest) returns (google.protobuf.Empty);
+  rpc GetPins (google.protobuf.Empty) returns (GetPinsResponse);
 }
 
 message Post {
@@ -191,4 +194,21 @@ message SearchFoodByIngredientRequest {
 
 message SearchFoodByIngredientResponse {
   repeated PostPreviewExplore postPreview = 1;
+}
+
+message PinPostRequest {
+  int64 id = 1;
+}
+
+message UnpinPostRequest {
+  int64 id = 1;
+}
+
+message PinedPost {
+  string title = 1;
+  string image_url = 2;
+}
+
+message GetPinsResponse {
+  repeated PinedPost PinedPost = 1;
 }
