@@ -21,6 +21,9 @@ service PostAPI {
   rpc LikeComment (LikeCommentRequest) returns (google.protobuf.Empty);
   rpc DislikeComment (DislikeCommentRequest) returns (google.protobuf.Empty);
   rpc ReportComment (RepostCommentRequest) returns (google.protobuf.Empty);
+  rpc PinPost (PinPostRequest) returns (google.protobuf.Empty);
+  rpc UnpinPost (UnpinPostRequest) returns (google.protobuf.Empty);
+  rpc GetPins (google.protobuf.Empty) returns (GetPinsResponse);
 }
 
 message Post {
@@ -157,4 +160,21 @@ message Category {
 
 message GetCategoriesResponse {
   repeated Category categories = 1;
+}
+
+message PinPostRequest {
+  int64 id = 1;
+}
+
+message UnpinPostRequest {
+  int64 id = 1;
+}
+
+message PinedPost {
+  string title = 1;
+  string image_url = 2;
+}
+
+message GetPinsResponse {
+  repeated PinedPost PinedPost = 1;
 }
