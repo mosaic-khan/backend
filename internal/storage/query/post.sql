@@ -11,6 +11,11 @@ FROM post
          JOIN category on post.category_id = category.id
 WHERE post.id = $1;
 
+-- name: GetPostProfileId :one
+SELECT profile_id
+FROM post
+WHERE id = $1;
+
 -- name: PostImageCount :one
 SELECT count(*)
 FROM post_image

@@ -144,6 +144,11 @@ type ProfileLikePost struct {
 	ProfileID int64
 }
 
+type ProfilePinPost struct {
+	ProfileID int64
+	PostID    int64
+}
+
 type Signup struct {
 	ID               int32
 	Email            string
