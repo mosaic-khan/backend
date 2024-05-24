@@ -4,7 +4,17 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: GetPost :one
-SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id,
+    (SELECT EXISTS
+        (SELECT
+        FROM profile_pin_post
+        WHERE profile_pin_post.profile_id = $2 AND profile_pin_post.post_id = $1)
+    ) AS pinned,
+    (SELECT EXISTS
+        (SELECT
+        FROM profile_like_post
+        WHERE profile_like_post.profile_id = $1 AND profile_like_post.post_id = $1)
+    ) AS liked
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
