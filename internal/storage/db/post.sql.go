@@ -114,6 +114,19 @@ func (q *Queries) GetPostOwnerProfile(ctx context.Context, id int64) (int64, err
 	return profile_id, err
 }
 
+const getPostProfileId = `-- name: GetPostProfileId :one
+SELECT profile_id
+FROM post
+WHERE id = $1
+`
+
+func (q *Queries) GetPostProfileId(ctx context.Context, id int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getPostProfileId, id)
+	var profile_id int64
+	err := row.Scan(&profile_id)
+	return profile_id, err
+}
+
 const getPostsPreview = `-- name: GetPostsPreview :many
 SELECT post.id, post.title, post.description, post_image.image_url, post.num_likes, post.num_comments,
        (SELECT EXISTS

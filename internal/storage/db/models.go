@@ -145,6 +145,11 @@ type ProfileLikePost struct {
 	ProfileID int64
 }
 
+type ProfilePinPost struct {
+	ProfileID int64
+	PostID    int64
+}
+
 type ReportComment struct {
 	ID        int32
 	ProfileID int64
