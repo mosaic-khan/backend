@@ -99,7 +99,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 	profileID := ctx.Value("ProfileID").(int64)
 
 	// get post
-	post, err := s.query.GetPost(ctx, in.GetPostID())
+	post, err := s.query.GetPost(ctx, db.GetPostParams{PostID: in.PostID, ProfileID: profileID})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, status.Errorf(codes.InvalidArgument, "post id %d doesn't exist\n", in.GetPostID())
 	} else if err != nil {
@@ -122,20 +122,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 		return nil, status.Errorf(codes.Internal, "could not get post images")
 	}
 
-	// check if profile has liked the post or not
-	l, err := s.query.ProfileLikePost(ctx, db.ProfileLikePostParams{ProfileID: profileID, PostID: in.GetPostID()})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not check if user has liked the post or not")
-	}
-
-	var like bool
-	if l > 0 {
-		like = true
-	} else {
-		like = false
-	}
-
-	return &PostAPIService.GetPostResponse{
+	response := &PostAPIService.GetPostResponse{
 		Post: &PostAPIService.Post{
 			Id:            post.ID,
 			Title:         post.Title,
@@ -144,14 +131,26 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			NumImages:     int32(post.NumImages),
 			NumLikes:      post.NumLikes,
 			NumComments:   post.NumComments,
-			Like:          like,
+			Like:          post.Liked,
 			Ingredients:   ingredientsMap,
 			ImageUrls:     imageUrls,
 			Username:      post.Username,
 			ProfilePicUrl: post.ProfilePicAddress,
 		},
-	}, nil
+	}
 
+	pinned := new(bool)
+
+	if profileID == post.ProfileID && !post.Pinned {
+		*pinned = false
+	} else if profileID == post.ProfileID && post.Pinned {
+		*pinned = true
+	} else {
+		pinned = nil
+	}
+	response.Post.Pinned = pinned
+
+	return response, nil
 }
 
 func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.SuggestIngredientRequest) (*PostAPIService.SuggestIngredientResponse, error) {

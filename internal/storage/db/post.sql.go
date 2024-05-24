@@ -34,13 +34,28 @@ func (q *Queries) AddImage(ctx context.Context, arg AddImageParams) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id,
+    (SELECT EXISTS
+        (SELECT
+        FROM profile_pin_post
+        WHERE profile_pin_post.profile_id = $2 AND profile_pin_post.post_id = $1)
+    ) AS pinned,
+    (SELECT EXISTS
+        (SELECT
+        FROM profile_like_post
+        WHERE profile_like_post.profile_id = $1 AND profile_like_post.post_id = $1)
+    ) AS liked
 FROM post
          JOIN profile on profile.id = post.profile_id
          JOIN account on account.id = profile.user_id
          JOIN category on post.category_id = category.id
 WHERE post.id = $1
 `
+
+type GetPostParams struct {
+	PostID    int64
+	ProfileID int64
+}
 
 type GetPostRow struct {
 	ID                int64
@@ -52,10 +67,13 @@ type GetPostRow struct {
 	NumImages         int16
 	NumLikes          int32
 	NumComments       int32
+	ProfileID         int64
+	Pinned            bool
+	Liked             bool
 }
 
-func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
-	row := q.db.QueryRowContext(ctx, getPost, id)
+func (q *Queries) GetPost(ctx context.Context, arg GetPostParams) (GetPostRow, error) {
+	row := q.db.QueryRowContext(ctx, getPost, arg.PostID, arg.ProfileID)
 	var i GetPostRow
 	err := row.Scan(
 		&i.ID,
@@ -67,6 +85,9 @@ func (q *Queries) GetPost(ctx context.Context, id int64) (GetPostRow, error) {
 		&i.NumImages,
 		&i.NumLikes,
 		&i.NumComments,
+		&i.ProfileID,
+		&i.Pinned,
+		&i.Liked,
 	)
 	return i, err
 }
