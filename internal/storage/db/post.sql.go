@@ -43,7 +43,7 @@ SELECT post.id, post.title, post.description, category.name as category, account
     (SELECT EXISTS
         (SELECT
         FROM profile_like_post
-        WHERE profile_like_post.profile_id = $1 AND profile_like_post.post_id = $1)
+        WHERE profile_like_post.profile_id = $2 AND profile_like_post.post_id = $1)
     ) AS liked
 FROM post
          JOIN profile on profile.id = post.profile_id
