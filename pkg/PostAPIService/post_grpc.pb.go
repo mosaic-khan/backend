@@ -27,8 +27,8 @@ type PostAPIClient interface {
 	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*Comment, error)
+	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*Comment, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -116,8 +116,8 @@ func (c *postAPIClient) Dislike(ctx context.Context, in *DislikeRequest, opts ..
 	return out, nil
 }
 
-func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*Comment, error) {
+	out := new(Comment)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddComment", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -125,8 +125,8 @@ func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, o
 	return out, nil
 }
 
-func (c *postAPIClient) AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *postAPIClient) AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*Comment, error) {
+	out := new(Comment)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddReply", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -191,8 +191,8 @@ type PostAPIServer interface {
 	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
 	Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error)
-	AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error)
-	AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error)
+	AddComment(context.Context, *AddCommentRequest) (*Comment, error)
+	AddReply(context.Context, *AddReplyRequest) (*Comment, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
@@ -229,10 +229,10 @@ func (UnimplementedPostAPIServer) Like(context.Context, *LikeRequest) (*emptypb.
 func (UnimplementedPostAPIServer) Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Dislike not implemented")
 }
-func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error) {
+func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
 }
-func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error) {
+func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddReply not implemented")
 }
 func (UnimplementedPostAPIServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error) {

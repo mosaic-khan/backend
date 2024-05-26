@@ -1,10 +1,18 @@
--- name: AddComment :exec
+-- name: AddComment :one
 INSERT INTO comment(post_id, profile_id, comment)
-VALUES ($1, $2, $3);
+VALUES ($1, $2, $3)
+RETURNING id;
 
--- name: AddReply :exec
+-- name: AddReply :one
+WITH parent AS (
+    SELECT post_id
+    FROM comment
+    WHERE id = $1
+)
 INSERT INTO comment(parent_id, post_id, profile_id, comment)
-VALUES ($1, $2, $3, $4);
+SELECT $1, parent.post_id, $2, $3
+FROM parent
+RETURNING id;
 
 
 -- name: LikeCommentOrReply :exec
@@ -58,3 +66,22 @@ WHERE comment.parent_id = $2 and num_report < 1000;
 
 -- name: ReportComment :exec
 INSERT INTO report_comment (profile_id, comment_id) values ($1, $2);
+
+
+
+-- name: GetComment :one
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
+       (SELECT EXISTS
+           (SELECT 1 FROM profile_like_comment
+            WHERE profile_like_comment.comment_id = comment.id and profile_like_comment.profile_id = $1)
+       ) AS isLiked,
+       (SELECT EXISTS
+           (SELECT 1 FROM comment c
+                WHERE c.parent_id = comment.id
+           )
+       ) AS has_replies,
+       comment.time
+FROM comment
+    JOIN profile on comment.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+WHERE comment.id = $2;
