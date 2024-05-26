@@ -10,16 +10,16 @@ import (
 	"main/pkg/SearchAPIService"
 )
 
-func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*SearchAPIService.GetCategoriesResponse, error) {
+func (s *Server) GetAllCategories(ctx context.Context, _ *emptypb.Empty) (*SearchAPIService.GetAllCategoriesResponse, error) {
 	categoriesDB, err := s.query.GetCategories(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "could not get categories")
 	}
 
-	categories := make([]*SearchAPIService.Category, len(categoriesDB))
+	categories := make([]*SearchAPIService.Categories, len(categoriesDB))
 
 	for i, c := range categoriesDB {
-		temp := &SearchAPIService.Category{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
+		temp := &SearchAPIService.Categories{Id: int32(c.ID), Name: c.Name, Level: int32(c.Level)}
 		if c.Parent.Valid {
 			p := int32(c.Parent.Int16)
 			temp.Parent = &p
@@ -29,7 +29,7 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*SearchAP
 		categories[i] = temp
 	}
 
-	return &SearchAPIService.GetCategoriesResponse{Categories: categories}, nil
+	return &SearchAPIService.GetAllCategoriesResponse{Categories: categories}, nil
 }
 
 func (s *Server) SearchCategories(ctx context.Context, in *SearchAPIService.SearchCategoriesRequest) (*SearchAPIService.SearchCategoriesResponse, error) {

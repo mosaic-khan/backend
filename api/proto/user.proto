@@ -194,7 +194,7 @@ message ProfilePreview {
   string username = 2;
   string name = 3;
   string profilePicUrl = 4;
-  int64 isFollowed = 5;
+  bool isFollowed = 5;
 }
 
 message FollowRequest {

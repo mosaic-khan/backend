@@ -7,7 +7,7 @@ package KhanAPI;
 option go_package = "./../../pkg/SearchAPIService";
 
 service SearchAPI {
-  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse);
+  rpc GetAllCategories (google.protobuf.Empty) returns (GetAllCategoriesResponse);
   rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
   rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
   rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
@@ -32,15 +32,15 @@ message ProfilePreviewExplore {
   int64 isFollowed = 5;
 }
 
-message Category {
+message Categories {
   int32 id = 1;
   string name = 2;
   int32 level = 3;
   optional int32 parent =4;
 }
 
-message GetCategoriesResponse {
-  repeated Category categories = 1;
+message GetAllCategoriesResponse {
+  repeated Categories categories = 1;
 }
 
 message SearchCategoriesRequest {

@@ -44,21 +44,28 @@ func (q *Queries) FollowStatus(ctx context.Context, arg FollowStatusParams) (boo
 }
 
 const followerList = `-- name: FollowerList :many
-SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
-FROM follow join profile on follow.follower = profile.id
-JOIN account on profile.user_id = account.id
-WHERE following = $1
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address,
+       (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = $1 and f.following = $2)) AS is_followed
+FROM follow JOIN profile on follow.following = profile.id
+    JOIN account on profile.user_id = account.id
+WHERE following = $2
 `
+
+type FollowerListParams struct {
+	Myprofile int64
+	Profileid int64
+}
 
 type FollowerListRow struct {
 	ID                int64
 	Username          string
 	Name              interface{}
 	ProfilePicAddress string
+	IsFollowed        bool
 }
 
-func (q *Queries) FollowerList(ctx context.Context, following int64) ([]FollowerListRow, error) {
-	rows, err := q.db.QueryContext(ctx, followerList, following)
+func (q *Queries) FollowerList(ctx context.Context, arg FollowerListParams) ([]FollowerListRow, error) {
+	rows, err := q.db.QueryContext(ctx, followerList, arg.Myprofile, arg.Profileid)
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +78,7 @@ func (q *Queries) FollowerList(ctx context.Context, following int64) ([]Follower
 			&i.Username,
 			&i.Name,
 			&i.ProfilePicAddress,
+			&i.IsFollowed,
 		); err != nil {
 			return nil, err
 		}
@@ -86,21 +94,28 @@ func (q *Queries) FollowerList(ctx context.Context, following int64) ([]Follower
 }
 
 const followingList = `-- name: FollowingList :many
-SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address,
+       (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = $1 and f.following = $2)) AS is_followed
 FROM follow JOIN profile on follow.following = profile.id
-JOIN account on profile.user_id = account.id
-WHERE follower = $1
+    JOIN account on profile.user_id = account.id
+WHERE follower = $2
 `
+
+type FollowingListParams struct {
+	Myprofile int64
+	Profileid int64
+}
 
 type FollowingListRow struct {
 	ID                int64
 	Username          string
 	Name              interface{}
 	ProfilePicAddress string
+	IsFollowed        bool
 }
 
-func (q *Queries) FollowingList(ctx context.Context, follower int64) ([]FollowingListRow, error) {
-	rows, err := q.db.QueryContext(ctx, followingList, follower)
+func (q *Queries) FollowingList(ctx context.Context, arg FollowingListParams) ([]FollowingListRow, error) {
+	rows, err := q.db.QueryContext(ctx, followingList, arg.Myprofile, arg.Profileid)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +128,7 @@ func (q *Queries) FollowingList(ctx context.Context, follower int64) ([]Followin
 			&i.Username,
 			&i.Name,
 			&i.ProfilePicAddress,
+			&i.IsFollowed,
 		); err != nil {
 			return nil, err
 		}
