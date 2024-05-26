@@ -523,10 +523,18 @@ func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.
 func (s *Server) ReportComment(ctx context.Context, in *PostAPIService.RepostCommentRequest) (*emptypb.Empty, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	_ = s.query.ReportComment(ctx, db.ReportCommentParams{
+	err := s.query.ReportComment(ctx, db.ReportCommentParams{
 		ProfileID: profileID,
 		CommentID: in.Id,
 	})
+	var driverErr *pq.Error
+	if err != nil {
+		errors.As(err, &driverErr)
+	}
+
+	if driverErr != nil && driverErr.Code == ("23505") {
+		return nil, status.Errorf(codes.AlreadyExists, "unique_violation")
+	}
 
 	return nil, nil
 }

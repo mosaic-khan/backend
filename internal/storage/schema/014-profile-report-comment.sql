@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS report_comment (
     id SERIAL NOT NULL PRIMARY KEY,
-    profile_id  BIGINT REFERENCES profile(id) NOT NULL,
-    comment_id BIGINT REFERENCES comment(id) NOT NULL,
+    profile_id  BIGINT REFERENCES profile(id) ON DELETE CASCADE NOT NULL,
+    comment_id BIGINT REFERENCES comment(id) ON DELETE CASCADE NOT NULL,
     UNIQUE (profile_id, comment_id)
 );
 
