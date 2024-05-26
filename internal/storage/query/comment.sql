@@ -32,7 +32,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
 FROM comment
     JOIN profile on comment.profile_id = profile.id
     JOIN account on profile.user_id = account.id
-WHERE comment.parent_id IS NULL and comment.post_id = $2;
+WHERE comment.parent_id IS NULL and comment.post_id = $2 and num_report < 1000;
 
 
 -- name: GetReplies :many
@@ -52,4 +52,9 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $2;
+WHERE comment.parent_id = $2 and num_report < 1000;
+
+
+
+-- name: ReportComment :exec
+INSERT INTO report_comment (profile_id, comment_id) values ($1, $2);

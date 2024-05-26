@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS comment (
     num_likes INT NOT NULL DEFAULT 0 CHECK(num_likes >= 0),
     comment TEXT NOT NULL,
     time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    num_report INT NOT NULL DEFAULT 0,
     FOREIGN KEY(parent_id)
         REFERENCES comment(id)
         ON DELETE CASCADE

@@ -80,7 +80,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
 FROM comment
     JOIN profile on comment.profile_id = profile.id
     JOIN account on profile.user_id = account.id
-WHERE comment.parent_id IS NULL and comment.post_id = $2
+WHERE comment.parent_id IS NULL and comment.post_id = $2 and num_report < 1000
 `
 
 type GetPostsCommentsParams struct {
@@ -150,7 +150,7 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $2
+WHERE comment.parent_id = $2 and num_report < 1000
 `
 
 type GetRepliesParams struct {
@@ -213,5 +213,19 @@ type LikeCommentOrReplyParams struct {
 
 func (q *Queries) LikeCommentOrReply(ctx context.Context, arg LikeCommentOrReplyParams) error {
 	_, err := q.db.ExecContext(ctx, likeCommentOrReply, arg.ProfileID, arg.CommentID)
+	return err
+}
+
+const reportComment = `-- name: ReportComment :exec
+INSERT INTO report_comment (profile_id, comment_id) values ($1, $2)
+`
+
+type ReportCommentParams struct {
+	ProfileID int64
+	CommentID int64
+}
+
+func (q *Queries) ReportComment(ctx context.Context, arg ReportCommentParams) error {
+	_, err := q.db.ExecContext(ctx, reportComment, arg.ProfileID, arg.CommentID)
 	return err
 }

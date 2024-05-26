@@ -32,6 +32,7 @@ type PostAPIClient interface {
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DislikeComment(ctx context.Context, in *DislikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
 	SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error)
 	SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error)
@@ -163,6 +164,15 @@ func (c *postAPIClient) DislikeComment(ctx context.Context, in *DislikeCommentRe
 	return out, nil
 }
 
+func (c *postAPIClient) ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/ReportComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
 	out := new(GetCategoriesResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
@@ -216,6 +226,7 @@ type PostAPIServer interface {
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error)
+	ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error)
 	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
 	SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error)
 	SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error)
@@ -265,6 +276,9 @@ func (UnimplementedPostAPIServer) LikeComment(context.Context, *LikeCommentReque
 }
 func (UnimplementedPostAPIServer) DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DislikeComment not implemented")
+}
+func (UnimplementedPostAPIServer) ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportComment not implemented")
 }
 func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
@@ -525,6 +539,24 @@ func _PostAPI_DislikeComment_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_ReportComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RepostCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).ReportComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/ReportComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).ReportComment(ctx, req.(*RepostCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -655,6 +687,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DislikeComment",
 			Handler:    _PostAPI_DislikeComment_Handler,
+		},
+		{
+			MethodName: "ReportComment",
+			Handler:    _PostAPI_ReportComment_Handler,
 		},
 		{
 			MethodName: "GetCategories",
