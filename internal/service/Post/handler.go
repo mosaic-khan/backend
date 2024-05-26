@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
 	"strconv"
@@ -291,31 +290,6 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.SearchCategoriesRequest) (*PostAPIService.SearchCategoriesResponse, error) {
-
-	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
-	if err != nil {
-		log.Println(err.Error())
-		return nil, status.Error(codes.Internal, "could not get posts")
-	}
-
-	var posts []*PostAPIService.PostPreviewExplore
-
-	for _, p := range postsDB {
-		posts = append(posts, &PostAPIService.PostPreviewExplore{
-			Id:               p.ID,
-			Title:            p.Title,
-			ShortDescription: p.Description,
-			PostImage:        p.PostImage.String,
-			Username:         p.Username,
-			ProfilePicUrl:    p.ProfilePicAddress,
-		})
-	}
-
-	return &PostAPIService.SearchCategoriesResponse{Posts: posts}, nil
-
-}
-
 func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
@@ -460,64 +434,6 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 	}
 
 	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
-}
-
-func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
-	if in.PageNumber == nil {
-		in.PageNumber = new(int32)
-		*in.PageNumber = 1
-	}
-
-	searchResult, err := s.query.SearchName(ctx, db.SearchNameParams{
-		Name: in.Name,
-		Page: (in.GetPageNumber() - 1) * 20,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while searching for posts")
-	}
-
-	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
-
-	for i, row := range searchResult {
-		posts[i] = &PostAPIService.PostPreviewExplore{
-			Id:               row.ID,
-			Title:            row.Title,
-			ShortDescription: row.Description,
-			PostImage:        row.ImageUrl.String,
-			Username:         row.Username,
-			ProfilePicUrl:    row.ProfilePicAddress,
-		}
-	}
-
-	return &PostAPIService.SearchFoodByNameResponse{PostPreview: posts}, nil
-}
-
-func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
-
-	searchResult, err := s.query.SearchIngredient(ctx, db.SearchIngredientParams{
-		Page:       (in.GetPageNumber() - 1) * 20,
-		Include:    in.Include,
-		Includecnt: int32(len(in.Include)),
-		Exclude:    in.Exclude,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while searching for posts")
-	}
-
-	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
-
-	for i, row := range searchResult {
-		posts[i] = &PostAPIService.PostPreviewExplore{
-			Id:               row.ID,
-			Title:            row.Title,
-			ShortDescription: row.Description,
-			PostImage:        row.ImageUrl.String,
-			Username:         row.Username,
-			ProfilePicUrl:    row.ProfilePicAddress,
-		}
-	}
-
-	return &PostAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
 }
 
 func (s *Server) ReportComment(ctx context.Context, in *PostAPIService.RepostCommentRequest) (*emptypb.Empty, error) {
