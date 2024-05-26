@@ -24,7 +24,6 @@ service UserAPI {
   rpc GetProfile (GetProfileRequests) returns (GetProfileResponse);
   rpc GetCities (GetCitiesRequest) returns (GetCitiesResponse);
   rpc DeleteAccount (DeleteAccountRequest) returns (google.protobuf.Empty);
-  rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
   rpc Follow (FollowRequest) returns (google.protobuf.Empty);
   rpc Unfollow (UnfollowRequest) returns (google.protobuf.Empty);
   rpc GetFollowingList (GetFollowingListRequest) returns (GetFollowingListResponse);
@@ -188,14 +187,6 @@ message GetCitiesResponse {
 
 message DeleteAccountRequest {
   string password = 1;
-}
-
-message SearchUsernameRequest {
-  string username = 1;
-}
-
-message SearchUsernameResponse {
-  repeated ProfilePreview ProfilePreview = 1;
 }
 
 message ProfilePreview {

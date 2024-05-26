@@ -22,6 +22,7 @@ type PostAPIClient interface {
 	GetProfilePosts(ctx context.Context, in *GetProfilePostsRequests, opts ...grpc.CallOption) (*GetProfilePostsResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error)
+	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
 	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
 	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -33,10 +34,6 @@ type PostAPIClient interface {
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DislikeComment(ctx context.Context, in *DislikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
-	SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error)
-	SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error)
-	SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error)
 }
 
 type postAPIClient struct {
@@ -68,6 +65,15 @@ func (c *postAPIClient) GetPost(ctx context.Context, in *GetPostRequest, opts ..
 func (c *postAPIClient) SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error) {
 	out := new(SetPostResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SetPost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
+	out := new(GetCategoriesResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -173,42 +179,6 @@ func (c *postAPIClient) ReportComment(ctx context.Context, in *RepostCommentRequ
 	return out, nil
 }
 
-func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
-	out := new(GetCategoriesResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error) {
-	out := new(SearchFoodByNameResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchFoodByName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error) {
-	out := new(SearchFoodByIngredientResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchFoodByIngredient", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error) {
-	out := new(SearchCategoriesResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchCategories", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -216,6 +186,7 @@ type PostAPIServer interface {
 	GetProfilePosts(context.Context, *GetProfilePostsRequests) (*GetProfilePostsResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error)
+	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
 	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
 	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
@@ -227,10 +198,6 @@ type PostAPIServer interface {
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error)
 	ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error)
-	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
-	SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error)
-	SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error)
-	SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -246,6 +213,9 @@ func (UnimplementedPostAPIServer) GetPost(context.Context, *GetPostRequest) (*Ge
 }
 func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPost not implemented")
+}
+func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
 }
 func (UnimplementedPostAPIServer) SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SuggestIngredient not implemented")
@@ -279,18 +249,6 @@ func (UnimplementedPostAPIServer) DislikeComment(context.Context, *DislikeCommen
 }
 func (UnimplementedPostAPIServer) ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportComment not implemented")
-}
-func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
-}
-func (UnimplementedPostAPIServer) SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
-}
-func (UnimplementedPostAPIServer) SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByIngredient not implemented")
-}
-func (UnimplementedPostAPIServer) SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchCategories not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -355,6 +313,24 @@ func _PostAPI_SetPost_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostAPIServer).SetPost(ctx, req.(*SetPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).GetCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/GetCategories",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).GetCategories(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -557,78 +533,6 @@ func _PostAPI_ReportComment_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).GetCategories(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/GetCategories",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).GetCategories(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchFoodByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchFoodByNameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchFoodByName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchFoodByName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchFoodByName(ctx, req.(*SearchFoodByNameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchFoodByIngredient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchFoodByIngredientRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchFoodByIngredient(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchFoodByIngredient",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchFoodByIngredient(ctx, req.(*SearchFoodByIngredientRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchCategoriesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchCategories(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchCategories",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchCategories(ctx, req.(*SearchCategoriesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -647,6 +551,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetPost",
 			Handler:    _PostAPI_SetPost_Handler,
+		},
+		{
+			MethodName: "GetCategories",
+			Handler:    _PostAPI_GetCategories_Handler,
 		},
 		{
 			MethodName: "SuggestIngredient",
@@ -691,22 +599,6 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportComment",
 			Handler:    _PostAPI_ReportComment_Handler,
-		},
-		{
-			MethodName: "GetCategories",
-			Handler:    _PostAPI_GetCategories_Handler,
-		},
-		{
-			MethodName: "SearchFoodByName",
-			Handler:    _PostAPI_SearchFoodByName_Handler,
-		},
-		{
-			MethodName: "SearchFoodByIngredient",
-			Handler:    _PostAPI_SearchFoodByIngredient_Handler,
-		},
-		{
-			MethodName: "SearchCategories",
-			Handler:    _PostAPI_SearchCategories_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
