@@ -58,6 +58,7 @@ FROM post
     LEFT JOIN post_image on post.id = post_image.post_id
 WHERE post.profile_id = $1 and post_image.is_primary = true
 ORDER BY post.id DESC
+OFFSET $3
 LIMIT 20;
 
 
