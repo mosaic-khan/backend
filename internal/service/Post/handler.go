@@ -99,7 +99,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 	profileID := ctx.Value("ProfileID").(int64)
 
 	// get post
-	post, err := s.query.GetPost(ctx, in.GetPostID())
+	post, err := s.query.GetPost(ctx, db.GetPostParams{PostID: in.PostID, ProfileID: profileID})
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, status.Errorf(codes.InvalidArgument, "post id %d doesn't exist\n", in.GetPostID())
 	} else if err != nil {
@@ -122,20 +122,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 		return nil, status.Errorf(codes.Internal, "could not get post images")
 	}
 
-	// check if profile has liked the post or not
-	l, err := s.query.ProfileLikePost(ctx, db.ProfileLikePostParams{ProfileID: profileID, PostID: in.GetPostID()})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not check if user has liked the post or not")
-	}
-
-	var like bool
-	if l > 0 {
-		like = true
-	} else {
-		like = false
-	}
-
-	return &PostAPIService.GetPostResponse{
+	response := &PostAPIService.GetPostResponse{
 		Post: &PostAPIService.Post{
 			Id:            post.ID,
 			Title:         post.Title,
@@ -144,14 +131,26 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			NumImages:     int32(post.NumImages),
 			NumLikes:      post.NumLikes,
 			NumComments:   post.NumComments,
-			Like:          like,
+			Like:          post.Liked,
 			Ingredients:   ingredientsMap,
 			ImageUrls:     imageUrls,
 			Username:      post.Username,
 			ProfilePicUrl: post.ProfilePicAddress,
 		},
-	}, nil
+	}
 
+	pinned := new(bool)
+
+	if profileID == post.ProfileID && !post.Pinned {
+		*pinned = false
+	} else if profileID == post.ProfileID && post.Pinned {
+		*pinned = true
+	} else {
+		pinned = nil
+	}
+	response.Post.Pinned = pinned
+
+	return response, nil
 }
 
 func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.SuggestIngredientRequest) (*PostAPIService.SuggestIngredientResponse, error) {
@@ -508,4 +507,68 @@ func (s *Server) ReportComment(ctx context.Context, in *PostAPIService.RepostCom
 	}
 
 	return nil, nil
+}
+
+func (s *Server) PinPost(ctx context.Context, in *PostAPIService.PinPostRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	p, err := s.query.GetPostProfileId(ctx, in.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not pin post, cant find post owner")
+	}
+	if p != profileID {
+		return nil, status.Errorf(codes.InvalidArgument, "Don't have permission to pin post with id %d", in.GetId())
+	}
+
+	c, err := s.query.GetPinsCount(ctx, profileID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not pin post")
+	}
+	if c > 3 {
+		return nil, status.Errorf(codes.InvalidArgument, "Can not pin posts any more, maximum number of pins 3")
+	}
+
+	err = s.query.AddPin(ctx, db.AddPinParams{ProfileID: profileID, PostID: in.GetId()})
+	if err != nil {
+
+		var driverErr *pq.Error
+		if errors.As(err, &driverErr) && driverErr.Code == "23505" { // error code 23505 = unique_violation
+			return nil, status.Errorf(codes.InvalidArgument, "post with id %d is already pinned", in.GetId())
+		}
+
+		return nil, status.Errorf(codes.Internal, "Could not pin post")
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) UnpinPost(ctx context.Context, in *PostAPIService.UnpinPostRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.RemovePin(ctx, db.RemovePinParams{ProfileID: profileID, PostID: in.GetId()})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not unpin post with id %d", in.GetId())
+	}
+
+	return &emptypb.Empty{}, nil
+
+}
+
+func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetPinsResponse, error) {
+
+	profileID := ctx.Value("ProfileID").(int64)
+
+	pins, err := s.query.GetPins(ctx, profileID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not retreive pined post")
+	}
+
+	getPinsReq := &PostAPIService.GetPinsResponse{}
+
+	for _, p := range pins {
+		getPinsReq.PinedPost = append(getPinsReq.PinedPost, &PostAPIService.PinedPost{Title: p.Title, ImageUrl: p.ImageUrl.String})
+	}
+
+	return getPinsReq, nil
+
 }
