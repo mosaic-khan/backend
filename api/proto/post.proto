@@ -67,10 +67,12 @@ message SetPostResponse {
 
 message GetProfilePostsRequests {
   int64 profileID = 1;
+  optional int32 pageNumber = 2;
 }
 
 message GetProfilePostsResponse {
   repeated PostPreview postPreview = 1;
+  int32 pageNumber = 2;
 }
 
 message GetPostRequest {

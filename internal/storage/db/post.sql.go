@@ -158,12 +158,14 @@ FROM post
     LEFT JOIN post_image on post.id = post_image.post_id
 WHERE post.profile_id = $1 and post_image.is_primary = true
 ORDER BY post.id DESC
+OFFSET $3
 LIMIT 20
 `
 
 type GetPostsPreviewParams struct {
 	ProfileID   int64
 	ProfileID_2 int64
+	Offset      int32
 }
 
 type GetPostsPreviewRow struct {
@@ -177,7 +179,7 @@ type GetPostsPreviewRow struct {
 }
 
 func (q *Queries) GetPostsPreview(ctx context.Context, arg GetPostsPreviewParams) ([]GetPostsPreviewRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsPreview, arg.ProfileID, arg.ProfileID_2)
+	rows, err := q.db.QueryContext(ctx, getPostsPreview, arg.ProfileID, arg.ProfileID_2, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
