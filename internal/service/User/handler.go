@@ -677,8 +677,12 @@ func (s *Server) Unfollow(ctx context.Context, in *UserAPIService.UnfollowReques
 }
 
 func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFollowingListRequest) (*UserAPIService.GetFollowingListResponse, error) {
+	profileId := ctx.Value("ProfileID").(int64)
 
-	dbList, err := s.query.FollowingList(ctx, in.ProfileID)
+	dbList, err := s.query.FollowingList(ctx, db.FollowingListParams{
+		Myprofile: profileId,
+		Profileid: in.ProfileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
 	}
@@ -690,6 +694,7 @@ func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFol
 			Username:      row.Username,
 			Name:          row.Name.(string),
 			ProfilePicUrl: row.ProfilePicAddress,
+			IsFollowed:    row.IsFollowed,
 		}
 	}
 
@@ -697,8 +702,12 @@ func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFol
 }
 
 func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFollowerListRequest) (*UserAPIService.GetFollowerListResponse, error) {
+	profileId := ctx.Value("ProfileID").(int64)
 
-	dbList, err := s.query.FollowerList(ctx, in.ProfileID)
+	dbList, err := s.query.FollowerList(ctx, db.FollowerListParams{
+		Myprofile: profileId,
+		Profileid: in.ProfileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
 	}
@@ -710,6 +719,7 @@ func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFoll
 			Username:      row.Username,
 			Name:          row.Name.(string),
 			ProfilePicUrl: row.ProfilePicAddress,
+			IsFollowed:    row.IsFollowed,
 		}
 	}
 

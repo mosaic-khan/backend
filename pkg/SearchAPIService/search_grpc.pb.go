@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SearchAPIClient interface {
-	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
+	GetAllCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllCategoriesResponse, error)
 	SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error)
 	SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error)
 	SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error)
@@ -35,9 +35,9 @@ func NewSearchAPIClient(cc grpc.ClientConnInterface) SearchAPIClient {
 	return &searchAPIClient{cc}
 }
 
-func (c *searchAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
-	out := new(GetCategoriesResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.SearchAPI/GetCategories", in, out, opts...)
+func (c *searchAPIClient) GetAllCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllCategoriesResponse, error) {
+	out := new(GetAllCategoriesResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.SearchAPI/GetAllCategories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (c *searchAPIClient) MixedSearch(ctx context.Context, in *MixedSearchReques
 // All implementations must embed UnimplementedSearchAPIServer
 // for forward compatibility
 type SearchAPIServer interface {
-	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
+	GetAllCategories(context.Context, *emptypb.Empty) (*GetAllCategoriesResponse, error)
 	SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error)
 	SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error)
 	SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error)
@@ -106,8 +106,8 @@ type SearchAPIServer interface {
 type UnimplementedSearchAPIServer struct {
 }
 
-func (UnimplementedSearchAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
+func (UnimplementedSearchAPIServer) GetAllCategories(context.Context, *emptypb.Empty) (*GetAllCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllCategories not implemented")
 }
 func (UnimplementedSearchAPIServer) SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
@@ -137,20 +137,20 @@ func RegisterSearchAPIServer(s grpc.ServiceRegistrar, srv SearchAPIServer) {
 	s.RegisterService(&SearchAPI_ServiceDesc, srv)
 }
 
-func _SearchAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SearchAPI_GetAllCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SearchAPIServer).GetCategories(ctx, in)
+		return srv.(SearchAPIServer).GetAllCategories(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/KhanAPI.SearchAPI/GetCategories",
+		FullMethod: "/KhanAPI.SearchAPI/GetAllCategories",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SearchAPIServer).GetCategories(ctx, req.(*emptypb.Empty))
+		return srv.(SearchAPIServer).GetAllCategories(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -253,8 +253,8 @@ var SearchAPI_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SearchAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetCategories",
-			Handler:    _SearchAPI_GetCategories_Handler,
+			MethodName: "GetAllCategories",
+			Handler:    _SearchAPI_GetAllCategories_Handler,
 		},
 		{
 			MethodName: "SearchFoodByName",
