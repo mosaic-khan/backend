@@ -57,7 +57,8 @@ SELECT post.id, post.title, post.description, post_image.image_url, post.num_lik
 FROM post
     LEFT JOIN post_image on post.id = post_image.post_id
 WHERE post.profile_id = $1 and post_image.is_primary = true
-ORDER BY post.id
+ORDER BY post.id DESC
+OFFSET $3
 LIMIT 20;
 
 
@@ -72,7 +73,10 @@ FROM post
 	INNER JOIN profile ON post.profile_id = profile.id
 	LEFT JOIN post_image ON post.id = post_image.post_id
 	INNER JOIN account ON profile.user_id = account.id
-WHERE category_id = ANY($1::int[]) and is_primary = true;
+WHERE category_id = ANY($1::int[]) and is_primary = true
+ORDER BY post.num_likes
+OFFSET $2
+LIMIT 20;
 
 
 -- name: SearchName :many
@@ -93,9 +97,9 @@ WITH selected_post_id AS (
       SELECT post_has_ingredient.post_id AS p_id
       FROM post_has_ingredient
                JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
-      WHERE ingredient.name = ANY (sqlc.arg(include)::TEXT[])
+      WHERE (sqlc.arg(includeCnt) = 0 OR ingredient.name = ANY (sqlc.arg(include)::TEXT[]))
       GROUP BY post_has_ingredient.post_id
-      HAVING COUNT(DISTINCT ingredient.id) = sqlc.arg(includeCnt)
+      HAVING COUNT(DISTINCT ingredient.id) >= sqlc.arg(includeCnt)
       INTERSECT
       SELECT post_has_ingredient.post_id AS p_id
       FROM post_has_ingredient
@@ -122,3 +126,41 @@ LIMIT 20;
 DELETE
 FROM post
 WHERE id = $1;
+
+-- name: MixedSearch :many
+WITH selected_post_id AS (
+    SELECT post_has_ingredient.post_id AS p_id
+    FROM post_has_ingredient
+             JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+    WHERE (sqlc.arg(includeCnt) = 0 OR ingredient.name = ANY (sqlc.arg(include)::TEXT[]))
+    GROUP BY post_has_ingredient.post_id
+    HAVING COUNT(DISTINCT ingredient.id) >= sqlc.arg(includeCnt)
+    INTERSECT
+    SELECT post_has_ingredient.post_id AS p_id
+    FROM post_has_ingredient
+             JOIN ingredient on post_has_ingredient.ingredient_id = ingredient.id
+    WHERE NOT EXISTS (SELECT 1
+                      FROM post_has_ingredient phi
+                               JOIN ingredient ing on phi.ingredient_id = ing.id
+                      WHERE phi.post_id = post_has_ingredient.post_id
+                        and ing.name = ANY (sqlc.arg(exclude)::TEXT[]))
+    INTERSECT
+    SELECT post.id
+    FROM post
+    WHERE category_id = ANY(sqlc.arg(categories)::int[]) OR array_length(sqlc.arg(categories)::int[], 1) = 0
+    INTERSECT
+    SELECT post.id
+    FROM post
+    WHERE post.title = '' OR similarity(post.title, sqlc.arg(name)) > 0.5
+)
+SELECT post.id, post.title, post.description,
+       post_image.image_url, account.username, profile.profile_pic_address
+FROM selected_post_id
+         JOIN post on post.id = selected_post_id.p_id
+         JOIN profile on post.profile_id = profile.id
+         JOIN account on profile.user_id = account.id
+         LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true
+ORDER BY post.num_likes DESC
+OFFSET sqlc.arg(page)
+    LIMIT 20;

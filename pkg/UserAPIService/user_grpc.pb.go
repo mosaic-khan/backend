@@ -36,7 +36,6 @@ type UserAPIClient interface {
 	GetProfile(ctx context.Context, in *GetProfileRequests, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	GetCities(ctx context.Context, in *GetCitiesRequest, opts ...grpc.CallOption) (*GetCitiesResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	SearchUsername(ctx context.Context, in *SearchUsernameRequest, opts ...grpc.CallOption) (*SearchUsernameResponse, error)
 	Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Unfollow(ctx context.Context, in *UnfollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetFollowingList(ctx context.Context, in *GetFollowingListRequest, opts ...grpc.CallOption) (*GetFollowingListResponse, error)
@@ -204,15 +203,6 @@ func (c *userAPIClient) DeleteAccount(ctx context.Context, in *DeleteAccountRequ
 	return out, nil
 }
 
-func (c *userAPIClient) SearchUsername(ctx context.Context, in *SearchUsernameRequest, opts ...grpc.CallOption) (*SearchUsernameResponse, error) {
-	out := new(SearchUsernameResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/SearchUsername", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *userAPIClient) Follow(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/KhanAPI.UserAPI/Follow", in, out, opts...)
@@ -270,7 +260,6 @@ type UserAPIServer interface {
 	GetProfile(context.Context, *GetProfileRequests) (*GetProfileResponse, error)
 	GetCities(context.Context, *GetCitiesRequest) (*GetCitiesResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountRequest) (*emptypb.Empty, error)
-	SearchUsername(context.Context, *SearchUsernameRequest) (*SearchUsernameResponse, error)
 	Follow(context.Context, *FollowRequest) (*emptypb.Empty, error)
 	Unfollow(context.Context, *UnfollowRequest) (*emptypb.Empty, error)
 	GetFollowingList(context.Context, *GetFollowingListRequest) (*GetFollowingListResponse, error)
@@ -332,9 +321,6 @@ func (UnimplementedUserAPIServer) GetCities(context.Context, *GetCitiesRequest) 
 }
 func (UnimplementedUserAPIServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
-}
-func (UnimplementedUserAPIServer) SearchUsername(context.Context, *SearchUsernameRequest) (*SearchUsernameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchUsername not implemented")
 }
 func (UnimplementedUserAPIServer) Follow(context.Context, *FollowRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Follow not implemented")
@@ -667,24 +653,6 @@ func _UserAPI_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserAPI_SearchUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchUsernameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserAPIServer).SearchUsername(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.UserAPI/SearchUsername",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserAPIServer).SearchUsername(ctx, req.(*SearchUsernameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _UserAPI_Follow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FollowRequest)
 	if err := dec(in); err != nil {
@@ -831,10 +799,6 @@ var UserAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAccount",
 			Handler:    _UserAPI_DeleteAccount_Handler,
-		},
-		{
-			MethodName: "SearchUsername",
-			Handler:    _UserAPI_SearchUsername_Handler,
 		},
 		{
 			MethodName: "Follow",

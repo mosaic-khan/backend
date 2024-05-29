@@ -24,13 +24,15 @@ SELECT EXISTS (
 
 
 -- name: FollowingList :many
-SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address,
+       (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = sqlc.arg(myProfile) and f.following = sqlc.arg(profileID))) AS is_followed
 FROM follow JOIN profile on follow.following = profile.id
-JOIN account on profile.user_id = account.id
-WHERE follower = $1;
+    JOIN account on profile.user_id = account.id
+WHERE follower = sqlc.arg(profileID);
 
 -- name: FollowerList :many
-SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address
-FROM follow join profile on follow.follower = profile.id
-JOIN account on profile.user_id = account.id
-WHERE following = $1;
+SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address,
+       (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = sqlc.arg(myProfile) and f.following = sqlc.arg(profileID))) AS is_followed
+FROM follow JOIN profile on follow.following = profile.id
+    JOIN account on profile.user_id = account.id
+WHERE following = sqlc.arg(profileID);

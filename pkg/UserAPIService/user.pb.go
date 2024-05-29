@@ -1532,100 +1532,6 @@ func (x *DeleteAccountRequest) GetPassword() string {
 	return ""
 }
 
-type SearchUsernameRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
-}
-
-func (x *SearchUsernameRequest) Reset() {
-	*x = SearchUsernameRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[26]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SearchUsernameRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SearchUsernameRequest) ProtoMessage() {}
-
-func (x *SearchUsernameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[26]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SearchUsernameRequest.ProtoReflect.Descriptor instead.
-func (*SearchUsernameRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{26}
-}
-
-func (x *SearchUsernameRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
-	}
-	return ""
-}
-
-type SearchUsernameResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ProfilePreview []*ProfilePreview `protobuf:"bytes,1,rep,name=ProfilePreview,proto3" json:"ProfilePreview,omitempty"`
-}
-
-func (x *SearchUsernameResponse) Reset() {
-	*x = SearchUsernameResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[27]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SearchUsernameResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SearchUsernameResponse) ProtoMessage() {}
-
-func (x *SearchUsernameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[27]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SearchUsernameResponse.ProtoReflect.Descriptor instead.
-func (*SearchUsernameResponse) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{27}
-}
-
-func (x *SearchUsernameResponse) GetProfilePreview() []*ProfilePreview {
-	if x != nil {
-		return x.ProfilePreview
-	}
-	return nil
-}
-
 type ProfilePreview struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1635,12 +1541,13 @@ type ProfilePreview struct {
 	Username      string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	ProfilePicUrl string `protobuf:"bytes,4,opt,name=profilePicUrl,proto3" json:"profilePicUrl,omitempty"`
+	IsFollowed    bool   `protobuf:"varint,5,opt,name=isFollowed,proto3" json:"isFollowed,omitempty"`
 }
 
 func (x *ProfilePreview) Reset() {
 	*x = ProfilePreview{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[28]
+		mi := &file_user_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1653,7 +1560,7 @@ func (x *ProfilePreview) String() string {
 func (*ProfilePreview) ProtoMessage() {}
 
 func (x *ProfilePreview) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[28]
+	mi := &file_user_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1666,7 +1573,7 @@ func (x *ProfilePreview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProfilePreview.ProtoReflect.Descriptor instead.
 func (*ProfilePreview) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{28}
+	return file_user_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ProfilePreview) GetProfileID() int64 {
@@ -1697,6 +1604,13 @@ func (x *ProfilePreview) GetProfilePicUrl() string {
 	return ""
 }
 
+func (x *ProfilePreview) GetIsFollowed() bool {
+	if x != nil {
+		return x.IsFollowed
+	}
+	return false
+}
+
 type FollowRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1708,7 +1622,7 @@ type FollowRequest struct {
 func (x *FollowRequest) Reset() {
 	*x = FollowRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[29]
+		mi := &file_user_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1721,7 +1635,7 @@ func (x *FollowRequest) String() string {
 func (*FollowRequest) ProtoMessage() {}
 
 func (x *FollowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[29]
+	mi := &file_user_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1734,7 +1648,7 @@ func (x *FollowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FollowRequest.ProtoReflect.Descriptor instead.
 func (*FollowRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{29}
+	return file_user_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *FollowRequest) GetProfileID() int64 {
@@ -1755,7 +1669,7 @@ type UnfollowRequest struct {
 func (x *UnfollowRequest) Reset() {
 	*x = UnfollowRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[30]
+		mi := &file_user_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1768,7 +1682,7 @@ func (x *UnfollowRequest) String() string {
 func (*UnfollowRequest) ProtoMessage() {}
 
 func (x *UnfollowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[30]
+	mi := &file_user_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1781,7 +1695,7 @@ func (x *UnfollowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnfollowRequest.ProtoReflect.Descriptor instead.
 func (*UnfollowRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{30}
+	return file_user_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *UnfollowRequest) GetProfileID() int64 {
@@ -1802,7 +1716,7 @@ type GetFollowingListRequest struct {
 func (x *GetFollowingListRequest) Reset() {
 	*x = GetFollowingListRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[31]
+		mi := &file_user_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1815,7 +1729,7 @@ func (x *GetFollowingListRequest) String() string {
 func (*GetFollowingListRequest) ProtoMessage() {}
 
 func (x *GetFollowingListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[31]
+	mi := &file_user_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1828,7 +1742,7 @@ func (x *GetFollowingListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFollowingListRequest.ProtoReflect.Descriptor instead.
 func (*GetFollowingListRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{31}
+	return file_user_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetFollowingListRequest) GetProfileID() int64 {
@@ -1849,7 +1763,7 @@ type GetFollowingListResponse struct {
 func (x *GetFollowingListResponse) Reset() {
 	*x = GetFollowingListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[32]
+		mi := &file_user_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1862,7 +1776,7 @@ func (x *GetFollowingListResponse) String() string {
 func (*GetFollowingListResponse) ProtoMessage() {}
 
 func (x *GetFollowingListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[32]
+	mi := &file_user_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1875,7 +1789,7 @@ func (x *GetFollowingListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFollowingListResponse.ProtoReflect.Descriptor instead.
 func (*GetFollowingListResponse) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{32}
+	return file_user_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *GetFollowingListResponse) GetProfilePreview() []*ProfilePreview {
@@ -1896,7 +1810,7 @@ type GetFollowerListRequest struct {
 func (x *GetFollowerListRequest) Reset() {
 	*x = GetFollowerListRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[33]
+		mi := &file_user_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1909,7 +1823,7 @@ func (x *GetFollowerListRequest) String() string {
 func (*GetFollowerListRequest) ProtoMessage() {}
 
 func (x *GetFollowerListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[33]
+	mi := &file_user_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1922,7 +1836,7 @@ func (x *GetFollowerListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFollowerListRequest.ProtoReflect.Descriptor instead.
 func (*GetFollowerListRequest) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{33}
+	return file_user_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetFollowerListRequest) GetProfileID() int64 {
@@ -1943,7 +1857,7 @@ type GetFollowerListResponse struct {
 func (x *GetFollowerListResponse) Reset() {
 	*x = GetFollowerListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_user_proto_msgTypes[34]
+		mi := &file_user_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1956,7 +1870,7 @@ func (x *GetFollowerListResponse) String() string {
 func (*GetFollowerListResponse) ProtoMessage() {}
 
 func (x *GetFollowerListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_proto_msgTypes[34]
+	mi := &file_user_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1969,7 +1883,7 @@ func (x *GetFollowerListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFollowerListResponse.ProtoReflect.Descriptor instead.
 func (*GetFollowerListResponse) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{34}
+	return file_user_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetFollowerListResponse) GetProfilePreview() []*ProfilePreview {
@@ -2138,16 +2052,7 @@ var file_user_proto_rawDesc = []byte{
 	0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
 	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
-	0x64, 0x22, 0x33, 0x0a, 0x15, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x55, 0x73, 0x65, 0x72, 0x6e,
-	0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73,
-	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73,
-	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x59, 0x0a, 0x16, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68,
-	0x55, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x3f, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65, 0x76, 0x69,
-	0x65, 0x77, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41,
-	0x50, 0x49, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65, 0x76, 0x69, 0x65,
-	0x77, 0x52, 0x0e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65, 0x76, 0x69, 0x65,
-	0x77, 0x22, 0x84, 0x01, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65,
+	0x64, 0x22, 0xa4, 0x01, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65,
 	0x76, 0x69, 0x65, 0x77, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49,
 	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65,
 	0x49, 0x44, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
@@ -2155,7 +2060,9 @@ var file_user_proto_rawDesc = []byte{
 	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
 	0x6d, 0x65, 0x12, 0x24, 0x0a, 0x0d, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x69, 0x63,
 	0x55, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x70, 0x72, 0x6f, 0x66, 0x69,
-	0x6c, 0x65, 0x50, 0x69, 0x63, 0x55, 0x72, 0x6c, 0x22, 0x2d, 0x0a, 0x0d, 0x46, 0x6f, 0x6c, 0x6c,
+	0x6c, 0x65, 0x50, 0x69, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x1e, 0x0a, 0x0a, 0x69, 0x73, 0x46, 0x6f,
+	0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0a, 0x69, 0x73,
+	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x22, 0x2d, 0x0a, 0x0d, 0x46, 0x6f, 0x6c, 0x6c,
 	0x6f, 0x77, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x72, 0x6f,
 	0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x70, 0x72,
 	0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x44, 0x22, 0x2f, 0x0a, 0x0f, 0x55, 0x6e, 0x66, 0x6f, 0x6c,
@@ -2180,7 +2087,7 @@ var file_user_proto_rawDesc = []byte{
 	0x69, 0x65, 0x77, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x4b, 0x68, 0x61, 0x6e,
 	0x41, 0x50, 0x49, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65, 0x76, 0x69,
 	0x65, 0x77, 0x52, 0x0e, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x50, 0x72, 0x65, 0x76, 0x69,
-	0x65, 0x77, 0x32, 0xf3, 0x0c, 0x0a, 0x07, 0x55, 0x73, 0x65, 0x72, 0x41, 0x50, 0x49, 0x12, 0x45,
+	0x65, 0x77, 0x32, 0xa0, 0x0c, 0x0a, 0x07, 0x55, 0x73, 0x65, 0x72, 0x41, 0x50, 0x49, 0x12, 0x45,
 	0x0a, 0x0c, 0x52, 0x65, 0x66, 0x72, 0x65, 0x73, 0x68, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x16,
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
 	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x1d, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49,
@@ -2259,33 +2166,28 @@ var file_user_proto_rawDesc = []byte{
 	0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1d, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50,
 	0x49, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x51,
-	0x0a, 0x0e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x55, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
-	0x12, 0x1e, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63,
-	0x68, 0x55, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x1f, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63,
-	0x68, 0x55, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x38, 0x0a, 0x06, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x12, 0x16, 0x2e, 0x4b, 0x68,
-	0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x3c, 0x0a, 0x08, 0x55,
-	0x6e, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x12, 0x18, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50,
-	0x49, 0x2e, 0x55, 0x6e, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x57, 0x0a, 0x10, 0x47, 0x65, 0x74,
-	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x20, 0x2e,
-	0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f,
-	0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x21, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c,
-	0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65,
-	0x72, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1f, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e,
-	0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49,
-	0x2e, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1c, 0x5a, 0x1a, 0x2e, 0x2f, 0x2e, 0x2e,
-	0x2f, 0x2e, 0x2e, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x55, 0x73, 0x65, 0x72, 0x41, 0x50, 0x49, 0x53,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x38,
+	0x0a, 0x06, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x12, 0x16, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41,
+	0x50, 0x49, 0x2e, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x3c, 0x0a, 0x08, 0x55, 0x6e, 0x66, 0x6f,
+	0x6c, 0x6c, 0x6f, 0x77, 0x12, 0x18, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x55,
+	0x6e, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x57, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c,
+	0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x20, 0x2e, 0x4b, 0x68, 0x61,
+	0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e,
+	0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x4b,
+	0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77,
+	0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69,
+	0x73, 0x74, 0x12, 0x1f, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65, 0x74,
+	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x4b, 0x68, 0x61, 0x6e, 0x41, 0x50, 0x49, 0x2e, 0x47, 0x65,
+	0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1c, 0x5a, 0x1a, 0x2e, 0x2f, 0x2e, 0x2e, 0x2f, 0x2e, 0x2e,
+	0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x55, 0x73, 0x65, 0x72, 0x41, 0x50, 0x49, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2300,7 +2202,7 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_user_proto_goTypes = []interface{}{
 	(*User)(nil),                          // 0: KhanAPI.User
 	(*Profile)(nil),                       // 1: KhanAPI.Profile
@@ -2328,73 +2230,68 @@ var file_user_proto_goTypes = []interface{}{
 	(*City)(nil),                          // 23: KhanAPI.City
 	(*GetCitiesResponse)(nil),             // 24: KhanAPI.GetCitiesResponse
 	(*DeleteAccountRequest)(nil),          // 25: KhanAPI.DeleteAccountRequest
-	(*SearchUsernameRequest)(nil),         // 26: KhanAPI.SearchUsernameRequest
-	(*SearchUsernameResponse)(nil),        // 27: KhanAPI.SearchUsernameResponse
-	(*ProfilePreview)(nil),                // 28: KhanAPI.ProfilePreview
-	(*FollowRequest)(nil),                 // 29: KhanAPI.FollowRequest
-	(*UnfollowRequest)(nil),               // 30: KhanAPI.UnfollowRequest
-	(*GetFollowingListRequest)(nil),       // 31: KhanAPI.GetFollowingListRequest
-	(*GetFollowingListResponse)(nil),      // 32: KhanAPI.GetFollowingListResponse
-	(*GetFollowerListRequest)(nil),        // 33: KhanAPI.GetFollowerListRequest
-	(*GetFollowerListResponse)(nil),       // 34: KhanAPI.GetFollowerListResponse
-	(*emptypb.Empty)(nil),                 // 35: google.protobuf.Empty
+	(*ProfilePreview)(nil),                // 26: KhanAPI.ProfilePreview
+	(*FollowRequest)(nil),                 // 27: KhanAPI.FollowRequest
+	(*UnfollowRequest)(nil),               // 28: KhanAPI.UnfollowRequest
+	(*GetFollowingListRequest)(nil),       // 29: KhanAPI.GetFollowingListRequest
+	(*GetFollowingListResponse)(nil),      // 30: KhanAPI.GetFollowingListResponse
+	(*GetFollowerListRequest)(nil),        // 31: KhanAPI.GetFollowerListRequest
+	(*GetFollowerListResponse)(nil),       // 32: KhanAPI.GetFollowerListResponse
+	(*emptypb.Empty)(nil),                 // 33: google.protobuf.Empty
 }
 var file_user_proto_depIdxs = []int32{
 	0,  // 0: KhanAPI.GetUserInfoResponse.user:type_name -> KhanAPI.User
 	1,  // 1: KhanAPI.GetProfileResponse.profile:type_name -> KhanAPI.Profile
 	23, // 2: KhanAPI.GetCitiesResponse.cities:type_name -> KhanAPI.City
-	28, // 3: KhanAPI.SearchUsernameResponse.ProfilePreview:type_name -> KhanAPI.ProfilePreview
-	28, // 4: KhanAPI.GetFollowingListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
-	28, // 5: KhanAPI.GetFollowerListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
-	35, // 6: KhanAPI.UserAPI.RefreshToken:input_type -> google.protobuf.Empty
-	3,  // 7: KhanAPI.UserAPI.Login:input_type -> KhanAPI.LoginRequest
-	5,  // 8: KhanAPI.UserAPI.ForgetPassword:input_type -> KhanAPI.ForgetPasswordRequest
-	6,  // 9: KhanAPI.UserAPI.NewPasswordWithToken:input_type -> KhanAPI.NewPasswordWithTokenRequest
-	7,  // 10: KhanAPI.UserAPI.SignUp:input_type -> KhanAPI.SignUpRequest
-	9,  // 11: KhanAPI.UserAPI.CodeVerification:input_type -> KhanAPI.CodeVerificationRequest
-	11, // 12: KhanAPI.UserAPI.PersonalInfoCompletion:input_type -> KhanAPI.PersonalInfoCompletionRequest
-	13, // 13: KhanAPI.UserAPI.EditProfileInfo:input_type -> KhanAPI.EditProfileInfoRequest
-	35, // 14: KhanAPI.UserAPI.GetUserInfo:input_type -> google.protobuf.Empty
-	14, // 15: KhanAPI.UserAPI.ChangeUsername:input_type -> KhanAPI.ChangeUsernameRequest
-	15, // 16: KhanAPI.UserAPI.ChangeEmail:input_type -> KhanAPI.ChangeEmailRequest
-	17, // 17: KhanAPI.UserAPI.ConfirmChangeEmail:input_type -> KhanAPI.ConfirmChangeEmailRequest
-	18, // 18: KhanAPI.UserAPI.ChangePassword:input_type -> KhanAPI.ChangePasswordRequest
-	19, // 19: KhanAPI.UserAPI.ChangeProfilePic:input_type -> KhanAPI.ChangeProfilePicRequest
-	20, // 20: KhanAPI.UserAPI.GetProfile:input_type -> KhanAPI.GetProfileRequests
-	22, // 21: KhanAPI.UserAPI.GetCities:input_type -> KhanAPI.GetCitiesRequest
-	25, // 22: KhanAPI.UserAPI.DeleteAccount:input_type -> KhanAPI.DeleteAccountRequest
-	26, // 23: KhanAPI.UserAPI.SearchUsername:input_type -> KhanAPI.SearchUsernameRequest
-	29, // 24: KhanAPI.UserAPI.Follow:input_type -> KhanAPI.FollowRequest
-	30, // 25: KhanAPI.UserAPI.Unfollow:input_type -> KhanAPI.UnfollowRequest
-	31, // 26: KhanAPI.UserAPI.GetFollowingList:input_type -> KhanAPI.GetFollowingListRequest
-	33, // 27: KhanAPI.UserAPI.GetFollowerList:input_type -> KhanAPI.GetFollowerListRequest
-	2,  // 28: KhanAPI.UserAPI.RefreshToken:output_type -> KhanAPI.RefreshTokenResponse
-	4,  // 29: KhanAPI.UserAPI.Login:output_type -> KhanAPI.LoginResponse
-	35, // 30: KhanAPI.UserAPI.ForgetPassword:output_type -> google.protobuf.Empty
-	35, // 31: KhanAPI.UserAPI.NewPasswordWithToken:output_type -> google.protobuf.Empty
-	8,  // 32: KhanAPI.UserAPI.SignUp:output_type -> KhanAPI.SignUpResponse
-	10, // 33: KhanAPI.UserAPI.CodeVerification:output_type -> KhanAPI.CodeVerificationResponse
-	35, // 34: KhanAPI.UserAPI.PersonalInfoCompletion:output_type -> google.protobuf.Empty
-	35, // 35: KhanAPI.UserAPI.EditProfileInfo:output_type -> google.protobuf.Empty
-	12, // 36: KhanAPI.UserAPI.GetUserInfo:output_type -> KhanAPI.GetUserInfoResponse
-	35, // 37: KhanAPI.UserAPI.ChangeUsername:output_type -> google.protobuf.Empty
-	16, // 38: KhanAPI.UserAPI.ChangeEmail:output_type -> KhanAPI.ChangeEmailResponse
-	35, // 39: KhanAPI.UserAPI.ConfirmChangeEmail:output_type -> google.protobuf.Empty
-	35, // 40: KhanAPI.UserAPI.ChangePassword:output_type -> google.protobuf.Empty
-	35, // 41: KhanAPI.UserAPI.ChangeProfilePic:output_type -> google.protobuf.Empty
-	21, // 42: KhanAPI.UserAPI.GetProfile:output_type -> KhanAPI.GetProfileResponse
-	24, // 43: KhanAPI.UserAPI.GetCities:output_type -> KhanAPI.GetCitiesResponse
-	35, // 44: KhanAPI.UserAPI.DeleteAccount:output_type -> google.protobuf.Empty
-	27, // 45: KhanAPI.UserAPI.SearchUsername:output_type -> KhanAPI.SearchUsernameResponse
-	35, // 46: KhanAPI.UserAPI.Follow:output_type -> google.protobuf.Empty
-	35, // 47: KhanAPI.UserAPI.Unfollow:output_type -> google.protobuf.Empty
-	32, // 48: KhanAPI.UserAPI.GetFollowingList:output_type -> KhanAPI.GetFollowingListResponse
-	34, // 49: KhanAPI.UserAPI.GetFollowerList:output_type -> KhanAPI.GetFollowerListResponse
-	28, // [28:50] is the sub-list for method output_type
-	6,  // [6:28] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	26, // 3: KhanAPI.GetFollowingListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
+	26, // 4: KhanAPI.GetFollowerListResponse.profilePreview:type_name -> KhanAPI.ProfilePreview
+	33, // 5: KhanAPI.UserAPI.RefreshToken:input_type -> google.protobuf.Empty
+	3,  // 6: KhanAPI.UserAPI.Login:input_type -> KhanAPI.LoginRequest
+	5,  // 7: KhanAPI.UserAPI.ForgetPassword:input_type -> KhanAPI.ForgetPasswordRequest
+	6,  // 8: KhanAPI.UserAPI.NewPasswordWithToken:input_type -> KhanAPI.NewPasswordWithTokenRequest
+	7,  // 9: KhanAPI.UserAPI.SignUp:input_type -> KhanAPI.SignUpRequest
+	9,  // 10: KhanAPI.UserAPI.CodeVerification:input_type -> KhanAPI.CodeVerificationRequest
+	11, // 11: KhanAPI.UserAPI.PersonalInfoCompletion:input_type -> KhanAPI.PersonalInfoCompletionRequest
+	13, // 12: KhanAPI.UserAPI.EditProfileInfo:input_type -> KhanAPI.EditProfileInfoRequest
+	33, // 13: KhanAPI.UserAPI.GetUserInfo:input_type -> google.protobuf.Empty
+	14, // 14: KhanAPI.UserAPI.ChangeUsername:input_type -> KhanAPI.ChangeUsernameRequest
+	15, // 15: KhanAPI.UserAPI.ChangeEmail:input_type -> KhanAPI.ChangeEmailRequest
+	17, // 16: KhanAPI.UserAPI.ConfirmChangeEmail:input_type -> KhanAPI.ConfirmChangeEmailRequest
+	18, // 17: KhanAPI.UserAPI.ChangePassword:input_type -> KhanAPI.ChangePasswordRequest
+	19, // 18: KhanAPI.UserAPI.ChangeProfilePic:input_type -> KhanAPI.ChangeProfilePicRequest
+	20, // 19: KhanAPI.UserAPI.GetProfile:input_type -> KhanAPI.GetProfileRequests
+	22, // 20: KhanAPI.UserAPI.GetCities:input_type -> KhanAPI.GetCitiesRequest
+	25, // 21: KhanAPI.UserAPI.DeleteAccount:input_type -> KhanAPI.DeleteAccountRequest
+	27, // 22: KhanAPI.UserAPI.Follow:input_type -> KhanAPI.FollowRequest
+	28, // 23: KhanAPI.UserAPI.Unfollow:input_type -> KhanAPI.UnfollowRequest
+	29, // 24: KhanAPI.UserAPI.GetFollowingList:input_type -> KhanAPI.GetFollowingListRequest
+	31, // 25: KhanAPI.UserAPI.GetFollowerList:input_type -> KhanAPI.GetFollowerListRequest
+	2,  // 26: KhanAPI.UserAPI.RefreshToken:output_type -> KhanAPI.RefreshTokenResponse
+	4,  // 27: KhanAPI.UserAPI.Login:output_type -> KhanAPI.LoginResponse
+	33, // 28: KhanAPI.UserAPI.ForgetPassword:output_type -> google.protobuf.Empty
+	33, // 29: KhanAPI.UserAPI.NewPasswordWithToken:output_type -> google.protobuf.Empty
+	8,  // 30: KhanAPI.UserAPI.SignUp:output_type -> KhanAPI.SignUpResponse
+	10, // 31: KhanAPI.UserAPI.CodeVerification:output_type -> KhanAPI.CodeVerificationResponse
+	33, // 32: KhanAPI.UserAPI.PersonalInfoCompletion:output_type -> google.protobuf.Empty
+	33, // 33: KhanAPI.UserAPI.EditProfileInfo:output_type -> google.protobuf.Empty
+	12, // 34: KhanAPI.UserAPI.GetUserInfo:output_type -> KhanAPI.GetUserInfoResponse
+	33, // 35: KhanAPI.UserAPI.ChangeUsername:output_type -> google.protobuf.Empty
+	16, // 36: KhanAPI.UserAPI.ChangeEmail:output_type -> KhanAPI.ChangeEmailResponse
+	33, // 37: KhanAPI.UserAPI.ConfirmChangeEmail:output_type -> google.protobuf.Empty
+	33, // 38: KhanAPI.UserAPI.ChangePassword:output_type -> google.protobuf.Empty
+	33, // 39: KhanAPI.UserAPI.ChangeProfilePic:output_type -> google.protobuf.Empty
+	21, // 40: KhanAPI.UserAPI.GetProfile:output_type -> KhanAPI.GetProfileResponse
+	24, // 41: KhanAPI.UserAPI.GetCities:output_type -> KhanAPI.GetCitiesResponse
+	33, // 42: KhanAPI.UserAPI.DeleteAccount:output_type -> google.protobuf.Empty
+	33, // 43: KhanAPI.UserAPI.Follow:output_type -> google.protobuf.Empty
+	33, // 44: KhanAPI.UserAPI.Unfollow:output_type -> google.protobuf.Empty
+	30, // 45: KhanAPI.UserAPI.GetFollowingList:output_type -> KhanAPI.GetFollowingListResponse
+	32, // 46: KhanAPI.UserAPI.GetFollowerList:output_type -> KhanAPI.GetFollowerListResponse
+	26, // [26:47] is the sub-list for method output_type
+	5,  // [5:26] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -2716,30 +2613,6 @@ func file_user_proto_init() {
 			}
 		}
 		file_user_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchUsernameRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_user_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchUsernameResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_user_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ProfilePreview); i {
 			case 0:
 				return &v.state
@@ -2751,7 +2624,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FollowRequest); i {
 			case 0:
 				return &v.state
@@ -2763,7 +2636,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UnfollowRequest); i {
 			case 0:
 				return &v.state
@@ -2775,7 +2648,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFollowingListRequest); i {
 			case 0:
 				return &v.state
@@ -2787,7 +2660,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFollowingListResponse); i {
 			case 0:
 				return &v.state
@@ -2799,7 +2672,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFollowerListRequest); i {
 			case 0:
 				return &v.state
@@ -2811,7 +2684,7 @@ func file_user_proto_init() {
 				return nil
 			}
 		}
-		file_user_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
+		file_user_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFollowerListResponse); i {
 			case 0:
 				return &v.state
@@ -2832,7 +2705,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_user_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   35,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

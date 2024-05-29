@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+package KhanAPI;
+option go_package = "./../../pkg/SearchAPIService";
+
+service SearchAPI {
+  rpc GetAllCategories (google.protobuf.Empty) returns (GetAllCategoriesResponse);
+  rpc SearchFoodByName (SearchFoodByNameRequest) returns (SearchFoodByNameResponse);
+  rpc SearchFoodByIngredient (SearchFoodByIngredientRequest) returns (SearchFoodByIngredientResponse);
+  rpc SearchCategories (SearchCategoriesRequest) returns (SearchCategoriesResponse);
+  rpc SearchUsername (SearchUsernameRequest) returns (SearchUsernameResponse);
+  rpc MixedSearch (MixedSearchRequest) returns (MixedSearchResponse);
+}
+
+message PostPreviewExplore {
+  int64 id = 1;
+  string title = 2;
+  string shortDescription = 3;
+  string postImage = 4;
+  string username = 5;
+  string profile_pic_url = 6;
+}
+
+message ProfilePreviewExplore {
+  int64 profileID = 1;
+  string username = 2;
+  string name = 3;
+  string profilePicUrl = 4;
+  int64 isFollowed = 5;
+}
+
+message Categories {
+  int32 id = 1;
+  string name = 2;
+  int32 level = 3;
+  optional int32 parent =4;
+}
+
+message GetAllCategoriesResponse {
+  repeated Categories categories = 1;
+}
+
+message SearchCategoriesRequest {
+  repeated int32 categoryID = 1;
+  optional int32 pageNumber = 2;
+}
+
+message SearchCategoriesResponse {
+  repeated PostPreviewExplore posts = 1;
+  int32 pageNumber = 2;
+}
+
+message SearchFoodByNameRequest {
+  string name = 1;
+  optional int32 pageNumber = 2;
+}
+
+message SearchFoodByNameResponse {
+  repeated PostPreviewExplore postPreview = 1;
+  int32 pageNumber = 2;
+}
+
+message SearchFoodByIngredientRequest {
+  repeated string include = 1;
+  repeated string exclude = 2;
+  optional int32 pageNumber = 3;
+}
+
+message SearchFoodByIngredientResponse {
+  repeated PostPreviewExplore postPreview = 1;
+  int32 pageNumber = 2;
+}
+
+
+message SearchUsernameRequest {
+  string username = 1;
+}
+
+message SearchUsernameResponse {
+  repeated ProfilePreviewExplore profilePreview = 1;
+}
+
+
+message MixedSearchRequest {
+  string name = 1;
+  repeated int32 categoryID = 2;
+  repeated string includeIng = 3;
+  repeated string excludeIng = 4;
+  optional int32 pageNumber = 5;
+}
+
+message MixedSearchResponse {
+  repeated PostPreviewExplore posts = 1;
+  int32 pageNumber = 2;
+}

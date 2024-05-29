@@ -11,9 +11,10 @@ import (
 	"time"
 )
 
-const addComment = `-- name: AddComment :exec
+const addComment = `-- name: AddComment :one
 INSERT INTO comment(post_id, profile_id, comment)
 VALUES ($1, $2, $3)
+RETURNING id
 `
 
 type AddCommentParams struct {
@@ -22,31 +23,36 @@ type AddCommentParams struct {
 	Comment   string
 }
 
-func (q *Queries) AddComment(ctx context.Context, arg AddCommentParams) error {
-	_, err := q.db.ExecContext(ctx, addComment, arg.PostID, arg.ProfileID, arg.Comment)
-	return err
+func (q *Queries) AddComment(ctx context.Context, arg AddCommentParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, addComment, arg.PostID, arg.ProfileID, arg.Comment)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
-const addReply = `-- name: AddReply :exec
+const addReply = `-- name: AddReply :one
+WITH parent AS (
+    SELECT post_id
+    FROM comment
+    WHERE id = $1
+)
 INSERT INTO comment(parent_id, post_id, profile_id, comment)
-VALUES ($1, $2, $3, $4)
+SELECT $1, parent.post_id, $2, $3
+FROM parent
+RETURNING id
 `
 
 type AddReplyParams struct {
 	ParentID  sql.NullInt64
-	PostID    int64
 	ProfileID int64
 	Comment   string
 }
 
-func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) error {
-	_, err := q.db.ExecContext(ctx, addReply,
-		arg.ParentID,
-		arg.PostID,
-		arg.ProfileID,
-		arg.Comment,
-	)
-	return err
+func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, addReply, arg.ParentID, arg.ProfileID, arg.Comment)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const dislikeCommentOrReply = `-- name: DislikeCommentOrReply :exec
@@ -65,6 +71,58 @@ func (q *Queries) DislikeCommentOrReply(ctx context.Context, arg DislikeCommentO
 	return err
 }
 
+const getComment = `-- name: GetComment :one
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
+       (SELECT EXISTS
+           (SELECT 1 FROM profile_like_comment
+            WHERE profile_like_comment.comment_id = comment.id and profile_like_comment.profile_id = $1)
+       ) AS isLiked,
+       (SELECT EXISTS
+           (SELECT 1 FROM comment c
+                WHERE c.parent_id = comment.id
+           )
+       ) AS has_replies,
+       comment.time
+FROM comment
+    JOIN profile on comment.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+WHERE comment.id = $2
+`
+
+type GetCommentParams struct {
+	ProfileID int64
+	ID        int64
+}
+
+type GetCommentRow struct {
+	ID                int64
+	Username          string
+	FirstName         string
+	ProfilePicAddress string
+	Comment           string
+	NumLikes          int32
+	Isliked           bool
+	HasReplies        bool
+	Time              time.Time
+}
+
+func (q *Queries) GetComment(ctx context.Context, arg GetCommentParams) (GetCommentRow, error) {
+	row := q.db.QueryRowContext(ctx, getComment, arg.ProfileID, arg.ID)
+	var i GetCommentRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FirstName,
+		&i.ProfilePicAddress,
+		&i.Comment,
+		&i.NumLikes,
+		&i.Isliked,
+		&i.HasReplies,
+		&i.Time,
+	)
+	return i, err
+}
+
 const getPostsComments = `-- name: GetPostsComments :many
 SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (SELECT EXISTS
@@ -80,7 +138,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
 FROM comment
     JOIN profile on comment.profile_id = profile.id
     JOIN account on profile.user_id = account.id
-WHERE comment.parent_id IS NULL and comment.post_id = $2
+WHERE comment.parent_id IS NULL and comment.post_id = $2 and num_report < 1000
 `
 
 type GetPostsCommentsParams struct {
@@ -150,7 +208,7 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $2
+WHERE comment.parent_id = $2 and num_report < 1000
 `
 
 type GetRepliesParams struct {
@@ -213,5 +271,19 @@ type LikeCommentOrReplyParams struct {
 
 func (q *Queries) LikeCommentOrReply(ctx context.Context, arg LikeCommentOrReplyParams) error {
 	_, err := q.db.ExecContext(ctx, likeCommentOrReply, arg.ProfileID, arg.CommentID)
+	return err
+}
+
+const reportComment = `-- name: ReportComment :exec
+INSERT INTO report_comment (profile_id, comment_id) values ($1, $2)
+`
+
+type ReportCommentParams struct {
+	ProfileID int64
+	CommentID int64
+}
+
+func (q *Queries) ReportComment(ctx context.Context, arg ReportCommentParams) error {
+	_, err := q.db.ExecContext(ctx, reportComment, arg.ProfileID, arg.CommentID)
 	return err
 }

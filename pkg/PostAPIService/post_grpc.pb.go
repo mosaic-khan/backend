@@ -26,24 +26,22 @@ type PostAPIClient interface {
 	GetProfilePosts(ctx context.Context, in *GetProfilePostsRequests, opts ...grpc.CallOption) (*GetProfilePostsResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error)
+	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
 	SuggestIngredient(ctx context.Context, in *SuggestIngredientRequest, opts ...grpc.CallOption) (*SuggestIngredientResponse, error)
 	AddImageForPost(ctx context.Context, in *AddImageForPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Like(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Dislike(ctx context.Context, in *DislikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*Comment, error)
+	AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*Comment, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DislikeComment(ctx context.Context, in *DislikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
-	SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error)
-	SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error)
-	SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error)
 	PinPost(ctx context.Context, in *PinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UnpinPost(ctx context.Context, in *UnpinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetPins(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPinsResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type postAPIClient struct {
@@ -75,6 +73,15 @@ func (c *postAPIClient) GetPost(ctx context.Context, in *GetPostRequest, opts ..
 func (c *postAPIClient) SetPost(ctx context.Context, in *SetPostRequest, opts ...grpc.CallOption) (*SetPostResponse, error) {
 	out := new(SetPostResponse)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SetPost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
+	out := new(GetCategoriesResponse)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +124,8 @@ func (c *postAPIClient) Dislike(ctx context.Context, in *DislikeRequest, opts ..
 	return out, nil
 }
 
-func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*Comment, error) {
+	out := new(Comment)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddComment", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -126,8 +133,8 @@ func (c *postAPIClient) AddComment(ctx context.Context, in *AddCommentRequest, o
 	return out, nil
 }
 
-func (c *postAPIClient) AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *postAPIClient) AddReply(ctx context.Context, in *AddReplyRequest, opts ...grpc.CallOption) (*Comment, error) {
+	out := new(Comment)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/AddReply", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -171,42 +178,6 @@ func (c *postAPIClient) DislikeComment(ctx context.Context, in *DislikeCommentRe
 	return out, nil
 }
 
-func (c *postAPIClient) GetCategories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
-	out := new(GetCategoriesResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/GetCategories", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchFoodByName(ctx context.Context, in *SearchFoodByNameRequest, opts ...grpc.CallOption) (*SearchFoodByNameResponse, error) {
-	out := new(SearchFoodByNameResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchFoodByName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchFoodByIngredient(ctx context.Context, in *SearchFoodByIngredientRequest, opts ...grpc.CallOption) (*SearchFoodByIngredientResponse, error) {
-	out := new(SearchFoodByIngredientResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchFoodByIngredient", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postAPIClient) SearchCategories(ctx context.Context, in *SearchCategoriesRequest, opts ...grpc.CallOption) (*SearchCategoriesResponse, error) {
-	out := new(SearchCategoriesResponse)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/SearchCategories", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *postAPIClient) PinPost(ctx context.Context, in *PinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/PinPost", in, out, opts...)
@@ -243,6 +214,15 @@ func (c *postAPIClient) DeletePost(ctx context.Context, in *DeletePostRequest, o
 	return out, nil
 }
 
+func (c *postAPIClient) ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/ReportComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -250,24 +230,22 @@ type PostAPIServer interface {
 	GetProfilePosts(context.Context, *GetProfilePostsRequests) (*GetProfilePostsResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error)
+	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
 	SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error)
 	AddImageForPost(context.Context, *AddImageForPostRequest) (*emptypb.Empty, error)
 	Like(context.Context, *LikeRequest) (*emptypb.Empty, error)
 	Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error)
-	AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error)
-	AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error)
+	AddComment(context.Context, *AddCommentRequest) (*Comment, error)
+	AddReply(context.Context, *AddReplyRequest) (*Comment, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error)
-	GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error)
-	SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error)
-	SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error)
-	SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error)
 	PinPost(context.Context, *PinPostRequest) (*emptypb.Empty, error)
 	UnpinPost(context.Context, *UnpinPostRequest) (*emptypb.Empty, error)
 	GetPins(context.Context, *emptypb.Empty) (*GetPinsResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*emptypb.Empty, error)
+	ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -284,6 +262,9 @@ func (UnimplementedPostAPIServer) GetPost(context.Context, *GetPostRequest) (*Ge
 func (UnimplementedPostAPIServer) SetPost(context.Context, *SetPostRequest) (*SetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPost not implemented")
 }
+func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
+}
 func (UnimplementedPostAPIServer) SuggestIngredient(context.Context, *SuggestIngredientRequest) (*SuggestIngredientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SuggestIngredient not implemented")
 }
@@ -296,10 +277,10 @@ func (UnimplementedPostAPIServer) Like(context.Context, *LikeRequest) (*emptypb.
 func (UnimplementedPostAPIServer) Dislike(context.Context, *DislikeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Dislike not implemented")
 }
-func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest) (*emptypb.Empty, error) {
+func (UnimplementedPostAPIServer) AddComment(context.Context, *AddCommentRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
 }
-func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*emptypb.Empty, error) {
+func (UnimplementedPostAPIServer) AddReply(context.Context, *AddReplyRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddReply not implemented")
 }
 func (UnimplementedPostAPIServer) GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error) {
@@ -314,18 +295,6 @@ func (UnimplementedPostAPIServer) LikeComment(context.Context, *LikeCommentReque
 func (UnimplementedPostAPIServer) DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DislikeComment not implemented")
 }
-func (UnimplementedPostAPIServer) GetCategories(context.Context, *emptypb.Empty) (*GetCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
-}
-func (UnimplementedPostAPIServer) SearchFoodByName(context.Context, *SearchFoodByNameRequest) (*SearchFoodByNameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByName not implemented")
-}
-func (UnimplementedPostAPIServer) SearchFoodByIngredient(context.Context, *SearchFoodByIngredientRequest) (*SearchFoodByIngredientResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFoodByIngredient not implemented")
-}
-func (UnimplementedPostAPIServer) SearchCategories(context.Context, *SearchCategoriesRequest) (*SearchCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchCategories not implemented")
-}
 func (UnimplementedPostAPIServer) PinPost(context.Context, *PinPostRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PinPost not implemented")
 }
@@ -337,6 +306,9 @@ func (UnimplementedPostAPIServer) GetPins(context.Context, *emptypb.Empty) (*Get
 }
 func (UnimplementedPostAPIServer) DeletePost(context.Context, *DeletePostRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
+}
+func (UnimplementedPostAPIServer) ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportComment not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -401,6 +373,24 @@ func _PostAPI_SetPost_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostAPIServer).SetPost(ctx, req.(*SetPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).GetCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/GetCategories",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).GetCategories(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -585,78 +575,6 @@ func _PostAPI_DislikeComment_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostAPI_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).GetCategories(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/GetCategories",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).GetCategories(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchFoodByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchFoodByNameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchFoodByName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchFoodByName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchFoodByName(ctx, req.(*SearchFoodByNameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchFoodByIngredient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchFoodByIngredientRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchFoodByIngredient(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchFoodByIngredient",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchFoodByIngredient(ctx, req.(*SearchFoodByIngredientRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostAPI_SearchCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchCategoriesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).SearchCategories(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/SearchCategories",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).SearchCategories(ctx, req.(*SearchCategoriesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _PostAPI_PinPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PinPostRequest)
 	if err := dec(in); err != nil {
@@ -729,6 +647,24 @@ func _PostAPI_DeletePost_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_ReportComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RepostCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).ReportComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/ReportComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).ReportComment(ctx, req.(*RepostCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -747,6 +683,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetPost",
 			Handler:    _PostAPI_SetPost_Handler,
+		},
+		{
+			MethodName: "GetCategories",
+			Handler:    _PostAPI_GetCategories_Handler,
 		},
 		{
 			MethodName: "SuggestIngredient",
@@ -789,22 +729,6 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostAPI_DislikeComment_Handler,
 		},
 		{
-			MethodName: "GetCategories",
-			Handler:    _PostAPI_GetCategories_Handler,
-		},
-		{
-			MethodName: "SearchFoodByName",
-			Handler:    _PostAPI_SearchFoodByName_Handler,
-		},
-		{
-			MethodName: "SearchFoodByIngredient",
-			Handler:    _PostAPI_SearchFoodByIngredient_Handler,
-		},
-		{
-			MethodName: "SearchCategories",
-			Handler:    _PostAPI_SearchCategories_Handler,
-		},
-		{
 			MethodName: "PinPost",
 			Handler:    _PostAPI_PinPost_Handler,
 		},
@@ -819,6 +743,10 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePost",
 			Handler:    _PostAPI_DeletePost_Handler,
+		},
+		{
+			MethodName: "ReportComment",
+			Handler:    _PostAPI_ReportComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"main/internal/service/Media"
+	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
 	"os"
@@ -172,9 +172,15 @@ func (s *Server) SuggestIngredient(ctx context.Context, in *PostAPIService.Sugge
 func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProfilePostsRequests) (*PostAPIService.GetProfilePostsResponse, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
+	if in.PageNumber == nil {
+		in.PageNumber = new(int32)
+		*in.PageNumber = 1
+	}
+
 	postsDB, err := s.query.GetPostsPreview(ctx, db.GetPostsPreviewParams{
 		ProfileID:   in.ProfileID,
 		ProfileID_2: profileID,
+		Offset:      (in.GetPageNumber() - 1) * 20,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching posts")
@@ -194,7 +200,7 @@ func (s *Server) GetProfilePosts(ctx context.Context, in *PostAPIService.GetProf
 		}
 	}
 
-	return &PostAPIService.GetProfilePostsResponse{PostPreview: posts}, nil
+	return &PostAPIService.GetProfilePostsResponse{PostPreview: posts, PageNumber: in.GetPageNumber()}, nil
 }
 
 func (s *Server) AddImageForPost(ctx context.Context, in *PostAPIService.AddImageForPostRequest) (*emptypb.Empty, error) {
@@ -275,7 +281,6 @@ func (s *Server) Like(ctx context.Context, in *PostAPIService.LikeRequest) (*emp
 	} else if driverErr != nil && driverErr.Code == ("23505") { // error code 23505 = unique_violation
 		return nil, status.Errorf(codes.InvalidArgument, "already liked post with id %d", in.GetPostId())
 	} else if err != nil {
-		fmt.Println(err.Error())
 		return nil, status.Error(codes.Internal, "could not like post")
 	}
 
@@ -293,63 +298,93 @@ func (s *Server) Dislike(ctx context.Context, in *PostAPIService.DislikeRequest)
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) SearchCategories(ctx context.Context, in *PostAPIService.SearchCategoriesRequest) (*PostAPIService.SearchCategoriesResponse, error) {
-
-	postsDB, err := s.query.GetPostsWithCategory(ctx, in.GetCategoryID())
-	if err != nil {
-		log.Println(err.Error())
-		return nil, status.Error(codes.Internal, "could not get posts")
-	}
-
-	var posts []*PostAPIService.PostPreviewExplore
-
-	for _, p := range postsDB {
-		posts = append(posts, &PostAPIService.PostPreviewExplore{
-			Id:               p.ID,
-			Title:            p.Title,
-			ShortDescription: p.Description,
-			PostImage:        p.PostImage.String,
-			Username:         p.Username,
-			ProfilePicUrl:    p.ProfilePicAddress,
-		})
-	}
-
-	return &PostAPIService.SearchCategoriesResponse{Posts: posts}, nil
-
-}
-
-func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*emptypb.Empty, error) {
+func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRequest) (*PostAPIService.Comment, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	err := s.query.AddComment(ctx, db.AddCommentParams{
+	safe, err := utils.CommentClient.IsSafe(in.GetComment())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not check comment regarding swears")
+	} else if !safe {
+		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
+	}
+
+	id, err := s.query.AddComment(ctx, db.AddCommentParams{
 		PostID:    in.PostID,
 		ProfileID: profileID,
 		Comment:   in.Comment,
 	})
+	var driverErr *pq.Error
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while adding a comment")
+		errors.As(err, &driverErr)
+	}
+	if driverErr != nil && driverErr.Code == ("23503") { // error code 23503 = foreign_key_violation
+		return nil, status.Errorf(codes.InvalidArgument, "post with id %d does not exists", in.GetPostID())
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, "error while adding comment")
 	}
 
-	return nil, nil
+	comment, err := s.query.GetComment(ctx, db.GetCommentParams{ID: id, ProfileID: profileID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get comment with id %d", id)
+	}
+
+	return &PostAPIService.Comment{
+		ID:         id,
+		Name:       comment.FirstName,
+		Username:   comment.Username,
+		ProfileUrl: comment.ProfilePicAddress,
+		Comment:    comment.Comment,
+		Time:       comment.Time.GoString(),
+		HasReplies: comment.HasReplies,
+		IsLiked:    comment.Isliked,
+		NumLikes:   comment.NumLikes,
+	}, nil
 }
 
-func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*emptypb.Empty, error) {
+func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyRequest) (*PostAPIService.Comment, error) {
 	profileID := ctx.Value("ProfileID").(int64)
 
-	err := s.query.AddReply(ctx, db.AddReplyParams{
+	safe, err := utils.CommentClient.IsSafe(in.GetComment())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not check comment regarding swears")
+	} else if !safe {
+		return nil, status.Errorf(codes.PermissionDenied, "comment contains swear words")
+	}
+
+	id, err := s.query.AddReply(ctx, db.AddReplyParams{
 		ParentID: sql.NullInt64{
 			Int64: in.CommentID,
 			Valid: true,
 		},
-		PostID:    in.PostID,
 		ProfileID: profileID,
 		Comment:   in.Comment,
 	})
+	var driverErr *pq.Error
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while adding a reply")
+		errors.As(err, &driverErr)
+	}
+	if driverErr != nil && driverErr.Code == ("23503") { // error code 23503 = foreign_key_violation
+		return nil, status.Errorf(codes.InvalidArgument, "comment or post does not exist")
+	} else if err != nil {
+		return nil, status.Error(codes.Internal, "error while adding reply")
 	}
 
-	return nil, nil
+	comment, err := s.query.GetComment(ctx, db.GetCommentParams{ID: id, ProfileID: profileID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get comment with id %d", id)
+	}
+
+	return &PostAPIService.Comment{
+		ID:         id,
+		Name:       comment.FirstName,
+		Username:   comment.Username,
+		ProfileUrl: comment.ProfilePicAddress,
+		Comment:    comment.Comment,
+		Time:       comment.Time.GoString(),
+		HasReplies: comment.HasReplies,
+		IsLiked:    comment.Isliked,
+		NumLikes:   comment.NumLikes,
+	}, nil
 }
 
 func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetCommentsRequest) (*PostAPIService.GetCommentsResponse, error) {
@@ -464,62 +499,23 @@ func (s *Server) GetCategories(ctx context.Context, _ *emptypb.Empty) (*PostAPIS
 	return &PostAPIService.GetCategoriesResponse{Categories: categories}, nil
 }
 
-func (s *Server) SearchFoodByName(ctx context.Context, in *PostAPIService.SearchFoodByNameRequest) (*PostAPIService.SearchFoodByNameResponse, error) {
-	if in.PageNumber == nil {
-		in.PageNumber = new(int32)
-		*in.PageNumber = 1
-	}
+func (s *Server) ReportComment(ctx context.Context, in *PostAPIService.RepostCommentRequest) (*emptypb.Empty, error) {
+	profileID := ctx.Value("ProfileID").(int64)
 
-	searchResult, err := s.query.SearchName(ctx, db.SearchNameParams{
-		Name: in.Name,
-		Page: (in.GetPageNumber() - 1) * 20,
+	err := s.query.ReportComment(ctx, db.ReportCommentParams{
+		ProfileID: profileID,
+		CommentID: in.Id,
 	})
+	var driverErr *pq.Error
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while searching for posts")
+		errors.As(err, &driverErr)
 	}
 
-	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
-
-	for i, row := range searchResult {
-		posts[i] = &PostAPIService.PostPreviewExplore{
-			Id:               row.ID,
-			Title:            row.Title,
-			ShortDescription: row.Description,
-			PostImage:        row.ImageUrl.String,
-			Username:         row.Username,
-			ProfilePicUrl:    row.ProfilePicAddress,
-		}
+	if driverErr != nil && driverErr.Code == ("23505") {
+		return nil, status.Errorf(codes.AlreadyExists, "unique_violation")
 	}
 
-	return &PostAPIService.SearchFoodByNameResponse{PostPreview: posts}, nil
-}
-
-func (s *Server) SearchFoodByIngredient(ctx context.Context, in *PostAPIService.SearchFoodByIngredientRequest) (*PostAPIService.SearchFoodByIngredientResponse, error) {
-
-	searchResult, err := s.query.SearchIngredient(ctx, db.SearchIngredientParams{
-		Page:       (in.GetPageNumber() - 1) * 20,
-		Include:    in.Include,
-		Includecnt: int32(len(in.Include)),
-		Exclude:    in.Exclude,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while searching for posts")
-	}
-
-	posts := make([]*PostAPIService.PostPreviewExplore, len(searchResult))
-
-	for i, row := range searchResult {
-		posts[i] = &PostAPIService.PostPreviewExplore{
-			Id:               row.ID,
-			Title:            row.Title,
-			ShortDescription: row.Description,
-			PostImage:        row.ImageUrl.String,
-			Username:         row.Username,
-			ProfilePicUrl:    row.ProfilePicAddress,
-		}
-	}
-
-	return &PostAPIService.SearchFoodByIngredientResponse{PostPreview: posts}, nil
+	return nil, nil
 }
 
 func (s *Server) PinPost(ctx context.Context, in *PostAPIService.PinPostRequest) (*emptypb.Empty, error) {
@@ -535,7 +531,6 @@ func (s *Server) PinPost(ctx context.Context, in *PostAPIService.PinPostRequest)
 
 	c, err := s.query.GetPinsCount(ctx, profileID)
 	if err != nil {
-		log.Println(err.Error())
 		return nil, status.Errorf(codes.Internal, "Could not pin post")
 	}
 	if c > 3 {

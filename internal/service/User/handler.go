@@ -648,22 +648,6 @@ func (s *Server) DeleteAccount(ctx context.Context, in *UserAPIService.DeleteAcc
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) SearchUsername(ctx context.Context, in *UserAPIService.SearchUsernameRequest) (*UserAPIService.SearchUsernameResponse, error) {
-
-	profiles, err := s.query.SearchUsername(ctx, in.GetUsername())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error retrieving usernames smiliar to %s\n", in.GetUsername())
-	}
-
-	var r []*UserAPIService.ProfilePreview
-
-	for _, p := range profiles {
-		r = append(r, &UserAPIService.ProfilePreview{ProfileID: p.ID, Username: p.Username, Name: p.FirstName, ProfilePicUrl: p.ProfilePicAddress})
-	}
-
-	return &UserAPIService.SearchUsernameResponse{ProfilePreview: r}, nil
-}
-
 func (s *Server) Follow(ctx context.Context, in *UserAPIService.FollowRequest) (*emptypb.Empty, error) {
 	profileId := ctx.Value("ProfileID").(int64)
 
@@ -695,7 +679,10 @@ func (s *Server) Unfollow(ctx context.Context, in *UserAPIService.UnfollowReques
 func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFollowingListRequest) (*UserAPIService.GetFollowingListResponse, error) {
 	profileId := ctx.Value("ProfileID").(int64)
 
-	dbList, err := s.query.FollowingList(ctx, profileId)
+	dbList, err := s.query.FollowingList(ctx, db.FollowingListParams{
+		Myprofile: profileId,
+		Profileid: in.ProfileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
 	}
@@ -707,6 +694,7 @@ func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFol
 			Username:      row.Username,
 			Name:          row.Name.(string),
 			ProfilePicUrl: row.ProfilePicAddress,
+			IsFollowed:    row.IsFollowed,
 		}
 	}
 
@@ -716,7 +704,10 @@ func (s *Server) GetFollowingList(ctx context.Context, in *UserAPIService.GetFol
 func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFollowerListRequest) (*UserAPIService.GetFollowerListResponse, error) {
 	profileId := ctx.Value("ProfileID").(int64)
 
-	dbList, err := s.query.FollowerList(ctx, profileId)
+	dbList, err := s.query.FollowerList(ctx, db.FollowerListParams{
+		Myprofile: profileId,
+		Profileid: in.ProfileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "database error while fetching following list")
 	}
@@ -728,6 +719,7 @@ func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFoll
 			Username:      row.Username,
 			Name:          row.Name.(string),
 			ProfilePicUrl: row.ProfilePicAddress,
+			IsFollowed:    row.IsFollowed,
 		}
 	}
 

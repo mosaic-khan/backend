@@ -4,9 +4,11 @@ import (
 	"log"
 	"main/internal/service/Media"
 	"main/internal/service/Post"
+	"main/internal/service/Search"
 	"main/internal/service/User"
 	"main/internal/service/utils"
 	"main/pkg/PostAPIService"
+	"main/pkg/SearchAPIService"
 	"main/pkg/UserAPIService"
 	"net"
 	"net/http"
@@ -69,16 +71,35 @@ func StartMediaAPIServer() {
 	v.Done()
 }
 
+func StartSearchAPIServer() {
+	lis, err := net.Listen("tcp", ":9390")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+		return
+	}
+
+	searchS := Search.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(utils.MiddleWareAuth()))
+	SearchAPIService.RegisterSearchAPIServer(grpcServer, searchS)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
+
+	v.Done()
+}
+
 var v sync.WaitGroup
 
 func main() {
 	println("hello world")
 
-	v.Add(3)
+	v.Add(4)
 
 	go StartUserAPIServer()
 	go StartPostAPIServer()
 	go StartMediaAPIServer()
+	go StartSearchAPIServer()
 
 	v.Wait()
 }
