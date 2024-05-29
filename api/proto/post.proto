@@ -26,6 +26,7 @@ service PostAPI {
   rpc PinPost (PinPostRequest) returns (google.protobuf.Empty);
   rpc UnpinPost (UnpinPostRequest) returns (google.protobuf.Empty);
   rpc GetPins (google.protobuf.Empty) returns (GetPinsResponse);
+  rpc DeletePost (DeletePostRequest) returns (google.protobuf.Empty);
 }
 
 message Post {
@@ -212,4 +213,8 @@ message PinedPost {
 
 message GetPinsResponse {
   repeated PinedPost PinedPost = 1;
+}
+
+message DeletePostRequest {
+  int64 id = 1;
 }

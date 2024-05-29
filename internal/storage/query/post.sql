@@ -117,3 +117,8 @@ WHERE post_image.is_primary = true
 ORDER BY post.num_likes DESC
 OFFSET sqlc.arg(page)
 LIMIT 20;
+
+-- name: DeletePost :exec
+DELETE
+FROM post
+WHERE id = $1;
