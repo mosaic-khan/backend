@@ -55,6 +55,22 @@ func (q *Queries) AddReply(ctx context.Context, arg AddReplyParams) (int64, erro
 	return id, err
 }
 
+const deleteComment = `-- name: DeleteComment :exec
+DELETE
+FROM comment
+WHERE profile_id = $1 AND id = $2
+`
+
+type DeleteCommentParams struct {
+	ProfileID int64
+	ID        int64
+}
+
+func (q *Queries) DeleteComment(ctx context.Context, arg DeleteCommentParams) error {
+	_, err := q.db.ExecContext(ctx, deleteComment, arg.ProfileID, arg.ID)
+	return err
+}
+
 const dislikeCommentOrReply = `-- name: DislikeCommentOrReply :exec
 DELETE
 FROM profile_like_comment
@@ -82,6 +98,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                 WHERE c.parent_id = comment.id
            )
        ) AS has_replies,
+       comment.profile_id = $1 AS owned,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
@@ -103,6 +120,7 @@ type GetCommentRow struct {
 	NumLikes          int32
 	Isliked           bool
 	HasReplies        bool
+	Owned             bool
 	Time              time.Time
 }
 
@@ -118,6 +136,7 @@ func (q *Queries) GetComment(ctx context.Context, arg GetCommentParams) (GetComm
 		&i.NumLikes,
 		&i.Isliked,
 		&i.HasReplies,
+		&i.Owned,
 		&i.Time,
 	)
 	return i, err
@@ -134,6 +153,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                 WHERE c.parent_id = comment.id
            )
        ) AS has_replies,
+       comment.profile_id = $1 AS owned,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
@@ -155,6 +175,7 @@ type GetPostsCommentsRow struct {
 	NumLikes          int32
 	Isliked           bool
 	HasReplies        bool
+	Owned             bool
 	Time              time.Time
 }
 
@@ -176,6 +197,7 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 			&i.NumLikes,
 			&i.Isliked,
 			&i.HasReplies,
+			&i.Owned,
 			&i.Time,
 		); err != nil {
 			return nil, err
@@ -192,13 +214,14 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 }
 
 const getReplies = `-- name: GetReplies :many
-SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes
+SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
                     WHERE c.parent_id = comment.id
                    )
        ) AS has_replies,
+       comment.profile_id = $1 AS owned,
        comment.time
 FROM comment
          JOIN profile on comment.profile_id = profile.id
@@ -222,8 +245,10 @@ type GetRepliesRow struct {
 	FirstName         string
 	ProfilePicAddress string
 	Comment           string
+	NumLikes          int32
 	Isliked           interface{}
 	HasReplies        bool
+	Owned             bool
 	Time              time.Time
 }
 
@@ -242,8 +267,10 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 			&i.FirstName,
 			&i.ProfilePicAddress,
 			&i.Comment,
+			&i.NumLikes,
 			&i.Isliked,
 			&i.HasReplies,
+			&i.Owned,
 			&i.Time,
 		); err != nil {
 			return nil, err
