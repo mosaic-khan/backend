@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"main/internal/service/Media"
 	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
+	"os"
+	"path"
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -583,6 +586,41 @@ func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIServic
 
 	return getPinsReq, nil
 
+}
+
+func (s *Server) DeletePost(ctx context.Context, in *PostAPIService.DeletePostRequest) (*emptypb.Empty, error) {
+
+	profileID := ctx.Value("ProfileID")
+
+	ownerID, err := s.query.GetPostProfileId(ctx, in.Id)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Errorf(codes.InvalidArgument, "Post with id %d does not exist", in.Id)
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	if ownerID != profileID {
+		return nil, status.Errorf(codes.PermissionDenied, "does not own post with id %d", in.Id)
+	}
+
+	imageUrls, err := s.query.GetPostImages(ctx, in.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	// Remove imagese of the post
+	for _, i := range imageUrls {
+		os.Remove(Media.UploadDir + "/" + path.Base(i))
+	}
+
+	// delete post and every related entry in databsae
+	err = s.query.DeletePost(ctx, in.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) DeleteComment(ctx context.Context, in *PostAPIService.DeleteCommentRequest) (*emptypb.Empty, error) {

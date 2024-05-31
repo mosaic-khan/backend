@@ -122,6 +122,10 @@ ORDER BY post.num_likes DESC
 OFFSET sqlc.arg(page)
 LIMIT 20;
 
+-- name: DeletePost :exec
+DELETE
+FROM post
+WHERE id = $1;
 
 -- name: MixedSearch :many
 WITH selected_post_id AS (

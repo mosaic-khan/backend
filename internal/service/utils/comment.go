@@ -127,8 +127,6 @@ func (c *commentClient) IsSafe(comment string) (bool, error) {
 
 func init() {
 
-	fmt.Println("init running")
-
 	CommentClient.Client.Timeout = time.Second * 5
 	CommentClient.baseUrl = "https://api.text-mining.ir/api"
 	CommentClient.getToken()
