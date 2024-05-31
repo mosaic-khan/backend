@@ -80,24 +80,6 @@ static_resources:
                     socket_address:
                       address: 185.80.196.246
                       port_value: 9190
-    - name: grpc_search_service
-      connect_timeout: 5s
-      type: LOGICAL_DNS
-      typed_extension_protocol_options:
-        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-          explicit_http_config:
-            http2_protocol_options: {}
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: grpc_search_service
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: 185.80.196.246
-                      port_value: 9390
     - name: rest_media_service
       connect_timeout: 5s
       type: LOGICAL_DNS
@@ -116,3 +98,21 @@ static_resources:
                     socket_address:
                       address: 185.80.196.246
                       port_value: 9290
+    - name: grpc_search_service
+      connect_timeout: 5s
+      type: LOGICAL_DNS
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: grpc_search_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 185.80.196.246
+                      port_value: 9390

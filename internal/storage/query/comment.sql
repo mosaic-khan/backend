@@ -36,6 +36,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                 WHERE c.parent_id = comment.id
            )
        ) AS has_replies,
+       comment.profile_id = $1 AS owned,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
@@ -53,7 +54,8 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                    )
        ) AS has_replies,
        comment.time,
-       comment.parent_id
+       comment.parent_id,
+       comment.profile_id = $1 AS owned
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -72,7 +74,8 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                    )
        ) AS has_replies,
        comment.time,
-       comment.parent_id
+       comment.parent_id,
+       comment.profile_id = $1 AS owned
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -105,8 +108,14 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                 WHERE c.parent_id = comment.id
            )
        ) AS has_replies,
+       comment.profile_id = $1 AS owned,
        comment.time
 FROM comment
     JOIN profile on comment.profile_id = profile.id
     JOIN account on profile.user_id = account.id
 WHERE comment.id = $2;
+
+-- name: DeleteComment :exec
+DELETE
+FROM comment
+WHERE profile_id = $1 AND id = $2;

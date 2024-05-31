@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"main/internal/service/Media"
 	"main/internal/service/utils"
 	"main/internal/storage/db"
 	"main/pkg/PostAPIService"
+	"os"
+	"path"
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -335,6 +338,7 @@ func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRe
 		HasReplies: comment.HasReplies,
 		IsLiked:    comment.Isliked,
 		NumLikes:   comment.NumLikes,
+		Owned:      comment.Owned,
 	}, nil
 }
 
@@ -381,6 +385,7 @@ func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyReques
 		HasReplies: comment.HasReplies,
 		IsLiked:    comment.Isliked,
 		NumLikes:   comment.NumLikes,
+		Owned:      comment.Owned,
 	}, nil
 }
 
@@ -392,6 +397,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 		PostID:    in.PostID,
 	})
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, status.Errorf(codes.Internal, "error while getting posts comments")
 	}
 
@@ -408,6 +414,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked,
 			NumLikes:   comment.NumLikes,
+			Owned:      comment.Owned,
 		}
 	}
 
@@ -442,6 +449,7 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 			IsLiked:    comment.Isliked.(bool),
 			NumLikes:   comment.NumLikes,
 			ParentId:   &comment.ParentID.Int64,
+			Owned:      comment.Owned,
 		}
 	}
 
@@ -579,4 +587,51 @@ func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIServic
 
 	return getPinsReq, nil
 
+}
+
+func (s *Server) DeletePost(ctx context.Context, in *PostAPIService.DeletePostRequest) (*emptypb.Empty, error) {
+
+	profileID := ctx.Value("ProfileID")
+
+	ownerID, err := s.query.GetPostProfileId(ctx, in.Id)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Errorf(codes.InvalidArgument, "Post with id %d does not exist", in.Id)
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	if ownerID != profileID {
+		return nil, status.Errorf(codes.PermissionDenied, "does not own post with id %d", in.Id)
+	}
+
+	imageUrls, err := s.query.GetPostImages(ctx, in.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	// Remove imagese of the post
+	for _, i := range imageUrls {
+		os.Remove(Media.UploadDir + "/" + path.Base(i))
+	}
+
+	// delete post and every related entry in databsae
+	err = s.query.DeletePost(ctx, in.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete post")
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) DeleteComment(ctx context.Context, in *PostAPIService.DeleteCommentRequest) (*emptypb.Empty, error) {
+
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.DeleteComment(ctx, db.DeleteCommentParams{ProfileID: profileID, ID: in.Id})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete comment with id %d", in.Id)
+	}
+
+	return &emptypb.Empty{}, nil
 }

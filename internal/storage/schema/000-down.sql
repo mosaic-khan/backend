@@ -21,7 +21,8 @@ DROP FUNCTION IF EXISTS inc_num_comment_likes;
 DROP TRIGGER IF EXISTS delete_comment_like on profile_like_comment;
 DROP FUNCTION IF EXISTS dec_num_comment_likes;
 
-DROP TABLE IF EXISTS "report" CASCADE ;
+DROP TABLE IF EXISTS "report_comment" CASCADE ;
+DROP TABLE IF EXISTS "profile_pin_post" CASCADE ;
 DROP TABLE IF EXISTS "profile_like_post" CASCADE ;
 DROP TABLE IF EXISTS "profile_like_comment" CASCADE ;
 DROP TABLE IF EXISTS "comment" CASCADE ;
