@@ -44,14 +44,16 @@ WHERE comment.parent_id IS NULL and comment.post_id = $2 and num_report < 1000;
 
 
 -- name: GetReplies :many
-SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes
+WITH RECURSIVE replies AS (
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
                     WHERE c.parent_id = comment.id
                    )
        ) AS has_replies,
-       comment.time
+       comment.time,
+	   comment.parent_id
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -60,7 +62,30 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $2 and num_report < 1000;
+WHERE comment.parent_id = $2 AND num_report < 1000
+UNION
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
+       (lk.isLiked IS NOT NULL) AS isLiked,
+       (SELECT EXISTS
+                   (SELECT 1 FROM comment c
+                    WHERE c.parent_id = comment.id
+                   )
+       ) AS has_replies,
+       comment.time,
+	   comment.parent_id
+FROM comment
+         JOIN profile on comment.profile_id = profile.id
+         JOIN account on profile.user_id = account.id
+         LEFT JOIN (
+            SELECT comment_id AS cmnt_id, 1 AS isLiked
+            FROM profile_like_comment
+            WHERE profile_like_comment.profile_id = $1
+         ) AS lk on comment.id = lk.cmnt_id
+		 JOIN replies ON comment.parent_id = replies.id
+WHERE num_report < 1000
+)
+SELECT *
+FROM replies;
 
 
 

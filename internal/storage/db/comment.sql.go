@@ -192,14 +192,16 @@ func (q *Queries) GetPostsComments(ctx context.Context, arg GetPostsCommentsPara
 }
 
 const getReplies = `-- name: GetReplies :many
-SELECT comment.id, account.username,profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes
+WITH RECURSIVE replies AS (
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
        (lk.isLiked IS NOT NULL) AS isLiked,
        (SELECT EXISTS
                    (SELECT 1 FROM comment c
                     WHERE c.parent_id = comment.id
                    )
        ) AS has_replies,
-       comment.time
+       comment.time,
+	   comment.parent_id
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -208,7 +210,30 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-WHERE comment.parent_id = $2 and num_report < 1000
+WHERE comment.parent_id = $2 AND num_report < 1000
+UNION
+SELECT comment.id, account.username, profile.first_name, profile.profile_pic_address, comment.comment, comment.num_likes,
+       (lk.isLiked IS NOT NULL) AS isLiked,
+       (SELECT EXISTS
+                   (SELECT 1 FROM comment c
+                    WHERE c.parent_id = comment.id
+                   )
+       ) AS has_replies,
+       comment.time,
+	   comment.parent_id
+FROM comment
+         JOIN profile on comment.profile_id = profile.id
+         JOIN account on profile.user_id = account.id
+         LEFT JOIN (
+            SELECT comment_id AS cmnt_id, 1 AS isLiked
+            FROM profile_like_comment
+            WHERE profile_like_comment.profile_id = $1
+         ) AS lk on comment.id = lk.cmnt_id
+		 JOIN replies ON comment.parent_id = replies.id
+WHERE num_report < 1000
+)
+SELECT id, username, first_name, profile_pic_address, comment, num_likes, isliked, has_replies, time, parent_id
+FROM replies
 `
 
 type GetRepliesParams struct {
@@ -222,9 +247,11 @@ type GetRepliesRow struct {
 	FirstName         string
 	ProfilePicAddress string
 	Comment           string
+	NumLikes          int32
 	Isliked           interface{}
 	HasReplies        bool
 	Time              time.Time
+	ParentID          sql.NullInt64
 }
 
 func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRepliesRow, error) {
@@ -242,9 +269,11 @@ func (q *Queries) GetReplies(ctx context.Context, arg GetRepliesParams) ([]GetRe
 			&i.FirstName,
 			&i.ProfilePicAddress,
 			&i.Comment,
+			&i.NumLikes,
 			&i.Isliked,
 			&i.HasReplies,
 			&i.Time,
+			&i.ParentID,
 		); err != nil {
 			return nil, err
 		}

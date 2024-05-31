@@ -440,6 +440,8 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 			Time:       comment.Time.GoString(),
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked.(bool),
+			NumLikes:   comment.NumLikes,
+			ParentId:   &comment.ParentID.Int64,
 		}
 	}
 

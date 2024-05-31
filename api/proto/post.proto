@@ -132,6 +132,7 @@ message Comment {
   bool hasReplies = 7;
   bool isLiked = 8;
   int32 numLikes = 9;
+  optional int64 parentId = 10;
 }
 
 message GetRepliesRequest {
