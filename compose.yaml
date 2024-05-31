@@ -17,6 +17,8 @@ services:
       - SECRET_KEY=$SECRET_KEY
       - apikey=5acec106-ae16-ef11-af5d-00163e6496fc
     restart: always
+    volumes:
+      - khanmedia_data:/home/app/fileData
   postgres:
     image: postgres:16.2-alpine3.19
     environment:
@@ -47,3 +49,4 @@ services:
     restart: "no"
 volumes:
   postgres_data:
+  khanmedia_data:
