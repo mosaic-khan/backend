@@ -7,6 +7,7 @@ services:
       - 9090:9090
       - 9190:9190
       - 9290:9290
+      - 9390:9390
     environment:
       - DB_USER=$DB_USER
       - DB_PASS=$DB_PASS
@@ -14,6 +15,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=$DB_NAME
       - SECRET_KEY=$SECRET_KEY
+      - apikey=5acec106-ae16-ef11-af5d-00163e6496fc
     restart: always
   postgres:
     image: postgres:16.2-alpine3.19
