@@ -53,7 +53,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                    )
        ) AS has_replies,
        comment.time,
-	   comment.parent_id
+       comment.parent_id
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -72,7 +72,7 @@ SELECT comment.id, account.username, profile.first_name, profile.profile_pic_add
                    )
        ) AS has_replies,
        comment.time,
-	   comment.parent_id
+       comment.parent_id
 FROM comment
          JOIN profile on comment.profile_id = profile.id
          JOIN account on profile.user_id = account.id
@@ -81,7 +81,7 @@ FROM comment
             FROM profile_like_comment
             WHERE profile_like_comment.profile_id = $1
          ) AS lk on comment.id = lk.cmnt_id
-		 JOIN replies ON comment.parent_id = replies.id
+         JOIN replies ON comment.parent_id = replies.id
 WHERE num_report < 1000
 )
 SELECT *
