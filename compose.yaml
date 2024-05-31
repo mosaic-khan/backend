@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASS
     volumes:
-      - /var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     restart: always
   proxy:
     image: envoyproxy/envoy:v1.18-latest
@@ -45,3 +45,5 @@ services:
       - DB_PORT=5432
       - DB_NAME=$DB_NAME
     restart: "no"
+volumes:
+  postgres_data:
