@@ -335,6 +335,7 @@ func (s *Server) AddComment(ctx context.Context, in *PostAPIService.AddCommentRe
 		HasReplies: comment.HasReplies,
 		IsLiked:    comment.Isliked,
 		NumLikes:   comment.NumLikes,
+		Owned:      comment.Owned,
 	}, nil
 }
 
@@ -381,6 +382,7 @@ func (s *Server) AddReply(ctx context.Context, in *PostAPIService.AddReplyReques
 		HasReplies: comment.HasReplies,
 		IsLiked:    comment.Isliked,
 		NumLikes:   comment.NumLikes,
+		Owned:      comment.Owned,
 	}, nil
 }
 
@@ -392,6 +394,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 		PostID:    in.PostID,
 	})
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, status.Errorf(codes.Internal, "error while getting posts comments")
 	}
 
@@ -408,6 +411,7 @@ func (s *Server) GetComments(ctx context.Context, in *PostAPIService.GetComments
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked,
 			NumLikes:   comment.NumLikes,
+			Owned:      comment.Owned,
 		}
 	}
 
@@ -440,6 +444,8 @@ func (s *Server) GetReplies(ctx context.Context, in *PostAPIService.GetRepliesRe
 			Time:       comment.Time.GoString(),
 			HasReplies: comment.HasReplies,
 			IsLiked:    comment.Isliked.(bool),
+			NumLikes:   comment.NumLikes,
+			Owned:      comment.Owned,
 		}
 	}
 
@@ -577,4 +583,16 @@ func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIServic
 
 	return getPinsReq, nil
 
+}
+
+func (s *Server) DeleteComment(ctx context.Context, in *PostAPIService.DeleteCommentRequest) (*emptypb.Empty, error) {
+
+	profileID := ctx.Value("ProfileID").(int64)
+
+	err := s.query.DeleteComment(ctx, db.DeleteCommentParams{ProfileID: profileID, ID: in.Id})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not delete comment with id %d", in.Id)
+	}
+
+	return &emptypb.Empty{}, nil
 }

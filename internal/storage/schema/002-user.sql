@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS account (
     password CHAR(60) NOT NULL
 );
 
-CREATE EXTENSION pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX idx_account_username
 ON account
