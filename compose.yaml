@@ -17,13 +17,15 @@ services:
       - SECRET_KEY=$SECRET_KEY
       - apikey=5acec106-ae16-ef11-af5d-00163e6496fc
     restart: always
+    volumes:
+      - khanmedia_data:/home/app/fileData
   postgres:
     image: postgres:16.2-alpine3.19
     environment:
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASS
     volumes:
-      - /var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     restart: always
   proxy:
     image: envoyproxy/envoy:v1.18-latest
@@ -45,3 +47,6 @@ services:
       - DB_PORT=5432
       - DB_NAME=$DB_NAME
     restart: "no"
+volumes:
+  postgres_data:
+  khanmedia_data:
