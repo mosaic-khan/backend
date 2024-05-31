@@ -37,11 +37,12 @@ type PostAPIClient interface {
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	LikeComment(ctx context.Context, in *LikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DislikeComment(ctx context.Context, in *DislikeCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	PinPost(ctx context.Context, in *PinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UnpinPost(ctx context.Context, in *UnpinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetPins(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPinsResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type postAPIClient struct {
@@ -178,6 +179,24 @@ func (c *postAPIClient) DislikeComment(ctx context.Context, in *DislikeCommentRe
 	return out, nil
 }
 
+func (c *postAPIClient) ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/ReportComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postAPIClient) DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/DeleteComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postAPIClient) PinPost(ctx context.Context, in *PinPostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/PinPost", in, out, opts...)
@@ -214,15 +233,6 @@ func (c *postAPIClient) DeletePost(ctx context.Context, in *DeletePostRequest, o
 	return out, nil
 }
 
-func (c *postAPIClient) ReportComment(ctx context.Context, in *RepostCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/KhanAPI.PostAPI/ReportComment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // PostAPIServer is the server API for PostAPI service.
 // All implementations must embed UnimplementedPostAPIServer
 // for forward compatibility
@@ -241,11 +251,12 @@ type PostAPIServer interface {
 	GetReplies(context.Context, *GetRepliesRequest) (*GetRepliesResponse, error)
 	LikeComment(context.Context, *LikeCommentRequest) (*emptypb.Empty, error)
 	DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error)
+	ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error)
+	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
 	PinPost(context.Context, *PinPostRequest) (*emptypb.Empty, error)
 	UnpinPost(context.Context, *UnpinPostRequest) (*emptypb.Empty, error)
 	GetPins(context.Context, *emptypb.Empty) (*GetPinsResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*emptypb.Empty, error)
-	ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostAPIServer()
 }
 
@@ -295,6 +306,12 @@ func (UnimplementedPostAPIServer) LikeComment(context.Context, *LikeCommentReque
 func (UnimplementedPostAPIServer) DislikeComment(context.Context, *DislikeCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DislikeComment not implemented")
 }
+func (UnimplementedPostAPIServer) ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportComment not implemented")
+}
+func (UnimplementedPostAPIServer) DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
+}
 func (UnimplementedPostAPIServer) PinPost(context.Context, *PinPostRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PinPost not implemented")
 }
@@ -306,9 +323,6 @@ func (UnimplementedPostAPIServer) GetPins(context.Context, *emptypb.Empty) (*Get
 }
 func (UnimplementedPostAPIServer) DeletePost(context.Context, *DeletePostRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
-}
-func (UnimplementedPostAPIServer) ReportComment(context.Context, *RepostCommentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReportComment not implemented")
 }
 func (UnimplementedPostAPIServer) mustEmbedUnimplementedPostAPIServer() {}
 
@@ -575,6 +589,42 @@ func _PostAPI_DislikeComment_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostAPI_ReportComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RepostCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).ReportComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/ReportComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).ReportComment(ctx, req.(*RepostCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostAPI_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostAPIServer).DeleteComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/KhanAPI.PostAPI/DeleteComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostAPIServer).DeleteComment(ctx, req.(*DeleteCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostAPI_PinPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PinPostRequest)
 	if err := dec(in); err != nil {
@@ -647,24 +697,6 @@ func _PostAPI_DeletePost_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostAPI_ReportComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RepostCommentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostAPIServer).ReportComment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/KhanAPI.PostAPI/ReportComment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostAPIServer).ReportComment(ctx, req.(*RepostCommentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // PostAPI_ServiceDesc is the grpc.ServiceDesc for PostAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -729,6 +761,14 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostAPI_DislikeComment_Handler,
 		},
 		{
+			MethodName: "ReportComment",
+			Handler:    _PostAPI_ReportComment_Handler,
+		},
+		{
+			MethodName: "DeleteComment",
+			Handler:    _PostAPI_DeleteComment_Handler,
+		},
+		{
 			MethodName: "PinPost",
 			Handler:    _PostAPI_PinPost_Handler,
 		},
@@ -743,10 +783,6 @@ var PostAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePost",
 			Handler:    _PostAPI_DeletePost_Handler,
-		},
-		{
-			MethodName: "ReportComment",
-			Handler:    _PostAPI_ReportComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
