@@ -1,9 +1,14 @@
 package Media
 
 import (
+	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"io"
 	"main/internal/service/utils"
+	"main/pkg/PostAPIService"
 	"net/http"
 	"os"
 	"strconv"
@@ -64,6 +69,7 @@ func (s *Server) UploadProfilePicHandler(w http.ResponseWriter, r *http.Request)
 
 func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request) {
 	profileID := r.Context().Value("profileID").(int64)
+	token := r.Context().Value("token").(string)
 
 	if r.Method != "POST" {
 		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
@@ -118,6 +124,17 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		http.Error(w, "error while creating Token", http.StatusInternalServerError)
 	}
+
+	conn, _ := grpc.Dial("localhost:9190", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	defer func(conn *grpc.ClientConn) {
+		_ = conn.Close()
+	}(conn)
+
+	client := PostAPIService.NewPostAPIClient(conn)
+
+	ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("authorization", token))
+
+	_, _ = client.AddImageForPost(ctx, &PostAPIService.AddImageForPostRequest{PostImageToken: postImageToken})
 
 	_, _ = w.Write([]byte(postImageToken))
 	w.WriteHeader(http.StatusOK)
