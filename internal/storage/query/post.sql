@@ -4,7 +4,7 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: GetPost :one
-SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id,
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id, view,
     (SELECT EXISTS
         (SELECT
         FROM profile_pin_post
@@ -164,3 +164,8 @@ WHERE post_image.is_primary = true
 ORDER BY post.num_likes DESC
 OFFSET sqlc.arg(page)
     LIMIT 20;
+
+-- name: IncrementView :exec
+UPDATE post
+SET view = view + 1
+WHERE id = $1;

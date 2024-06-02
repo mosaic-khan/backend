@@ -45,7 +45,7 @@ func (q *Queries) DeletePost(ctx context.Context, id int64) error {
 }
 
 const getPost = `-- name: GetPost :one
-SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id,
+SELECT post.id, post.title, post.description, category.name as category, account.username, profile.profile_pic_address, post.num_images, post.num_likes, post.num_comments, post.profile_id, view,
     (SELECT EXISTS
         (SELECT
         FROM profile_pin_post
@@ -79,6 +79,7 @@ type GetPostRow struct {
 	NumLikes          int32
 	NumComments       int32
 	ProfileID         int64
+	View              int32
 	Pinned            bool
 	Liked             bool
 }
@@ -97,6 +98,7 @@ func (q *Queries) GetPost(ctx context.Context, arg GetPostParams) (GetPostRow, e
 		&i.NumLikes,
 		&i.NumComments,
 		&i.ProfileID,
+		&i.View,
 		&i.Pinned,
 		&i.Liked,
 	)
@@ -274,6 +276,17 @@ func (q *Queries) GetPostsWithCategory(ctx context.Context, arg GetPostsWithCate
 		return nil, err
 	}
 	return items, nil
+}
+
+const incrementView = `-- name: IncrementView :exec
+UPDATE post
+SET view = view + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncrementView(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, incrementView, id)
+	return err
 }
 
 const insertPost = `-- name: InsertPost :one
