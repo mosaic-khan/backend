@@ -261,7 +261,7 @@ func MediaMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), "profileID", profileID)
-		ctx = context.WithValue(ctx, "token", bearerToken)
+		ctx = context.WithValue(ctx, "token", authHeader)
 		r = r.WithContext(ctx)
 
 		wrappedWriter := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
