@@ -46,7 +46,7 @@ func (q *Queries) FollowStatus(ctx context.Context, arg FollowStatusParams) (boo
 const followerList = `-- name: FollowerList :many
 SELECT profile.id, account.username,  (profile.first_name || ' ' || profile.last_name) AS name, profile.profile_pic_address,
        (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = $1 and f.following = $2)) AS is_followed
-FROM follow JOIN profile on follow.following = profile.id
+FROM follow JOIN profile on follow.follower = profile.id
     JOIN account on profile.user_id = account.id
 WHERE following = $2
 `
