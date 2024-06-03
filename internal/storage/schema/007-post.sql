@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS post (
     num_likes INT NOT NULL DEFAULT 0 CHECK(num_likes >= 0),
     num_comments INT NOT NULL DEFAULT 0 CHECK(num_comments >= 0),
     profile_id BIGINT NOT NULL,
+    view INT NOT NULL DEFAULT 0,
     FOREIGN KEY(profile_id)
         REFERENCES profile(id)
         ON DELETE CASCADE

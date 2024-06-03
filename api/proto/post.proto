@@ -43,6 +43,7 @@ message Post {
   string profilePicUrl = 11;
   string category = 12;
   optional bool pinned = 13;
+  int32 view = 14;
 }
 
 message PostPreview {

@@ -106,6 +106,7 @@ type Post struct {
 	NumLikes    int32
 	NumComments int32
 	ProfileID   int64
+	View        int32
 }
 
 type PostHasIngredient struct {

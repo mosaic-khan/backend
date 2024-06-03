@@ -101,18 +101,24 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 
 	profileID := ctx.Value("ProfileID").(int64)
 
+	// increment post view
+	err := s.query.IncrementView(ctx, in.GetPostID())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not retreive post with id %d", in.GetPostID())
+	}
+
 	// get post
 	post, err := s.query.GetPost(ctx, db.GetPostParams{PostID: in.PostID, ProfileID: profileID})
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, status.Errorf(codes.InvalidArgument, "post id %d doesn't exist\n", in.GetPostID())
+		return nil, status.Errorf(codes.InvalidArgument, "post id %d doesn't exist", in.GetPostID())
 	} else if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not get post with id %d\n", in.GetPostID())
+		return nil, status.Errorf(codes.Internal, "could not get post with id %d", in.GetPostID())
 	}
 
 	// get post ingredients
 	ingredients, err := s.query.GetPostIngredient(ctx, in.GetPostID())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not get ingredients of post with id %d\n", in.GetPostID())
+		return nil, status.Errorf(codes.Internal, "could not get ingredients of post with id %d", in.GetPostID())
 	}
 
 	ingredientsMap := make(map[string]string)
@@ -139,6 +145,7 @@ func (s *Server) GetPost(ctx context.Context, in *PostAPIService.GetPostRequest)
 			ImageUrls:     imageUrls,
 			Username:      post.Username,
 			ProfilePicUrl: post.ProfilePicAddress,
+			View:          post.View,
 		},
 	}
 
