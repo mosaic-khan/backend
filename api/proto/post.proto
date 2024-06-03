@@ -26,7 +26,7 @@ service PostAPI {
   rpc UnpinPost (UnpinPostRequest) returns (google.protobuf.Empty);
   rpc GetPins (google.protobuf.Empty) returns (GetPinsResponse);
   rpc DeletePost (DeletePostRequest) returns (google.protobuf.Empty);
-  
+  rpc LoadTimeLine (LoadTimeLineRequest) returns (LoadTimeLineResponse);
 }
 
 message Post {
@@ -193,4 +193,24 @@ message DeletePostRequest {
 }
 message DeleteCommentRequest {
   int64 id = 1;
+}
+
+message LoadTimeLineRequest {
+  int32 pageNumber = 1;
+}
+
+message LoadTimeLineResponse {
+  message TimeLinePost {
+    int64 id = 1;
+    string title = 2;
+    string ShortDescription = 3;
+    string image = 4;
+    int32 numLikes = 6;
+    int32 numComments = 7;
+    bool isLiked = 8;
+    string username = 9;
+    string profilePicUrl = 10;
+  }
+  repeated TimeLinePost posts = 1;
+  int32 pageNumber = 2;
 }

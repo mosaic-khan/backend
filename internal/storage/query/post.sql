@@ -169,3 +169,32 @@ OFFSET sqlc.arg(page)
 UPDATE post
 SET view = view + 1
 WHERE id = $1;
+
+
+-- name: LoadTimeLine :many
+WITH selected_post_id AS (
+    SELECT post.id as p_id
+    FROM post
+    WHERE post.id in (
+        SELECT follow.following
+        FROM follow
+        WHERE follow.follower = $1
+    )
+)
+SELECT post.id, post.title, post.description,
+       post_image.image_url, account.username, profile.profile_pic_address,
+       (SELECT EXISTS
+                   (SELECT 1 FROM profile_like_post
+                    WHERE profile_like_post.profile_id = $1 AND post_id = post.id)
+       ) AS isLiked,
+       post.num_likes,
+       post.num_comments
+FROM selected_post_id
+    JOIN post on post.id = selected_post_id.p_id
+    JOIN profile on post.profile_id = profile.id
+    JOIN account on profile.user_id = account.id
+    LEFT JOIN post_image on post.id = post_image.post_id
+WHERE post_image.is_primary = true
+ORDER BY post.id DESC
+OFFSET $2
+LIMIT 20;

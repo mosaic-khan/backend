@@ -617,12 +617,12 @@ func (s *Server) DeletePost(ctx context.Context, in *PostAPIService.DeletePostRe
 		return nil, status.Errorf(codes.Internal, "Could not delete post")
 	}
 
-	// Remove imagese of the post
+	// Remove images of the post
 	for _, i := range imageUrls {
 		os.Remove(Media.UploadDir + "/" + path.Base(i))
 	}
 
-	// delete post and every related entry in databsae
+	// delete post and every related entry in database
 	err = s.query.DeletePost(ctx, in.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not delete post")
@@ -641,4 +641,33 @@ func (s *Server) DeleteComment(ctx context.Context, in *PostAPIService.DeleteCom
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) LoadTimeLine(ctx context.Context, in *PostAPIService.LoadTimeLineRequest) (*PostAPIService.LoadTimeLineResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
+
+	PostsDB, err := s.query.LoadTimeLine(ctx, db.LoadTimeLineParams{ProfileID: profileID, Offset: (in.PageNumber - 1) * 20})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while fetching timeline")
+	}
+
+	posts := make([]*PostAPIService.LoadTimeLineResponse_TimeLinePost, len(PostsDB))
+	for i, post := range PostsDB {
+		posts[i] = &PostAPIService.LoadTimeLineResponse_TimeLinePost{
+			Id:               post.ID,
+			Title:            post.Title,
+			ShortDescription: post.Description,
+			Image:            post.ImageUrl.String,
+			NumLikes:         post.NumLikes,
+			NumComments:      post.NumComments,
+			IsLiked:          post.Isliked,
+			Username:         post.Username,
+			ProfilePicUrl:    post.ProfilePicAddress,
+		}
+	}
+
+	return &PostAPIService.LoadTimeLineResponse{
+		Posts:      posts,
+		PageNumber: in.PageNumber,
+	}, nil
 }
