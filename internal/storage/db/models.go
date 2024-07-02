@@ -144,6 +144,7 @@ type ProfileLikeComment struct {
 type ProfileLikePost struct {
 	PostID    int64
 	ProfileID int64
+	LikeDate  time.Time
 }
 
 type ProfilePinPost struct {
