@@ -620,6 +620,7 @@ func (s *Server) DeletePost(ctx context.Context, in *PostAPIService.DeletePostRe
 	// Remove images of the post
 	for _, i := range imageUrls {
 		os.Remove(Media.UploadDir + "/" + path.Base(i))
+		os.Remove(Media.ThumbnailDir + "/" + path.Base(i))
 	}
 
 	// delete post and every related entry in database
