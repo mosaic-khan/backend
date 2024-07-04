@@ -24,7 +24,7 @@ service PostAPI {
   rpc DeleteComment (DeleteCommentRequest) returns (google.protobuf.Empty); 
   rpc PinPost (PinPostRequest) returns (google.protobuf.Empty);
   rpc UnpinPost (UnpinPostRequest) returns (google.protobuf.Empty);
-  rpc GetPins (google.protobuf.Empty) returns (GetPinsResponse);
+  rpc GetPins (GetPinsRequest) returns (GetPinsResponse);
   rpc DeletePost (DeletePostRequest) returns (google.protobuf.Empty);
   rpc LoadTimeLine (LoadTimeLineRequest) returns (LoadTimeLineResponse);
 }
@@ -180,8 +180,13 @@ message UnpinPostRequest {
 }
 
 message PinedPost {
-  string title = 1;
-  string image_url = 2;
+  int64 id = 1;
+  string title = 2;
+  string image_url = 3;
+}
+
+message GetPinsRequest {
+  int64 profileID = 1;
 }
 
 message GetPinsResponse {

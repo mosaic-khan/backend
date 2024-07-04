@@ -13,7 +13,7 @@ FROM profile_pin_post
 WHERE profile_id = $1;
 
 -- name: GetPins :many
-SELECT post.title, post_image.image_url
+SELECT post.id, post.title, post_image.image_url
 FROM profile_pin_post
     JOIN post ON profile_pin_post.post_id = post.id
     LEFT JOIN post_image ON profile_pin_post.post_id = post_image.post_id

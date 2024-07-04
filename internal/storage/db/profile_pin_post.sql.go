@@ -26,7 +26,7 @@ func (q *Queries) AddPin(ctx context.Context, arg AddPinParams) error {
 }
 
 const getPins = `-- name: GetPins :many
-SELECT post.title, post_image.image_url
+SELECT post.id, post.title, post_image.image_url
 FROM profile_pin_post
     JOIN post ON profile_pin_post.post_id = post.id
     LEFT JOIN post_image ON profile_pin_post.post_id = post_image.post_id
@@ -34,6 +34,7 @@ WHERE profile_pin_post.profile_id = $1 AND post_image.is_primary = TRUE
 `
 
 type GetPinsRow struct {
+	ID       int64
 	Title    string
 	ImageUrl sql.NullString
 }
@@ -47,7 +48,7 @@ func (q *Queries) GetPins(ctx context.Context, profileID int64) ([]GetPinsRow, e
 	var items []GetPinsRow
 	for rows.Next() {
 		var i GetPinsRow
-		if err := rows.Scan(&i.Title, &i.ImageUrl); err != nil {
+		if err := rows.Scan(&i.ID, &i.Title, &i.ImageUrl); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

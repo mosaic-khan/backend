@@ -577,11 +577,9 @@ func (s *Server) UnpinPost(ctx context.Context, in *PostAPIService.UnpinPostRequ
 
 }
 
-func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIService.GetPinsResponse, error) {
+func (s *Server) GetPins(ctx context.Context, in *PostAPIService.GetPinsRequest) (*PostAPIService.GetPinsResponse, error) {
 
-	profileID := ctx.Value("ProfileID").(int64)
-
-	pins, err := s.query.GetPins(ctx, profileID)
+	pins, err := s.query.GetPins(ctx, in.ProfileID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not retreive pined post")
 	}
@@ -589,7 +587,7 @@ func (s *Server) GetPins(ctx context.Context, in *emptypb.Empty) (*PostAPIServic
 	getPinsReq := &PostAPIService.GetPinsResponse{}
 
 	for _, p := range pins {
-		getPinsReq.PinedPost = append(getPinsReq.PinedPost, &PostAPIService.PinedPost{Title: p.Title, ImageUrl: p.ImageUrl.String})
+		getPinsReq.PinedPost = append(getPinsReq.PinedPost, &PostAPIService.PinedPost{Title: p.Title, ImageUrl: p.ImageUrl.String, Id: p.ID})
 	}
 
 	return getPinsReq, nil
