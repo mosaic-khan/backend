@@ -201,7 +201,7 @@ func SendResetPassEmail(email string, token string) {
 	smtpPort := "587"
 
 	// Message.
-	message, err := forgetPassEmail(fmt.Sprintf("khanmedia.ir/forgetpass?token=%s", token))
+	message, err := forgetPassEmail(fmt.Sprintf("khanmedia.ir/ResetPassword?token=%s", token))
 	if err != nil {
 		fmt.Println(err)
 		return
