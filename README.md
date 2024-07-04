@@ -7,4 +7,5 @@
 - go
 - postgres
 - gRPC
-- REDIS
+- sqlc
+- envoy
