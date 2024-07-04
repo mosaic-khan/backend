@@ -20,4 +20,5 @@ func Init(s *Server) {
 	http.Handle("/KhanAPI.MediaAPI/upload-post-image", utils.MediaMiddleware(http.HandlerFunc(s.UploadPostImagesHandler)))
 	http.Handle("/KhanAPI.MediaAPI/upload-profile-image", utils.MediaMiddleware(http.HandlerFunc(s.UploadProfilePicHandler)))
 	http.Handle("/KhanAPI.MediaAPI/images/", http.HandlerFunc(s.GetImageHandler))
+	http.Handle("/KhanAPI.MediaAPI/thumbnail/", http.HandlerFunc(s.GetThumbnail))
 }
