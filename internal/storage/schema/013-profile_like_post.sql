@@ -1,6 +1,7 @@
 CREATE TABLE profile_like_post (
     post_id BIGINT,
     profile_id BIGINT,
+    like_date DATE NOT NULL DEFAULT CURRENT_DATE,
     PRIMARY KEY (post_id, profile_id),
     FOREIGN KEY (post_id)
         REFERENCES post(id)

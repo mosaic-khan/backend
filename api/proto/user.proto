@@ -28,6 +28,7 @@ service UserAPI {
   rpc Unfollow (UnfollowRequest) returns (google.protobuf.Empty);
   rpc GetFollowingList (GetFollowingListRequest) returns (GetFollowingListResponse);
   rpc GetFollowerList (GetFollowerListRequest) returns (GetFollowerListResponse);
+  rpc GetTopChefs (google.protobuf.Empty) returns (GetTopChefsResponse);
 }
 
 message User {
@@ -219,4 +220,17 @@ message GetFollowerListRequest {
 
 message GetFollowerListResponse {
   repeated ProfilePreview profilePreview = 1;
+}
+
+
+message TopChef {
+  string username = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string profilePicUrl = 4; 
+}
+
+
+message GetTopChefsResponse {
+  repeated TopChef TopChefs = 1;
 }

@@ -171,6 +171,53 @@ func (q *Queries) GetProfileUserID(ctx context.Context, id int64) (int64, error)
 	return user_id, err
 }
 
+const getTopChefs = `-- name: GetTopChefs :many
+SELECT a.username, pr.first_name, pr.last_name, pr.profile_pic_address
+FROM (
+	SELECT pr.id, COUNT(*) AS total_likes
+	FROM profile pr JOIN post po ON pr.id = po.profile_id JOIN profile_like_post l ON po.id = l.post_id
+	WHERE l.like_date > CURRENT_DATE - 7 
+	GROUP BY pr.id
+	ORDER BY total_likes DESC
+	LIMIT 5
+) AS t JOIN account a ON a.id = t.id JOIN profile pr ON pr.id = t.id
+`
+
+type GetTopChefsRow struct {
+	Username          string
+	FirstName         string
+	LastName          string
+	ProfilePicAddress string
+}
+
+func (q *Queries) GetTopChefs(ctx context.Context) ([]GetTopChefsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTopChefs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTopChefsRow
+	for rows.Next() {
+		var i GetTopChefsRow
+		if err := rows.Scan(
+			&i.Username,
+			&i.FirstName,
+			&i.LastName,
+			&i.ProfilePicAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateProfileInfo = `-- name: UpdateProfileInfo :exec
 UPDATE profile
 SET	    first_name = $1,

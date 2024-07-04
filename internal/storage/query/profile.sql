@@ -53,3 +53,13 @@ UPDATE profile
 SET profile_pic_address = $1
 WHERE id = $2;
 
+-- name: GetTopChefs :many
+SELECT a.username, pr.first_name, pr.last_name, pr.profile_pic_address
+FROM (
+	SELECT pr.id, COUNT(*) AS total_likes
+	FROM profile pr JOIN post po ON pr.id = po.profile_id JOIN profile_like_post l ON po.id = l.post_id
+	WHERE l.like_date > CURRENT_DATE - 7 
+	GROUP BY pr.id
+	ORDER BY total_likes DESC
+	LIMIT 5
+) AS t JOIN account a ON a.id = t.id JOIN profile pr ON pr.id = t.id;

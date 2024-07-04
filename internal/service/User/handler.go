@@ -725,3 +725,25 @@ func (s *Server) GetFollowerList(ctx context.Context, in *UserAPIService.GetFoll
 
 	return &UserAPIService.GetFollowerListResponse{ProfilePreview: followingList}, nil
 }
+
+func (s *Server) GetTopChefs(ctx context.Context, in *emptypb.Empty) (*UserAPIService.GetTopChefsResponse, error) {
+
+	topChefs, err := s.query.GetTopChefs(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not get top chefs")
+	}
+
+	tc := []*UserAPIService.TopChef{}
+
+	for _, r := range topChefs {
+		tc = append(tc, &UserAPIService.TopChef{
+			Username:      r.Username,
+			FirstName:     r.FirstName,
+			LastName:      r.LastName,
+			ProfilePicUrl: r.ProfilePicAddress,
+		})
+	}
+
+	return &UserAPIService.GetTopChefsResponse{TopChefs: tc}, nil
+
+}
