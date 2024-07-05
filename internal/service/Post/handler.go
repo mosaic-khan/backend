@@ -547,7 +547,7 @@ func (s *Server) PinPost(ctx context.Context, in *PostAPIService.PinPostRequest)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not pin post")
 	}
-	if c > 3 {
+	if c == 3 {
 		return nil, status.Errorf(codes.InvalidArgument, "Can not pin posts any more, maximum number of pins 3")
 	}
 
