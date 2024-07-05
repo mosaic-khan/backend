@@ -57,10 +57,11 @@ WHERE id = $1;
 
 -- name: SearchUsername :many
 WITH username_similarity AS (
-    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity, se
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity,
+           (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = sqlc.arg(myProfile) and f.following = profile.id)) AS is_followed
     FROM account INNER JOIN profile on account.id = profile.user_id
 )
-SELECT id, username, first_name, profile_pic_address
+SELECT id, username, first_name, profile_pic_address, is_followed
 FROM username_similarity
 WHERE similarity > 0.3 
 ORDER BY similarity DESC
