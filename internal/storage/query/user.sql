@@ -57,7 +57,7 @@ WHERE id = $1;
 
 -- name: SearchUsername :many
 WITH username_similarity AS (
-    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, sqlc.arg(username)) AS similarity, se
     FROM account INNER JOIN profile on account.id = profile.user_id
 )
 SELECT id, username, first_name, profile_pic_address
