@@ -127,8 +127,12 @@ func (s *Server) SearchFoodByIngredient(ctx context.Context, in *SearchAPIServic
 }
 
 func (s *Server) SearchUsername(ctx context.Context, in *SearchAPIService.SearchUsernameRequest) (*SearchAPIService.SearchUsernameResponse, error) {
+	profileID := ctx.Value("ProfileID").(int64)
 
-	profiles, err := s.query.SearchUsername(ctx, in.GetUsername())
+	profiles, err := s.query.SearchUsername(ctx, db.SearchUsernameParams{
+		Username:  in.GetUsername(),
+		Myprofile: profileID,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error retrieving usernames smiliar to %s\n", in.GetUsername())
 	}
@@ -136,7 +140,11 @@ func (s *Server) SearchUsername(ctx context.Context, in *SearchAPIService.Search
 	var r []*SearchAPIService.ProfilePreviewExplore
 
 	for _, p := range profiles {
-		r = append(r, &SearchAPIService.ProfilePreviewExplore{ProfileID: p.ID, Username: p.Username, Name: p.FirstName, ProfilePicUrl: p.ProfilePicAddress})
+		isFollowed := 0
+		if p.IsFollowed {
+			isFollowed = 1
+		}
+		r = append(r, &SearchAPIService.ProfilePreviewExplore{ProfileID: p.ID, Username: p.Username, Name: p.FirstName, ProfilePicUrl: p.ProfilePicAddress, IsFollowed: int64(isFollowed)})
 	}
 
 	return &SearchAPIService.SearchUsernameResponse{ProfilePreview: r}, nil

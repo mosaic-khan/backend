@@ -179,25 +179,32 @@ func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) er
 
 const searchUsername = `-- name: SearchUsername :many
 WITH username_similarity AS (
-    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, $1) AS similarity
+    SELECT profile.id, username, first_name, profile_pic_address, similarity(username, $1) AS similarity,
+           (SELECT EXISTS(SELECT 1 FROM follow f WHERE f.follower = $2 and f.following = profile.id)) AS is_followed
     FROM account INNER JOIN profile on account.id = profile.user_id
 )
-SELECT id, username, first_name, profile_pic_address
+SELECT id, username, first_name, profile_pic_address, is_followed
 FROM username_similarity
 WHERE similarity > 0.3 
 ORDER BY similarity DESC
 LIMIT 50
 `
 
+type SearchUsernameParams struct {
+	Username  string
+	Myprofile int64
+}
+
 type SearchUsernameRow struct {
 	ID                int64
 	Username          string
 	FirstName         string
 	ProfilePicAddress string
+	IsFollowed        bool
 }
 
-func (q *Queries) SearchUsername(ctx context.Context, username string) ([]SearchUsernameRow, error) {
-	rows, err := q.db.QueryContext(ctx, searchUsername, username)
+func (q *Queries) SearchUsername(ctx context.Context, arg SearchUsernameParams) ([]SearchUsernameRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchUsername, arg.Username, arg.Myprofile)
 	if err != nil {
 		return nil, err
 	}
@@ -210,6 +217,7 @@ func (q *Queries) SearchUsername(ctx context.Context, username string) ([]Search
 			&i.Username,
 			&i.FirstName,
 			&i.ProfilePicAddress,
+			&i.IsFollowed,
 		); err != nil {
 			return nil, err
 		}
