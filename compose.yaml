@@ -15,7 +15,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=$DB_NAME
       - SECRET_KEY=$SECRET_KEY
-      - apikey=5acec106-ae16-ef11-af5d-00163e6496fc
+      - apikey=ef838fb5-b03a-ef11-af5e-00163e6496fc
     restart: always
     volumes:
       - khanmedia_data:/home/app/fileData
