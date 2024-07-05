@@ -413,12 +413,12 @@ WITH selected_post_id AS (
                       WHERE phi.post_id = post_has_ingredient.post_id
                         and ing.name = ANY ($4::TEXT[]))
     INTERSECT
-    SELECT post.id
+    SELECT post.id as p_id
     FROM post
-    WHERE ($5 IS NULL OR array_length($5::int[], 1) = 0)
+    WHERE (array_length($5::int[], 1) = 0)
        OR category_id = ANY($5::int[])
     INTERSECT
-    SELECT post.id
+    SELECT post.id as p_id
     FROM post
     WHERE $6 = '' OR similarity(post.title, $6) > 0.5
 )
@@ -432,7 +432,7 @@ FROM selected_post_id
 WHERE post_image.is_primary = true
 ORDER BY post.num_likes DESC
 OFFSET $1
-    LIMIT 20
+LIMIT 20
 `
 
 type MixedSearchParams struct {
@@ -440,7 +440,7 @@ type MixedSearchParams struct {
 	Includecnt interface{}
 	Include    []string
 	Exclude    []string
-	Categories interface{}
+	Categories []int32
 	Name       interface{}
 }
 
@@ -459,7 +459,7 @@ func (q *Queries) MixedSearch(ctx context.Context, arg MixedSearchParams) ([]Mix
 		arg.Includecnt,
 		pq.Array(arg.Include),
 		pq.Array(arg.Exclude),
-		arg.Categories,
+		pq.Array(arg.Categories),
 		arg.Name,
 	)
 	if err != nil {
