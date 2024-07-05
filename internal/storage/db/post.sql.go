@@ -420,7 +420,7 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id as p_id
     FROM post
-    WHERE $7 = '' OR similarity(post.title, $7) > 0.5
+    WHERE $7 = '' OR similarity(post.title, $7) > 0.2
 )
 SELECT post.id, post.title, post.description,
        post_image.image_url, account.username, profile.profile_pic_address
