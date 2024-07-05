@@ -145,12 +145,12 @@ WITH selected_post_id AS (
                       WHERE phi.post_id = post_has_ingredient.post_id
                         and ing.name = ANY (sqlc.arg(exclude)::TEXT[]))
     INTERSECT
-    SELECT post.id
+    SELECT post.id as p_id
     FROM post
-    WHERE (sqlc.arg(categories) IS NULL OR array_length(sqlc.arg(categories)::int[], 1) = 0)
+    WHERE (array_length(sqlc.arg(categories)::int[], 1) = 0)
        OR category_id = ANY(sqlc.arg(categories)::int[])
     INTERSECT
-    SELECT post.id
+    SELECT post.id as p_id
     FROM post
     WHERE sqlc.arg(name) = '' OR similarity(post.title, sqlc.arg(name)) > 0.5
 )
@@ -164,7 +164,7 @@ FROM selected_post_id
 WHERE post_image.is_primary = true
 ORDER BY post.num_likes DESC
 OFFSET sqlc.arg(page)
-    LIMIT 20;
+LIMIT 20;
 
 -- name: IncrementView :exec
 UPDATE post
