@@ -3,8 +3,9 @@ package Media
 import (
 	"context"
 	"fmt"
-	"image"
-	"image/jpeg"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"io"
 	"main/internal/service/utils"
 	"main/pkg/PostAPIService"
@@ -12,15 +13,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/nfnt/resize"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 )
 
 const UploadDir = "fileData"
-const ThumbnailDir = "fileData/thumbnail"
 
 func (s *Server) UploadProfilePicHandler(w http.ResponseWriter, r *http.Request) {
 	profileID := r.Context().Value("profileID").(int64)
@@ -69,6 +64,7 @@ func (s *Server) UploadProfilePicHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	_, _ = w.Write([]byte(profilePicToken))
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +105,7 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	filename := utils.GenerateFileName()
+	filename := utils.GenerateFileName() + ".png"
 
 	// Create and write the file
 	dst, err := os.Create(fmt.Sprintf("%s/%s", UploadDir, filename))
@@ -117,41 +113,16 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Could not create a file.", http.StatusInternalServerError)
 		return
 	}
+	defer dst.Close()
 
 	if _, err := io.Copy(dst, file); err != nil {
 		http.Error(w, "Failed to save the uploaded file.", http.StatusInternalServerError)
 		return
 	}
-	dst.Close()
-
-	f, _ := os.Open(fmt.Sprintf("%s/%s", UploadDir, filename))
-
-	// Create and write the thumbnail
-	img, _, err := image.Decode(f)
-	if err != nil {
-		fmt.Println(err.Error())
-		http.Error(w, "error while decoding image", http.StatusInternalServerError)
-		return
-	}
-
-	t := resize.Thumbnail(640, 640, img, resize.Lanczos3)
-
-	out, err := os.Create(fmt.Sprintf("%s/%s", ThumbnailDir, filename))
-	if err != nil {
-		http.Error(w, "could not create thumbnail", http.StatusInternalServerError)
-		return
-	}
-	defer out.Close()
-
-	err = jpeg.Encode(out, t, nil)
-	if err != nil {
-		http.Error(w, "could not save the thumbnail", http.StatusInternalServerError)
-	}
 
 	postImageToken, err := utils.CreatePostImageToken(strconv.Itoa(int(profileID)), strconv.Itoa(int(postID)), filename, s.hmacSecret)
 	if err != nil {
 		http.Error(w, "error while creating Token", http.StatusInternalServerError)
-		return
 	}
 
 	conn, _ := grpc.Dial("localhost:9190", grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -166,6 +137,7 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 	_, _ = client.AddImageForPost(ctx, &PostAPIService.AddImageForPostRequest{PostImageToken: postImageToken})
 
 	_, _ = w.Write([]byte(postImageToken))
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) GetImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -175,21 +147,6 @@ func (s *Server) GetImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filePath := UploadDir + "/" + r.URL.Path[len("/KhanAPI.MediaAPI/images/"):]
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		http.Error(w, "File not found.", http.StatusNotFound)
-		return
-	}
-
-	http.ServeFile(w, r, filePath)
-}
-
-func (s *Server) GetThumbnail(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	filePath := ThumbnailDir + "/" + r.URL.Path[len("/KhanAPI.MediaAPI/thumbnail/"):]
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		http.Error(w, "File not found.", http.StatusNotFound)
 		return
