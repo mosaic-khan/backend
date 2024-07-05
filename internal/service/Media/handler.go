@@ -105,7 +105,7 @@ func (s *Server) UploadPostImagesHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	filename := utils.GenerateFileName() + ".png"
+	filename := utils.GenerateFileName()
 
 	// Create and write the file
 	dst, err := os.Create(fmt.Sprintf("%s/%s", UploadDir, filename))
