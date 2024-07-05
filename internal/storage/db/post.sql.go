@@ -415,12 +415,12 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id as p_id
     FROM post
-    WHERE (array_length($5::int[], 1) = 0)
-       OR category_id = ANY($5::int[])
+    WHERE ($5 = 0)
+       OR category_id = ANY($6::int[])
     INTERSECT
     SELECT post.id as p_id
     FROM post
-    WHERE $6 = '' OR similarity(post.title, $6) > 0.5
+    WHERE $7 = '' OR similarity(post.title, $7) > 0.5
 )
 SELECT post.id, post.title, post.description,
        post_image.image_url, account.username, profile.profile_pic_address
@@ -436,12 +436,13 @@ LIMIT 20
 `
 
 type MixedSearchParams struct {
-	Page       int32
-	Includecnt interface{}
-	Include    []string
-	Exclude    []string
-	Categories []int32
-	Name       interface{}
+	Page        int32
+	Includecnt  interface{}
+	Include     []string
+	Exclude     []string
+	Categorycnt interface{}
+	Categories  []int32
+	Name        interface{}
 }
 
 type MixedSearchRow struct {
@@ -459,6 +460,7 @@ func (q *Queries) MixedSearch(ctx context.Context, arg MixedSearchParams) ([]Mix
 		arg.Includecnt,
 		pq.Array(arg.Include),
 		pq.Array(arg.Exclude),
+		arg.Categorycnt,
 		pq.Array(arg.Categories),
 		arg.Name,
 	)

@@ -157,12 +157,13 @@ func (s *Server) MixedSearch(ctx context.Context, in *SearchAPIService.MixedSear
 	}
 
 	searchResult, err := s.query.MixedSearch(ctx, db.MixedSearchParams{
-		Page:       (in.GetPageNumber() - 1) * 20,
-		Includecnt: len(in.IncludeIng),
-		Include:    in.IncludeIng,
-		Exclude:    in.ExcludeIng,
-		Categories: in.CategoryID,
-		Name:       in.Name,
+		Page:        (in.GetPageNumber() - 1) * 20,
+		Includecnt:  len(in.IncludeIng),
+		Include:     in.IncludeIng,
+		Exclude:     in.ExcludeIng,
+		Categories:  in.CategoryID,
+		Categorycnt: len(in.CategoryID),
+		Name:        in.Name,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while mixed searching in db")
