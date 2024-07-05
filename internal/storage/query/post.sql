@@ -147,7 +147,7 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id as p_id
     FROM post
-    WHERE (array_length(sqlc.arg(categories)::int[], 1) = 0)
+    WHERE (sqlc.arg(categoryCnt) = 0)
        OR category_id = ANY(sqlc.arg(categories)::int[])
     INTERSECT
     SELECT post.id as p_id
