@@ -415,11 +415,12 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE category_id = ANY($5::int[]) OR array_length($5::int[], 1) = 0
+    WHERE ($5 IS NULL OR array_length($5::int[], 1) = 0)
+       OR category_id = ANY($5::int[])
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE post.title = '' OR similarity(post.title, $6) > 0.5
+    WHERE $6 = '' OR similarity(post.title, $6) > 0.5
 )
 SELECT post.id, post.title, post.description,
        post_image.image_url, account.username, profile.profile_pic_address
@@ -439,8 +440,8 @@ type MixedSearchParams struct {
 	Includecnt interface{}
 	Include    []string
 	Exclude    []string
-	Categories []int32
-	Name       string
+	Categories interface{}
+	Name       interface{}
 }
 
 type MixedSearchRow struct {
@@ -458,7 +459,7 @@ func (q *Queries) MixedSearch(ctx context.Context, arg MixedSearchParams) ([]Mix
 		arg.Includecnt,
 		pq.Array(arg.Include),
 		pq.Array(arg.Exclude),
-		pq.Array(arg.Categories),
+		arg.Categories,
 		arg.Name,
 	)
 	if err != nil {

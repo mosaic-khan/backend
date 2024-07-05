@@ -31,6 +31,7 @@ func MiddleWareAuth() func(ctx context.Context, req interface{}, info *grpc.Unar
 			"/KhanAPI.UserAPI/NewPasswordWithToken",
 			"/KhanAPI.UserAPI/SignUp",
 			"/KhanAPI.UserAPI/CodeVerification",
+			"/KhanAPI.SearchAPI/GetAllCategories",
 		}
 
 		for _, method := range allowedMethods {

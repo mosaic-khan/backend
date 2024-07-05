@@ -147,11 +147,12 @@ WITH selected_post_id AS (
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE category_id = ANY(sqlc.arg(categories)::int[]) OR array_length(sqlc.arg(categories)::int[], 1) = 0
+    WHERE (sqlc.arg(categories) IS NULL OR array_length(sqlc.arg(categories)::int[], 1) = 0)
+       OR category_id = ANY(sqlc.arg(categories)::int[])
     INTERSECT
     SELECT post.id
     FROM post
-    WHERE post.title = '' OR similarity(post.title, sqlc.arg(name)) > 0.5
+    WHERE sqlc.arg(name) = '' OR similarity(post.title, sqlc.arg(name)) > 0.5
 )
 SELECT post.id, post.title, post.description,
        post_image.image_url, account.username, profile.profile_pic_address
